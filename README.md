@@ -1,5 +1,7 @@
 # quantum-field-molecules
 
+**Live: <https://w1neskin.github.io/quantum-field-molecules/>**
+
 Interactive visualization of molecules "through the eyes of quantum field
 theory": electron field density ⟨n̂(x)⟩, molecular orbitals (field modes),
 an energy budget with the exchange component singled out, bond curves E(R),
@@ -65,9 +67,13 @@ the main thread (the UI may stutter on heavy molecules like benzene).
   rotated into "bonds", "lone pairs" and "cores" - the very objects from a
   chemistry classroom, with automatic labels (bond O1–H2, lone pair O1,
   core O1).
-- 3D view (WebGL2 raymarching, 64³ grid): the molecule as a glowing cloud,
-  MOs two-colored by the sign of ψ; bonds, atom labels and a volume frame for
-  orientation.
+- 3D view (WebGL2 raymarching, 64³ grid): the molecule as a glowing field
+  cloud - density encoding is capped at the valence scale, so bonding clouds
+  stay visible next to heavy-atom cores. MO modes are two-colored by the sign
+  of ψ and animated as the physical standing wave Re ψ·e^(−iεt/ħ) (slowed by
+  ~10¹⁵, toggleable). The classical scaffold - nucleus dots, bond sticks, the
+  volume frame - is an opt-in overlay, off by default; only element labels
+  remain for orientation.
 - R slider for diatomics: an E(R) scan in the background, the map follows the
   slider; the chart shows the RHF/UHF curve, the FCI curve (for 2e⁻) and the
   experimental Morse potential with its exact vibrational levels Eᵥ and
@@ -88,8 +94,9 @@ the main thread (the UI may stutter on heavy molecules like benzene).
 - **Five languages**: English, Russian (complete, including molecule facts,
   help and glossary), German, Spanish and Simplified Chinese (UI; long-form
   texts fall back to English). The language is detected from the browser, can
-  be switched with the selector and is remembered; engine errors are localized
-  right in the worker.
+  be switched with the selector and is remembered; `?lang=ru` (de/es/zh) in
+  the URL makes language variants directly linkable. Engine errors are
+  localized right in the worker.
 - **Help and wiki glossary**: a modal window (the "Help" button or the "?" in
   each panel header) with three tabs - a guide to the main features
   (13 sections, including "Fields: what exists and what is drawn"), a glossary
@@ -130,9 +137,10 @@ engine error messages arrive already localized. Preset names and facts live in
 `App.theme.color()` and repaint on the theme-change event.
 
 3D: `grid3d.js` samples the field into a 64³ grid (frame by frame, without
-blocking the UI), `view3d.js` is a WebGL2 raycaster (emission–absorption,
-front-to-back) with an orbit camera. No WebGL2 - the 3D button simply is not
-shown.
+blocking the UI) and encodes it sqrt-compressed with a valence-scale cap for
+total density; `view3d.js` is a WebGL2 raycaster (emission–absorption,
+front-to-back) with an orbit camera and a requestAnimationFrame phase loop
+for MO modes. No WebGL2 - the 3D button simply is not shown.
 
 The client → worker boundary is an asynchronous request/response, i.e. a
 ready-made contract for a server-side backend (PySCF and the like) if one is
@@ -168,7 +176,7 @@ ever needed.
 node test/selfcheck.js
 ```
 
-29 checks against literature values (excerpt):
+39 checks against literature values (excerpt):
 
 | What | Reference | Source |
 |------|-----------|--------|
