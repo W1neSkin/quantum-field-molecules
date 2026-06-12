@@ -3,8 +3,11 @@
 (function (App) {
   "use strict";
 
+  // field sampling resolution; the visible canvas is larger and the field is
+  // blitted up so nuclei markers, labels and arrows stay crisp
   var W = 480, H = 288, NPIX = W * H;
   var BOHR_PER_ANGSTROM = 1.8897259886;
+  var fieldCanvas = null;
 
   // --- colormaps, rebuilt from the active theme palette ---
   var BG = { r: 24, g: 24, b: 24 }, FGc = { r: 212, g: 212, b: 212 };
@@ -211,9 +214,13 @@
   }
 
   function draw(canvas, prep, mode) {
-    var ctx = canvas.getContext("2d");
+    if (!fieldCanvas) {
+      fieldCanvas = document.createElement("canvas");
+      fieldCanvas.width = W; fieldCanvas.height = H;
+    }
+    var fctx = fieldCanvas.getContext("2d");
     var vals = fieldValues(prep, mode);
-    var img = ctx.createImageData(W, H);
+    var img = fctx.createImageData(W, H);
     var isEsp = mode.kind === "esp";
     var maxAbs = 1e-12;
     if (isEsp && prep.espScale) {
@@ -236,28 +243,33 @@
       var o = p * 4;
       img.data[o] = c.r; img.data[o + 1] = c.g; img.data[o + 2] = c.b; img.data[o + 3] = 255;
     }
-    ctx.putImageData(img, 0, 0);
+    fctx.putImageData(img, 0, 0);
 
-    // nuclei markers and 1 angstrom scale bar
+    var cw = canvas.width, ch = canvas.height, S = cw / W;
+    var ctx = canvas.getContext("2d");
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(fieldCanvas, 0, 0, W, H, 0, 0, cw, ch);
+
+    // nuclei markers and 1 angstrom scale bar, in full canvas resolution
     var fg = App.theme ? App.theme.color("chart-fg") : "rgb(212,212,212)";
-    ctx.font = "11px system-ui, sans-serif";
-    var pxPerBohr = W / (2 * prep.halfU);
+    ctx.font = Math.round(11 * S) + "px system-ui, sans-serif";
+    var pxPerBohr = cw / (2 * prep.halfU);
     prep.proj.forEach(function (uv, ai) {
-      var x = W / 2 + uv[0] * pxPerBohr, y = H / 2 - uv[1] * pxPerBohr;
-      ctx.beginPath(); ctx.arc(x, y, 3.5, 0, 2 * Math.PI);
-      ctx.strokeStyle = fg; ctx.lineWidth = 1.5; ctx.stroke();
+      var x = cw / 2 + uv[0] * pxPerBohr, y = ch / 2 - uv[1] * pxPerBohr;
+      ctx.beginPath(); ctx.arc(x, y, 3.5 * S, 0, 2 * Math.PI);
+      ctx.strokeStyle = fg; ctx.lineWidth = 1.5 * S; ctx.stroke();
       ctx.fillStyle = fg;
-      ctx.fillText(App.SYMBOLS[prep.result.atoms[ai].Z], x + 6, y - 6);
+      ctx.fillText(App.SYMBOLS[prep.result.atoms[ai].Z], x + 6 * S, y - 6 * S);
     });
-    var bar = BOHR_PER_ANGSTROM * pxPerBohr, y0 = H - 14;
-    ctx.strokeStyle = fg; ctx.lineWidth = 1;
+    var bar = BOHR_PER_ANGSTROM * pxPerBohr, y0 = ch - 14 * S;
+    ctx.strokeStyle = fg; ctx.lineWidth = 1 * S;
     ctx.beginPath();
-    ctx.moveTo(14, y0); ctx.lineTo(14 + bar, y0);
-    ctx.moveTo(14, y0 - 3); ctx.lineTo(14, y0 + 3);
-    ctx.moveTo(14 + bar, y0 - 3); ctx.lineTo(14 + bar, y0 + 3);
+    ctx.moveTo(14 * S, y0); ctx.lineTo(14 * S + bar, y0);
+    ctx.moveTo(14 * S, y0 - 3 * S); ctx.lineTo(14 * S, y0 + 3 * S);
+    ctx.moveTo(14 * S + bar, y0 - 3 * S); ctx.lineTo(14 * S + bar, y0 + 3 * S);
     ctx.stroke();
     ctx.fillStyle = fg;
-    ctx.fillText("1 Å", 18 + bar, y0 + 4);
+    ctx.fillText("1 Å", 18 * S + bar, y0 + 4 * S);
   }
 
   App.heatmap = {

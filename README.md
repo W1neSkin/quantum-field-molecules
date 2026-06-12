@@ -7,7 +7,7 @@ IR spectra and an exchange diagram. The interface is available in five
 languages (EN/RU/DE/ES/ZH) with built-in help, a wiki-style glossary and
 dark/light themes.
 
-The key point: **there is no precomputed molecule database** — the electronic
+The key point: **there is no precomputed molecule database** - the electronic
 structure is computed on the fly by a real Hartree–Fock method (RHF and UHF;
 STO-3G, 6-31G, 6-31G* basis sets) implemented in pure JavaScript. Presets are
 just ready-made geometries with extra facts and spectroscopic curves.
@@ -22,7 +22,7 @@ python3 -m http.server 8000
 # open http://localhost:8000
 ```
 
-or simply open `index.html` with a double click — then the computation runs on
+or simply open `index.html` with a double click - then the computation runs on
 the main thread (the UI may stutter on heavy molecules like benzene).
 
 ## Features
@@ -32,7 +32,7 @@ the main thread (the UI may stutter on heavy molecules like benzene).
 - **RHF** for closed shells, **UHF** for open shells (O₂, NO, OH, CH₃ and
   any custom molecule with an odd electron count): separate α/β orbitals,
   spin density, ⟨S²⟩ with spin contamination.
-- **FCI for two-electron systems** (H₂, HeH⁺, etc.) — the exact solution in
+- **FCI for two-electron systems** (H₂, HeH⁺, etc.) - the exact solution in
   the chosen basis: correlation energy and correct dissociation on the E(R)
   curve.
 - **STO-3G / 6-31G / 6-31G\* basis sets** (selector in the header): Basis Set
@@ -58,7 +58,7 @@ the main thread (the UI may stutter on heavy molecules like benzene).
   potential φ(r) (a reactivity map), spin density ρₛ (UHF), amplitude of any
   MO with its sign.
 - **Boys localization** (the "Boys orbitals" checkbox): occupied MOs are
-  rotated into "bonds", "lone pairs" and "cores" — the very objects from a
+  rotated into "bonds", "lone pairs" and "cores" - the very objects from a
   chemistry classroom, with automatic labels (bond O1–H2, lone pair O1,
   core O1).
 - 3D view (WebGL2 raymarching, 64³ grid): the molecule as a glowing cloud,
@@ -71,10 +71,10 @@ the main thread (the UI may stutter on heavy molecules like benzene).
 
 ### Export
 
-- **PNG** — snapshot of the current view (2D or 3D).
-- **.cube** — the current field in Gaussian cube format (opens in VMD,
+- **PNG** - snapshot of the current view (2D or 3D).
+- **.cube** - the current field in Gaussian cube format (opens in VMD,
   Avogadro, Multiwfn).
-- **JSON** — energies, orbitals, properties, FCI — everything for further
+- **JSON** - energies, orbitals, properties, FCI - everything for further
   processing.
 
 ### Interface
@@ -85,7 +85,7 @@ the main thread (the UI may stutter on heavy molecules like benzene).
   be switched with the selector and is remembered; engine errors are localized
   right in the worker.
 - **Help and wiki glossary**: a modal window (the "Help" button or the "?" in
-  each panel header) with three tabs — a guide to the main features
+  each panel header) with three tabs - a guide to the main features
   (12 sections), a glossary of ~28 terms with search (Hartree–Fock, basis
   set, ESP, Koopmans, correlation, Hessian, the QFT view, etc.) and "About".
 - **Dark and light themes**: a toggle in the header, starts from
@@ -121,7 +121,7 @@ engine error messages arrive already localized. Preset names and facts live in
 
 3D: `grid3d.js` samples the field into a 64³ grid (frame by frame, without
 blocking the UI), `view3d.js` is a WebGL2 raycaster (emission–absorption,
-front-to-back) with an orbit camera. No WebGL2 — the 3D button simply is not
+front-to-back) with an orbit camera. No WebGL2 - the 3D button simply is not
 shown.
 
 The client → worker boundary is an asynchronous request/response, i.e. a
@@ -178,13 +178,13 @@ node test/selfcheck.js
   overestimated.
 - Preset E(R) curves are Morse potentials built from spectroscopic constants
   (Huber & Herzberg); RHF dissociation is qualitatively wrong at large R
-  (the FCI curve for 2e⁻ and UHF fix this — visible right on the chart).
+  (the FCI curve for 2e⁻ and UHF fix this - visible right on the chart).
 - Δρ is built relative to a promolecule of spherically averaged atoms and is
   defined only in STO-3G.
-- Compute vibrations at the optimized geometry — otherwise expect imaginary
+- Compute vibrations at the optimized geometry - otherwise expect imaginary
   frequencies and shifted values (the app warns about this honestly).
 
 ## Deployment
 
-Static files with no build step: GitHub Pages / Cloudflare Pages work fine —
+Static files with no build step: GitHub Pages / Cloudflare Pages work fine -
 just serve the repository root.

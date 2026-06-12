@@ -25,7 +25,7 @@
     return atoms;
   }
 
-  // Full pipeline. mult = 2S+1 (0/undefined: auto — singlet RHF for even
+  // Full pipeline. mult = 2S+1 (0/undefined: auto - singlet RHF for even
   // electron counts, doublet UHF for odd). Returns a structured-clone payload.
   function compute(xyzText, charge, mult, basisName, onProgress) {
     var t0 = Date.now();

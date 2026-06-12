@@ -1,6 +1,6 @@
 // E(R) panel for diatomic presets: experimental Morse curve plus, when the
 // R-scan is ready, the computed RHF curve (minima aligned) and a draggable
-// current-R marker. RHF runs off the top at large R — its wrong dissociation
+// current-R marker. RHF runs off the top at large R - its wrong dissociation
 // is shown deliberately.
 (function (App) {
   "use strict";

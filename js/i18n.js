@@ -42,8 +42,11 @@
     [].forEach.call(document.querySelectorAll("[data-i18n]"), function (el) {
       el.textContent = t(el.getAttribute("data-i18n"));
     });
+    // custom tooltips (js/tooltip.js) read data-tip; aria-label for a11y
     [].forEach.call(document.querySelectorAll("[data-i18n-title]"), function (el) {
-      el.title = t(el.getAttribute("data-i18n-title"));
+      var s = t(el.getAttribute("data-i18n-title"));
+      el.dataset.tip = s;
+      el.setAttribute("aria-label", s);
     });
     [].forEach.call(document.querySelectorAll("[data-i18n-ph]"), function (el) {
       el.placeholder = t(el.getAttribute("data-i18n-ph"));

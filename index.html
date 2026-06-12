@@ -18,35 +18,40 @@
 </head>
 <body>
 <main>
-  <h1 data-i18n="app.h1">Molecules through the eyes of quantum field theory</h1>
+  <div class="titlebar">
+    <h1 data-i18n="app.h1">Molecules through the eyes of quantum field theory</h1>
+    <span class="row" style="gap:8px;flex-wrap:nowrap">
+      <select id="langSelect" data-i18n-title="top.lang.tip"></select>
+      <button id="themeToggle" class="btn icon" data-i18n-title="top.theme.tip">&#9790;</button>
+      <button id="helpBtn" class="btn" data-i18n="help.btn" data-i18n-title="top.help.tip"></button>
+    </span>
+  </div>
   <p class="lead" data-i18n="app.lead"></p>
 
-  <div class="topbar">
-    <select id="molSelect"></select>
-    <select id="basisSelect" data-i18n-title="top.basis.tip"></select>
-    <button id="btnOpt" class="btn" data-i18n="top.optimize" data-i18n-title="top.optimize.tip"></button>
-    <span id="status" class="status">…</span>
-    <span style="flex:1"></span>
-    <select id="langSelect" data-i18n-title="top.lang.tip"></select>
-    <button id="themeToggle" class="btn icon" data-i18n-title="top.theme.tip">&#9790;</button>
-    <button id="helpBtn" class="btn" data-i18n="help.btn" data-i18n-title="top.help.tip"></button>
-  </div>
+  <div class="shell">
+    <aside class="side">
+      <select id="molSelect" data-i18n-title="top.mol.tip"></select>
+      <select id="basisSelect" data-i18n-title="top.basis.tip"></select>
+      <button id="btnOpt" class="btn" data-i18n="top.optimize" data-i18n-title="top.optimize.tip"></button>
+      <span id="status" class="status">…</span>
 
-  <div id="customPanel" style="display:none">
-    <textarea id="xyzInput" data-i18n-ph="custom.ph">O 0 0 0.1173
+      <div id="customPanel" style="display:none">
+        <textarea id="xyzInput" data-i18n-ph="custom.ph">O 0 0 0.1173
 H 0 0.7572 -0.4692
 H 0 -0.7572 -0.4692</textarea>
-    <div class="row" style="margin-top:8px">
-      <span class="small muted" data-i18n="custom.charge"></span>
-      <input id="chargeInput" type="number" value="0" step="1">
-      <button id="computeBtn" class="btn" data-i18n="custom.compute"></button>
-      <span class="small faint" data-i18n="custom.hint"></span>
-    </div>
-  </div>
+        <div class="row" style="margin-top:8px">
+          <span class="small muted" data-i18n="custom.charge"></span>
+          <input id="chargeInput" type="number" value="0" step="1" data-i18n-title="custom.charge.tip">
+          <button id="computeBtn" class="btn" data-i18n="custom.compute"></button>
+          <span class="small faint" data-i18n="custom.hint"></span>
+        </div>
+      </div>
 
-  <div id="errorBox" class="callout" style="display:none"></div>
+      <div id="errorBox" class="callout" style="display:none"></div>
+      <div id="facts"></div>
+    </aside>
 
-  <div class="grid main-grid">
+    <div class="center">
     <section class="card">
       <header>
         <span data-i18n="card.density"></span>
@@ -64,7 +69,7 @@ H 0 -0.7572 -0.4692</textarea>
         <label id="locWrap" class="small muted" style="display:inline-flex;gap:5px;align-items:center;margin:2px 0 6px" data-i18n-title="loc.tip">
           <input type="checkbox" id="locToggle"> <span data-i18n="loc.label"></span>
         </label>
-        <canvas id="density" width="480" height="288"></canvas>
+        <canvas id="density" width="960" height="576"></canvas>
         <div id="glWrap" style="display:none">
           <canvas id="gl" width="960" height="576"></canvas>
           <div id="glLabels"></div>
@@ -73,24 +78,7 @@ H 0 -0.7572 -0.4692</textarea>
       </div>
     </section>
 
-    <div>
-      <section class="card">
-        <header><span data-i18n="card.levels"></span><button class="help-q" data-help="levels">?</button></header>
-        <div class="body">
-          <svg id="levels" style="width:100%;height:auto;display:block"></svg>
-        </div>
-      </section>
-      <section class="card">
-        <header><span data-i18n="card.budget"></span><button class="help-q" data-help="budget">?</button></header>
-        <div class="body">
-          <div id="budget"></div>
-          <p id="mulliken" class="small muted" style="margin-top:8px"></p>
-        </div>
-      </section>
-    </div>
-  </div>
-
-  <div class="grid bottom-grid">
+    <div class="grid bottom-grid" id="bottomGrid">
     <section class="card" id="energyCard">
       <header>
         <span data-i18n="card.energy"></span>
@@ -114,13 +102,28 @@ H 0 -0.7572 -0.4692</textarea>
       <div class="body">
         <div class="grid" style="grid-template-columns: minmax(0,1fr) minmax(0,1.2fr); gap:12px">
           <svg id="exchange" style="width:100%;height:auto;display:block"></svg>
-          <div>
-            <p id="pairs" class="small sec"></p>
-            <div id="facts"></div>
-          </div>
+          <p id="pairs" class="small sec" style="margin:0"></p>
         </div>
       </div>
     </section>
+    </div>
+    </div>
+
+    <aside class="rail">
+      <section class="card">
+        <header><span data-i18n="card.levels"></span><button class="help-q" data-help="levels">?</button></header>
+        <div class="body">
+          <svg id="levels" style="width:100%;height:auto;display:block"></svg>
+        </div>
+      </section>
+      <section class="card">
+        <header><span data-i18n="card.budget"></span><button class="help-q" data-help="budget">?</button></header>
+        <div class="body">
+          <div id="budget"></div>
+          <p id="mulliken" class="small muted" style="margin-top:8px"></p>
+        </div>
+      </section>
+    </aside>
   </div>
 
   <section class="card" id="vibCard">
@@ -195,6 +198,7 @@ H 0 -0.7572 -0.4692</textarea>
 <script src="js/diagrams.js"></script>
 <script src="js/exporter.js"></script>
 <script src="js/help.js"></script>
+<script src="js/tooltip.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

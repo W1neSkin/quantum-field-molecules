@@ -48,8 +48,11 @@
   }
 
   function setSliderEnabled() {
-    $("rSlider").disabled = !S.points || S.is3d;
-    $("rSlider").title = S.is3d ? t("scan.slider3d") : "";
+    var sl = $("rSlider");
+    sl.disabled = !S.points || S.is3d;
+    // disabled controls swallow mouse events, so the 3D hint lives on the row
+    if (S.is3d) { $("scanRow").dataset.tip = t("scan.slider3d"); delete sl.dataset.tip; }
+    else { delete $("scanRow").dataset.tip; sl.dataset.tip = t("scan.slider.tip"); }
   }
 
   function caption() {

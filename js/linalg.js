@@ -97,7 +97,7 @@
     return X;
   }
 
-  // Solve small dense linear system (Gauss with partial pivoting) — used by DIIS.
+  // Solve small dense linear system (Gauss with partial pivoting) - used by DIIS.
   function solveLin(Ain, bin) {
     var n = bin.length;
     var A = [], b = bin.slice();

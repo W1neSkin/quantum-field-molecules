@@ -68,6 +68,8 @@
         { kind: "mo", mo: scf.nocc, spin: "a", label: "LUMO" }
       );
     }
+    var tips = { total: "pills.total.tip", diff: "pills.diff.tip",
+                 esp: "pills.esp.tip", spin: "pills.spin.tip" };
     var box = $("modePills");
     box.innerHTML = "";
     pills.forEach(function (p) {
@@ -75,6 +77,9 @@
       var b = document.createElement("button");
       b.className = "pill";
       b.textContent = p.label;
+      b.dataset.tip = p.kind === "mo"
+        ? t(p.localized ? "pills.lmo.tip" : "pills.mo.tip")
+        : t(tips[p.kind]);
       var active = p.kind === state.mode.kind &&
         (p.kind !== "mo" || (p.mo === state.mode.mo && (state.mode.spin || "a") === p.spin &&
           !p.localized === !state.mode.localized));
@@ -89,7 +94,7 @@
     if (state.vibPick < 0 || !state.vib || prep !== state.prepMain) return;
     var vec = state.vib.modes[state.vibPick].vec;
     var ctx = canvas.getContext("2d");
-    var W = App.heatmap.W, H = App.heatmap.H;
+    var W = canvas.width, H = canvas.height, S = W / App.heatmap.W;
     var ppbU = W / (2 * prep.halfU), ppbV = H / (2 * prep.halfV);
     var plane = prep.plane;
     // project displacements onto the slice plane, common scale to ~26 px
@@ -101,14 +106,14 @@
                dx: du * ppbU, dy: -dv * ppbV };
     });
     var mx = arrows.reduce(function (s, a) { return Math.max(s, Math.hypot(a.dx, a.dy)); }, 1e-9);
-    var k = 26 / mx;
+    var k = 26 * S / mx;
     var arrowColor = App.theme.color("vib-arrow");
     ctx.strokeStyle = arrowColor;
     ctx.fillStyle = arrowColor;
-    ctx.lineWidth = 1.6;
+    ctx.lineWidth = 1.6 * S;
     arrows.forEach(function (a) {
       var dx = a.dx * k, dy = a.dy * k, len = Math.hypot(dx, dy);
-      if (len < 3) return; // atom barely moves in this plane
+      if (len < 3 * S) return; // atom barely moves in this plane
       var x2 = a.x + dx, y2 = a.y + dy;
       ctx.beginPath();
       ctx.moveTo(a.x, a.y); ctx.lineTo(x2, y2);
@@ -116,8 +121,8 @@
       var ang = Math.atan2(dy, dx);
       ctx.beginPath();
       ctx.moveTo(x2, y2);
-      ctx.lineTo(x2 - 6 * Math.cos(ang - 0.45), y2 - 6 * Math.sin(ang - 0.45));
-      ctx.lineTo(x2 - 6 * Math.cos(ang + 0.45), y2 - 6 * Math.sin(ang + 0.45));
+      ctx.lineTo(x2 - 6 * S * Math.cos(ang - 0.45), y2 - 6 * S * Math.sin(ang - 0.45));
+      ctx.lineTo(x2 - 6 * S * Math.cos(ang + 0.45), y2 - 6 * S * Math.sin(ang + 0.45));
       ctx.closePath();
       ctx.fill();
     });
@@ -311,7 +316,7 @@
     var facts = state.preset
       ? App.presetFacts(state.preset)
       : [t("facts.custom", { basis: state.result.basisName || "STO-3G" })];
-    $("facts").innerHTML = facts.map(function (f) { return "<p class='small sec'>— " + f + "</p>"; }).join("");
+    $("facts").innerHTML = facts.map(function (f) { return "<p class='small sec'>- " + f + "</p>"; }).join("");
 
     var c = App.diagrams.pairCounts(state.result.atoms, state.result.scf.nelec);
     $("pairs").textContent = t("pairs", { ee: c.ee, en: c.en, nn: c.nn });
@@ -321,6 +326,8 @@
     var card = $("energyCard");
     var show = state.preset && state.preset.morse;
     card.style.display = show ? "" : "none";
+    // exchange card takes the full row when there is no E(R) curve
+    $("bottomGrid").classList.toggle("solo", !show);
     App.scanCtl.presetLoaded(show ? state.preset : null, state.result);
   }
 
@@ -430,6 +437,7 @@
       b.textContent = m.freq < 0
         ? t("vib.imag", { f: Math.abs(m.freq).toFixed(0) })
         : t("vib.mode", { f: m.freq.toFixed(0), ir: m.ir.toFixed(0) });
+      b.dataset.tip = t("vib.pill.tip");
       b.addEventListener("click", function () { pickVib(i === state.vibPick ? -1 : i); });
       wrap.appendChild(b);
     });

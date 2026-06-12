@@ -1,4 +1,4 @@
-// In-app help: modal with three tabs — user guide, glossary (wiki), about.
+// In-app help: modal with three tabs - user guide, glossary (wiki), about.
 // Content comes from the locale files (helpSections / glossary / about);
 // card headers carry data-help="sectionId" buttons that deep-link here.
 (function (App) {

@@ -22,7 +22,7 @@
     return F;
   }
 
-  // V_pair(C) = sum_prims c*(2pi/p) * sum_tuv ex ey ez R_tuv — potential integral
+  // V_pair(C) = sum_prims c*(2pi/p) * sum_tuv ex ey ez R_tuv - potential integral
   function pairPotential(pair, C) {
     var L = pair.L, v = 0;
     var tmax = L[0] + L[1] + L[2];

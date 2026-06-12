@@ -18,12 +18,12 @@
         ru: [
           "Эталон ковалентной связи: оба кванта электронного поля занимают одну связывающую моду σg.",
           "КЭД-поправка (лэмбовский сдвиг) к энергии диссоциации составляет −0.195 см⁻¹ и подтверждена экспериментально.",
-          "Для двухэлектронной системы здесь дополнительно решается точная задача (полное КВ) — зелёная кривая на графике E(R)."
+          "Для двухэлектронной системы здесь дополнительно решается точная задача (полное КВ) - зелёная кривая на графике E(R)."
         ],
         en: [
           "The reference covalent bond: both quanta of the electron field occupy a single bonding σg mode.",
           "The QED correction (Lamb shift) to the dissociation energy is −0.195 cm⁻¹ and has been confirmed experimentally.",
-          "For this two-electron system the exact problem (full CI) is also solved here — the green curve in the E(R) chart."
+          "For this two-electron system the exact problem (full CI) is also solved here - the green curve in the E(R) chart."
         ]
       }
     },
@@ -52,12 +52,12 @@
       exp: { dipole: 0 },
       facts: {
         ru: [
-          "Связывающая σg и разрыхляющая σu* моды заполнены полностью — порядок связи равен нулю: паулиевское отталкивание следует из антикоммутации поля. Сопоставьте с порядком по Майеру в свойствах.",
-          "Остаётся лишь ван-дер-ваальсов минимум глубиной ~0.001 эВ при R ≈ 3 Å — следствие вакуумных флуктуаций (эффект Казимира–Полдера). Димер наблюдается только при милликельвиновых температурах."
+          "Связывающая σg и разрыхляющая σu* моды заполнены полностью - порядок связи равен нулю: паулиевское отталкивание следует из антикоммутации поля. Сопоставьте с порядком по Майеру в свойствах.",
+          "Остаётся лишь ван-дер-ваальсов минимум глубиной ~0.001 эВ при R ≈ 3 Å - следствие вакуумных флуктуаций (эффект Казимира–Полдера). Димер наблюдается только при милликельвиновых температурах."
         ],
         en: [
-          "Both the bonding σg and the antibonding σu* modes are fully occupied — the bond order is zero: Pauli repulsion follows from field anticommutation. Compare with the Mayer bond order in the properties panel.",
-          "Only a van der Waals well of ~0.001 eV at R ≈ 3 Å remains — a consequence of vacuum fluctuations (the Casimir–Polder effect). The dimer is observed only at millikelvin temperatures."
+          "Both the bonding σg and the antibonding σu* modes are fully occupied - the bond order is zero: Pauli repulsion follows from field anticommutation. Compare with the Mayer bond order in the properties panel.",
+          "Only a van der Waals well of ~0.001 eV at R ≈ 3 Å remains - a consequence of vacuum fluctuations (the Casimir–Polder effect). The dimer is observed only at millikelvin temperatures."
         ]
       }
     },
@@ -85,11 +85,11 @@
       facts: {
         ru: [
           "Самая слабая ковалентная связь среди пресетов: диффузные 2s-моды, Dₑ всего 1.06 эВ.",
-          "Остовные 1s-моды практически не перекрываются — связывание обеспечивает одна валентная пара."
+          "Остовные 1s-моды практически не перекрываются - связывание обеспечивает одна валентная пара."
         ],
         en: [
           "The loosest covalent bond among the presets: diffuse 2s modes, Dₑ of only 1.06 eV.",
-          "The 1s core modes barely overlap — a single valence pair provides the bonding."
+          "The 1s core modes barely overlap - a single valence pair provides the bonding."
         ]
       }
     },
@@ -102,11 +102,11 @@
       facts: {
         ru: [
           "Тройная связь: мода σ и две вырожденные π-моды; порядок по Майеру равен 3 (см. свойства).",
-          "Одна из самых прочных связей в химии (Dₑ ≈ 9.9 эВ) — причина инертности атмосферного азота."
+          "Одна из самых прочных связей в химии (Dₑ ≈ 9.9 эВ) - причина инертности атмосферного азота."
         ],
         en: [
           "A triple bond: one σ mode and two degenerate π modes; the Mayer bond order equals 3 (see properties).",
-          "One of the strongest bonds in chemistry (Dₑ ≈ 9.9 eV) — the reason atmospheric nitrogen is so inert."
+          "One of the strongest bonds in chemistry (Dₑ ≈ 9.9 eV) - the reason atmospheric nitrogen is so inert."
         ]
       }
     },
@@ -118,11 +118,11 @@
       exp: { ip: 14.01, dipole: 0.11 },
       facts: {
         ru: [
-          "Изоэлектронен N₂, однако моды асимметричны: ВЗМО локализована преимущественно на углероде — этим объясняется связывание CO с железом гемоглобина.",
+          "Изоэлектронен N₂, однако моды асимметричны: ВЗМО локализована преимущественно на углероде - этим объясняется связывание CO с железом гемоглобина.",
           "Известный аномальный диполь: всего ~0.1 Д, причём отрицательный полюс расположен на углероде, вопреки шкале электроотрицательности."
         ],
         en: [
-          "Isoelectronic with N₂, yet the modes are asymmetric: the HOMO protrudes towards carbon — which is how CO binds to the iron of hemoglobin.",
+          "Isoelectronic with N₂, yet the modes are asymmetric: the HOMO protrudes towards carbon - which is how CO binds to the iron of hemoglobin.",
           "The famous anomalous dipole: only ~0.1 D, with the negative end on carbon, contrary to electronegativity."
         ]
       }
@@ -135,12 +135,12 @@
       exp: { ip: 12.30, dipole: 0 },
       facts: {
         ru: [
-          "Триплетное основное состояние: два неспаренных кванта в вырожденных π*-модах — кислород парамагнитен, жидкий O₂ притягивается к магниту. Включите карту ρₛ.",
-          "Замкнутые оболочки (RHF) для O₂ неприменимы — расчёт ведётся методом UHF: α- и β-моды имеют разные профили, величина ⟨S²⟩ приведена в балансе."
+          "Триплетное основное состояние: два неспаренных кванта в вырожденных π*-модах - кислород парамагнитен, жидкий O₂ притягивается к магниту. Включите карту ρₛ.",
+          "Замкнутые оболочки (RHF) для O₂ неприменимы - расчёт ведётся методом UHF: α- и β-моды имеют разные профили, величина ⟨S²⟩ приведена в балансе."
         ],
         en: [
-          "A triplet ground state: two unpaired quanta in degenerate π* modes — oxygen is paramagnetic, and liquid O₂ sticks to a magnet. Switch on the ρₛ map.",
-          "Closed-shell RHF is not applicable to O₂ — it is computed with UHF: α and β modes have different profiles, and ⟨S²⟩ is reported in the budget."
+          "A triplet ground state: two unpaired quanta in degenerate π* modes - oxygen is paramagnetic, and liquid O₂ sticks to a magnet. Switch on the ρₛ map.",
+          "Closed-shell RHF is not applicable to O₂ - it is computed with UHF: α and β modes have different profiles, and ⟨S²⟩ is reported in the budget."
         ]
       }
     },
@@ -153,11 +153,11 @@
       facts: {
         ru: [
           "Устойчивый радикал: один неспаренный квант в π*-моде (виден на карте ρₛ).",
-          "Сигнальная молекула сосудистой системы — Нобелевская премия по физиологии и медицине 1998 года."
+          "Сигнальная молекула сосудистой системы - Нобелевская премия по физиологии и медицине 1998 года."
         ],
         en: [
           "A stable radical: one unpaired quantum in a π* mode (visible in the ρₛ map).",
-          "A signalling molecule of the vascular system — the 1998 Nobel Prize in Physiology or Medicine."
+          "A signalling molecule of the vascular system - the 1998 Nobel Prize in Physiology or Medicine."
         ]
       }
     },
@@ -169,12 +169,12 @@
       exp: { ip: 13.02, dipole: 1.668 },
       facts: {
         ru: [
-          "«Детергент атмосферы»: главный окислитель тропосферы, характерное время жизни — доли секунды.",
-          "Неспаренный спин занимает p-моду кислорода, перпендикулярную связи, — см. карту ρₛ."
+          "«Детергент атмосферы»: главный окислитель тропосферы, характерное время жизни - доли секунды.",
+          "Неспаренный спин занимает p-моду кислорода, перпендикулярную связи, - см. карту ρₛ."
         ],
         en: [
           "The “detergent of the atmosphere”: the main tropospheric oxidant, with a lifetime of a fraction of a second.",
-          "The unpaired spin occupies an oxygen p mode perpendicular to the bond — see the ρₛ map."
+          "The unpaired spin occupies an oxygen p mode perpendicular to the bond - see the ρₛ map."
         ]
       }
     },
@@ -186,10 +186,10 @@
       exp: { ip: 15.70, dipole: 0 },
       facts: {
         ru: [
-          "Формально одинарная связь, однако заполненные π*-моды выталкивают плотность из межъядерной области — связь слабая (1.66 эВ), что объясняет исключительную реакционную способность фтора."
+          "Формально одинарная связь, однако заполненные π*-моды выталкивают плотность из межъядерной области - связь слабая (1.66 эВ), что объясняет исключительную реакционную способность фтора."
         ],
         en: [
-          "Formally a single bond, yet the filled π* modes push density out of the internuclear region — the bond is weak (1.66 eV), which explains the exceptional reactivity of fluorine."
+          "Formally a single bond, yet the filled π* modes push density out of the internuclear region - the bond is weak (1.66 eV), which explains the exceptional reactivity of fluorine."
         ]
       }
     },
@@ -201,11 +201,11 @@
       exp: { ip: 12.62, dipole: 1.855 },
       facts: {
         ru: [
-          "Изогнутая геометрия (104.5°) обусловлена двумя неподелёнными парами — найдите их среди занятых МО (ВЗМО — почти чистая 2p-мода кислорода).",
+          "Изогнутая геометрия (104.5°) обусловлена двумя неподелёнными парами - найдите их среди занятых МО (ВЗМО - почти чистая 2p-мода кислорода).",
           "Дипольный момент 1.85 Д определяет свойства воды: водородные связи, растворение солей, аномалии льда."
         ],
         en: [
-          "The bent geometry (104.5°) is due to two lone pairs — find them among the occupied MOs (the HOMO is an almost pure oxygen 2p mode).",
+          "The bent geometry (104.5°) is due to two lone pairs - find them among the occupied MOs (the HOMO is an almost pure oxygen 2p mode).",
           "The 1.85 D dipole moment defines water’s behaviour: hydrogen bonding, salt dissolution, the anomalies of ice."
         ]
       }
@@ -218,10 +218,10 @@
       exp: { ip: 10.82, dipole: 1.472 },
       facts: {
         ru: [
-          "Пирамидальная молекула с неподелённой парой (ВЗМО) на вершине — именно она определяет осно́вные свойства аммиака."
+          "Пирамидальная молекула с неподелённой парой (ВЗМО) на вершине - именно она определяет осно́вные свойства аммиака."
         ],
         en: [
-          "A pyramidal molecule with a lone pair (the HOMO) at the apex — it is what makes ammonia a base."
+          "A pyramidal molecule with a lone pair (the HOMO) at the apex - it is what makes ammonia a base."
         ]
       }
     },
@@ -233,10 +233,10 @@
       exp: { ip: 13.6, dipole: 0 },
       facts: {
         ru: [
-          "Тетраэдр: три вырожденные t₂-моды поля и одна a₁ вместо четырёх «отдельных связей» — делокализация видна непосредственно на МО. Локализация Бойса возвращает четыре эквивалентные связи C–H."
+          "Тетраэдр: три вырожденные t₂-моды поля и одна a₁ вместо четырёх «отдельных связей» - делокализация видна непосредственно на МО. Локализация Бойса возвращает четыре эквивалентные связи C–H."
         ],
         en: [
-          "A tetrahedron: three degenerate t₂ field modes plus one a₁ instead of four “separate bonds” — the delocalization is directly visible in the MOs. Boys localization recovers four equivalent C–H bonds."
+          "A tetrahedron: three degenerate t₂ field modes plus one a₁ instead of four “separate bonds” - the delocalization is directly visible in the MOs. Boys localization recovers four equivalent C–H bonds."
         ]
       }
     },
@@ -266,11 +266,11 @@
       facts: {
         ru: [
           "Линейная молекула: две ортогональные π-системы, делокализованные по трём ядрам.",
-          "Несмотря на полярные связи, суммарный дипольный момент равен нулю — следствие симметрии мод поля (проверьте в свойствах)."
+          "Несмотря на полярные связи, суммарный дипольный момент равен нулю - следствие симметрии мод поля (проверьте в свойствах)."
         ],
         en: [
           "A linear molecule: two orthogonal π systems delocalized over three nuclei.",
-          "Despite polar bonds, the net dipole moment is zero — a consequence of the symmetry of the field modes (verify in the properties panel)."
+          "Despite polar bonds, the net dipole moment is zero - a consequence of the symmetry of the field modes (verify in the properties panel)."
         ]
       }
     },
@@ -282,7 +282,7 @@
       exp: { ip: 10.68, dipole: 0 },
       facts: {
         ru: [
-          "Классическая π-связь: ВЗМО — два лепестка над и под плоскостью молекулы. Она запрещает вращение вокруг C=C; порядок по Майеру ≈ 2."
+          "Классическая π-связь: ВЗМО - два лепестка над и под плоскостью молекулы. Она запрещает вращение вокруг C=C; порядок по Майеру ≈ 2."
         ],
         en: [
           "The classic π bond: the HOMO consists of two lobes above and below the molecular plane. It forbids rotation about C=C; the Mayer bond order is ≈ 2."
@@ -305,12 +305,12 @@
       exp: { ip: 9.45, dipole: 0 },
       facts: {
         ru: [
-          "Ароматическая система: шесть π-квантов в модах, делокализованных по всему кольцу — порядок связи C–C по Майеру ≈ 1.45, между одинарной и двойной.",
-          "36 базисных функций, ~1.7 млн уникальных интегралов — всё вычисляется непосредственно в браузере."
+          "Ароматическая система: шесть π-квантов в модах, делокализованных по всему кольцу - порядок связи C–C по Майеру ≈ 1.45, между одинарной и двойной.",
+          "36 базисных функций, ~1.7 млн уникальных интегралов - всё вычисляется непосредственно в браузере."
         ],
         en: [
-          "An aromatic system: six π quanta in modes delocalized over the whole ring — the Mayer C–C bond order is ≈ 1.45, between single and double.",
-          "36 basis functions, ~1.7 million unique integrals — all evaluated directly in the browser."
+          "An aromatic system: six π quanta in modes delocalized over the whole ring - the Mayer C–C bond order is ≈ 1.45, between single and double.",
+          "36 basis functions, ~1.7 million unique integrals - all evaluated directly in the browser."
         ]
       }
     }
@@ -321,10 +321,10 @@
     return null;
   };
 
-  // "H₂O — water" in the active language (En fallback)
+  // "H₂O - water" in the active language (En fallback)
   App.presetTitle = function (p) {
     var n = p.name[App.LANG] || p.name.en;
-    return p.formula + " \u2014 " + n;
+    return p.formula + " - " + n;
   };
   App.presetFacts = function (p) {
     return (p.facts && (p.facts[App.LANG] || p.facts.en)) || [];
