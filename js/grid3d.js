@@ -67,12 +67,18 @@
     }
   }
 
-  function encode(field, signed) {
+  // valence-scale cap for total density (a.u.): without it the nuclear cores
+  // (rho ~ 10^2 at O/N/F) eat the whole dynamic range and the bonding cloud
+  // encodes to ~0 - heavy molecules degrade to dots at the nuclei
+  var RHO_CAP = 1.5;
+
+  function encode(field, signed, cap) {
     var max = 1e-12, v;
     for (v = 0; v < NVOX; v++) if (Math.abs(field[v]) > max) max = Math.abs(field[v]);
+    if (cap && max > cap) max = cap;
     var u8 = new Uint8Array(NVOX);
     for (v = 0; v < NVOX; v++) {
-      var s = Math.sqrt(Math.abs(field[v]) / max);
+      var s = Math.sqrt(Math.min(Math.abs(field[v]), max) / max);
       u8[v] = signed
         ? Math.round((Math.sign(field[v]) * s * 0.5 + 0.5) * 255)
         : Math.round(s * 255);
@@ -127,7 +133,7 @@
       }
       if (mode.kind === "diff") subtractPromolecule(prep, out);
       var signed = mode.kind === "diff" || mode.kind === "spin";
-      done({ data: encode(out, signed), signed: signed });
+      done({ data: encode(out, signed, signed ? 0 : RHO_CAP), signed: signed });
     }
     step();
   }
