@@ -55,8 +55,12 @@ the main thread (the UI may stutter on heavy molecules like benzene).
 ### Visualization
 
 - Map modes: total density, deformation Δρ (STO-3G only), electrostatic
-  potential φ(r) (a reactivity map), spin density ρₛ (UHF), amplitude of any
-  MO with its sign.
+  potential φ(r) (a reactivity map), ELF (electron localization function:
+  bonds, lone pairs and shells as bright basins), Laplacian ∇²ρ (QTAIM charge
+  concentration/depletion), spin density ρₛ (UHF), amplitude of any MO with
+  its sign.
+- Electric field arrows E = −∇φ over the ESP map (toggleable): the direction
+  a positive test charge would be pushed.
 - **Boys localization** (the "Boys orbitals" checkbox): occupied MOs are
   rotated into "bonds", "lone pairs" and "cores" - the very objects from a
   chemistry classroom, with automatic labels (bond O1–H2, lone pair O1,
@@ -66,7 +70,9 @@ the main thread (the UI may stutter on heavy molecules like benzene).
   orientation.
 - R slider for diatomics: an E(R) scan in the background, the map follows the
   slider; the chart shows the RHF/UHF curve, the FCI curve (for 2e⁻) and the
-  experimental Morse potential.
+  experimental Morse potential with its exact vibrational levels Eᵥ and
+  nuclear wavefunctions χᵥ(R) - quantized bond motion, zero-point smearing
+  included.
 - MO level diagram: two columns for UHF (α↑ and β↓), the SOMO is highlighted.
 
 ### Export
@@ -86,15 +92,19 @@ the main thread (the UI may stutter on heavy molecules like benzene).
   right in the worker.
 - **Help and wiki glossary**: a modal window (the "Help" button or the "?" in
   each panel header) with three tabs - a guide to the main features
-  (12 sections), a glossary of ~28 terms with search (Hartree–Fock, basis
-  set, ESP, Koopmans, correlation, Hessian, the QFT view, etc.) and "About".
+  (13 sections, including "Fields: what exists and what is drawn"), a glossary
+  of ~30 terms with search (Hartree–Fock, basis set, ESP, ELF, the Laplacian,
+  Koopmans, correlation, Hessian, the QFT view, etc.) and "About".
 - **Dark and light themes**: a toggle in the header, starts from
   prefers-color-scheme, remembered. Everything is repainted, including the
   canvas LUT density maps and the SVG charts.
 
 ### Other
 
-- Custom molecule: XYZ (angstroms) + charge; H–Ne, up to 30 atoms
+- Molecule builder: click an element to add an atom bonded to the selected
+  one (covalent-radii bond length, VSEPR-like direction), rotate/select in a
+  live skeleton preview, then optimize; synced "XYZ text" tab with as-you-type
+  validation for pasting geometries. H–Ne, up to 30 atoms
   (up to 90 basis functions for 6-31G*).
 - Result cache in IndexedDB: reopening is instant
   (scans, optimizations and Hessians are cached too).
@@ -145,6 +155,8 @@ ever needed.
 | `optimize.js` | Numerical gradients + BFGS, emits the optimized XYZ |
 | `vib.js` | Numerical Hessian, frequencies, IR intensities |
 | `esp.js` | Electrostatic potential on a slice (reuses ERI pairs) |
+| `fields2d.js` | ELF and ∇²ρ on a slice: density-matrix contraction of basis values, gradients and Laplacians |
+| `builder.js` | Click-to-build molecule editor: VSEPR-like atom placement, skeleton preview |
 | `engine.js` | XYZ parser and the computation pipeline |
 | `i18n.js` + `lang/` | EN/RU/DE/ES/ZH dictionaries, `t()` with interpolation, `data-i18n` DOM markup |
 | `theme.js` | Dark/light themes, CSS variable access for canvas/SVG |

@@ -99,6 +99,13 @@ select {
 .status.ok { color: var(--green); }
 .status.error { color: var(--red); border-color: var(--red); }
 
+#bldCanvas {
+  width: 100%; display: block; border: 1px solid var(--stroke-2);
+  border-radius: 8px; cursor: grab; touch-action: none; background: var(--surface);
+}
+#bldElems .pill { min-width: 34px; text-align: center; }
+#customPanel .row .btn { width: auto; flex: 1; }
+
 textarea {
   width: 100%; min-height: 110px; resize: vertical;
   background: var(--surface); color: var(--text);

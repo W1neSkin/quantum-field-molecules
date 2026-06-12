@@ -9,8 +9,11 @@
   var state = {
     preset: null, result: null, prep: null, mode: { kind: "total" }, busy: false,
     view: "2d", prep3d: null, prep3dBuilding: false, volCache: {}, okStatus: "",
-    okInfo: null, basis: "STO-3G"
+    okInfo: null, basis: "STO-3G", efield: true
   };
+
+  // these fields are computed on the slice plane only, never as a 3D volume
+  var SLICE_ONLY = { esp: 1, elf: 1, lap: 1 };
 
   function setStatus(text, cls) {
     var s = $("status");
@@ -34,6 +37,8 @@
     if (mode.kind === "diff") return t("mode.diff");
     if (mode.kind === "spin") return t("mode.spin");
     if (mode.kind === "esp") return t("mode.esp");
+    if (mode.kind === "elf") return t("mode.elf");
+    if (mode.kind === "lap") return t("mode.lap");
     var spinB = mode.spin === "b" && scf.uhf;
     var eps = spinB ? scf.epsB : scf.eps;
     var nocc = spinB ? scf.noccB : scf.nocc;
@@ -57,6 +62,8 @@
       pills.push({ kind: "diff", label: t("pills.diff") });
     }
     pills.push({ kind: "esp", label: t("pills.esp") });
+    pills.push({ kind: "elf", label: t("pills.elf") });
+    pills.push({ kind: "lap", label: t("pills.lap") });
     if (scf.uhf) pills.push({ kind: "spin", label: t("pills.spin") });
     if (state.localized && scf.locLabels) {
       scf.locLabels.forEach(function (lbl, k) {
@@ -68,8 +75,8 @@
         { kind: "mo", mo: scf.nocc, spin: "a", label: "LUMO" }
       );
     }
-    var tips = { total: "pills.total.tip", diff: "pills.diff.tip",
-                 esp: "pills.esp.tip", spin: "pills.spin.tip" };
+    var tips = { total: "pills.total.tip", diff: "pills.diff.tip", esp: "pills.esp.tip",
+                 elf: "pills.elf.tip", lap: "pills.lap.tip", spin: "pills.spin.tip" };
     var box = $("modePills");
     box.innerHTML = "";
     pills.forEach(function (p) {
@@ -128,28 +135,84 @@
     });
   }
 
-  // draws the 2D map; ESP is built lazily and asynchronously per geometry
+  // arrows of the static electric field E = -grad(phi) over the ESP map
+  function drawEfield(canvas, prep) {
+    if (!state.efield || state.mode.kind !== "esp" || !prep.espValues) return;
+    var phi = prep.espValues;
+    var FW = App.heatmap.W, FH = App.heatmap.H;
+    var S = canvas.width / FW;
+    var du = 2 * prep.halfU / FW, dv = 2 * prep.halfV / FH; // bohr per field px
+    var pxPerBohrU = FW / (2 * prep.halfU), pxPerBohrV = FH / (2 * prep.halfV);
+    var step = 32, h = 4;
+    var arrows = [], emax = 1e-12;
+    for (var py = step / 2; py < FH - h; py += step) {
+      for (var px = step / 2; px < FW - h; px += step) {
+        if (px < h || py < h) continue;
+        // the singular 1/r region around each nucleus dwarfs the far field
+        var near = false;
+        for (var a = 0; a < prep.proj.length; a++) {
+          var nx = FW / 2 + prep.proj[a][0] * pxPerBohrU, ny = FH / 2 - prep.proj[a][1] * pxPerBohrV;
+          var ddx = (px - nx) / pxPerBohrU, ddy = (py - ny) / pxPerBohrV;
+          if (ddx * ddx + ddy * ddy < 1) { near = true; break; }
+        }
+        if (near) continue;
+        var Eu = -(phi[py * FW + px + h] - phi[py * FW + px - h]) / (2 * h * du);
+        var Ev = (phi[(py + h) * FW + px] - phi[(py - h) * FW + px]) / (2 * h * dv);
+        var m = Math.hypot(Eu, Ev);
+        if (m > emax) emax = m;
+        // screen y grows downward while the v axis points up
+        arrows.push({ x: px, y: py, ux: Eu / (m || 1), uy: -Ev / (m || 1), m: m });
+      }
+    }
+    var ctx = canvas.getContext("2d");
+    var fg = App.theme.color("chart-fg");
+    ctx.strokeStyle = fg; ctx.fillStyle = fg;
+    ctx.lineWidth = 1.1 * S;
+    ctx.globalAlpha = 0.65;
+    arrows.forEach(function (ar) {
+      var len = Math.sqrt(Math.min(ar.m / emax, 1)) * 13; // sqrt compresses the range
+      if (len < 3) return;
+      var x1 = (ar.x - ar.ux * len / 2) * S, y1 = (ar.y - ar.uy * len / 2) * S;
+      var x2 = (ar.x + ar.ux * len / 2) * S, y2 = (ar.y + ar.uy * len / 2) * S;
+      ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+      var hp = 3.4 * S, ang = Math.atan2(y2 - y1, x2 - x1);
+      ctx.beginPath();
+      ctx.moveTo(x2, y2);
+      ctx.lineTo(x2 - hp * Math.cos(ang - 0.5), y2 - hp * Math.sin(ang - 0.5));
+      ctx.lineTo(x2 - hp * Math.cos(ang + 0.5), y2 - hp * Math.sin(ang + 0.5));
+      ctx.closePath(); ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+  }
+
+  // slice-only fields (ESP, ELF, lap) are built lazily per geometry
+  function ensureLazy(prep, ensureFn, statusKey) {
+    ensureFn(prep, function (f) {
+      setStatus(t(statusKey, { p: Math.round(f * 100) }), "busy");
+    }, function () {
+      setStatus(state.okStatus, "ok");
+      if (state.prep === prep) drawMap();
+    });
+  }
+
   function drawMap() {
     var prep = state.prep, mode = state.mode;
     if (mode.kind === "esp" && !prep.espValues) {
-      App.esp.ensure(prep, function (f) {
-        setStatus(t("status.esp", { p: Math.round(f * 100) }), "busy");
-      }, function () {
-        setStatus(state.okStatus, "ok");
-        if (state.prep === prep && state.mode.kind === "esp") {
-          App.heatmap.draw($("density"), prep, state.mode);
-          drawVibArrows($("density"), prep);
-        }
-      });
+      ensureLazy(prep, App.esp.ensure, "status.esp");
+      return;
+    }
+    if ((mode.kind === "elf" || mode.kind === "lap") && !prep.elfValues) {
+      ensureLazy(prep, App.fields2d.ensure, "status.fields");
       return;
     }
     App.heatmap.draw($("density"), prep, mode);
     drawVibArrows($("density"), prep);
+    drawEfield($("density"), prep);
   }
 
   function setMode(mode) {
     state.mode = { kind: mode.kind, mo: mode.mo, spin: mode.spin, localized: mode.localized };
-    if (mode.kind === "esp" && state.view === "3d") { setView("2d"); }
+    if (SLICE_ONLY[mode.kind] && state.view === "3d") { setView("2d"); }
     renderModePills();
     renderLevels();
     drawMap();
@@ -160,11 +223,12 @@
   function updateNote() {
     $("modeNote").textContent = modeLabel(state.mode) +
       (state.view === "3d" ? t("note.3d") : "");
+    $("efWrap").style.display = state.mode.kind === "esp" ? "inline-flex" : "none";
   }
 
   // ---------- 3D view ----------
   function setView(view) {
-    if (view === "3d" && state.mode.kind === "esp") {
+    if (view === "3d" && SLICE_ONLY[state.mode.kind]) {
       state.mode = { kind: "total" };
       renderModePills();
     }
@@ -508,6 +572,86 @@
     });
   }
 
+  // ---------- custom molecule panel: builder + xyz text, kept in sync ----------
+  var BOHR_TO_A = 0.529177210903; // engine atoms are stored in bohr
+
+  function renderBldInfo() {
+    var atoms = App.builder.getAtoms();
+    if (!atoms.length) { $("bldInfo").textContent = ""; return; }
+    var s = t("custom.natoms", { n: atoms.length });
+    var sel = App.builder.selected();
+    if (sel >= 0) {
+      s += t("custom.sel", { sym: App.SYMBOLS[atoms[sel].Z] + (sel + 1) });
+      var bonds = App.builder.selectionBonds();
+      if (bonds && bonds.length) {
+        s += " (" + bonds.map(function (b) {
+          return b.label + " " + b.len.toFixed(2) + " \u00c5";
+        }).join(", ") + ")";
+      }
+    }
+    $("bldInfo").textContent = s;
+  }
+
+  function syncFromBuilder() {
+    $("xyzInput").value = App.builder.toXyz();
+    $("xyzError").style.display = "none";
+    renderBldInfo();
+  }
+
+  // textarea -> builder preview, with live localized validation
+  function parseToBuilder() {
+    try {
+      var atoms = App.engine.parseXYZ($("xyzInput").value).map(function (a) {
+        return { Z: a.Z, xyz: a.xyz.map(function (c) { return c * BOHR_TO_A; }) };
+      });
+      $("xyzError").style.display = "none";
+      App.builder.setAtoms(atoms);
+      renderBldInfo();
+    } catch (e) {
+      $("xyzError").textContent = e.message;
+      $("xyzError").style.display = "";
+    }
+  }
+
+  function setBldTab(build) {
+    $("bldPane").style.display = build ? "" : "none";
+    $("xyzPane").style.display = build ? "none" : "";
+    $("tabBuild").classList.toggle("active", build);
+    $("tabText").classList.toggle("active", !build);
+  }
+
+  function initBuilder() {
+    App.builder.init($("bldCanvas"), syncFromBuilder);
+    for (var z = 1; z <= 10; z++) {
+      (function (z) {
+        var b = document.createElement("button");
+        b.className = "pill";
+        b.textContent = App.SYMBOLS[z];
+        b.addEventListener("click", function () {
+          if (App.builder.add(z) < 0) $("bldInfo").textContent = t("err.parse.maxatoms");
+        });
+        $("bldElems").appendChild(b);
+      })(z);
+    }
+    $("bldDel").addEventListener("click", function () { App.builder.remove(); });
+    $("bldClear").addEventListener("click", function () { App.builder.clear(); });
+    $("bldFromCur").addEventListener("click", function () {
+      if (!state.result) return;
+      App.builder.setAtoms(state.result.atoms.map(function (a) {
+        return { Z: a.Z, xyz: a.xyz.map(function (c) { return c * BOHR_TO_A; }) };
+      }));
+      syncFromBuilder();
+    });
+    $("tabBuild").addEventListener("click", function () { setBldTab(true); });
+    $("tabText").addEventListener("click", function () { setBldTab(false); });
+    var timer = null;
+    $("xyzInput").addEventListener("input", function () {
+      clearTimeout(timer);
+      timer = setTimeout(parseToBuilder, 350);
+    });
+    parseToBuilder(); // seed the preview from the example geometry
+  }
+
   // reload whatever is currently selected (after a basis change)
   function reloadCurrent() {
     var id = $("molSelect").value;
@@ -538,6 +682,8 @@
   function rerenderText() {
     fillMolSelect();
     App.diagrams.renderExchange($("exchange"));
+    App.builder.render();
+    renderBldInfo();
     if (!state.result) return;
     renderModePills();
     renderLevels();
@@ -561,6 +707,7 @@
   function rerenderTheme() {
     App.heatmap.refreshTheme();
     App.diagrams.renderExchange($("exchange"));
+    App.builder.render();
     if (!state.result) return;
     drawMap();
     renderLevels();
@@ -590,6 +737,7 @@
     $("computeBtn").addEventListener("click", function () {
       loadMolecule($("xyzInput").value, parseInt($("chargeInput").value, 10) || 0, null);
     });
+    initBuilder();
 
     var bsel = $("basisSelect");
     Object.keys(App.BASIS_TABLES).forEach(function (name) {
@@ -633,6 +781,10 @@
     $("locToggle").addEventListener("change", function () {
       if (!state.result || state.busy) { this.checked = state.localized; return; }
       setLocalized(this.checked);
+    });
+    $("efToggle").addEventListener("change", function () {
+      state.efield = this.checked;
+      drawMap();
     });
     $("btnOpt").addEventListener("click", optimizeGeometry);
     $("vibBtn").addEventListener("click", runVib);

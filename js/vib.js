@@ -171,5 +171,5 @@
     for (i = 0; i < n; i++) for (j = 0; j < n; j++) Hm[i * n + j] = (H3[i * n + j] + H3[j * n + i]) / 2;
   }
 
-  App.vib = { run: run };
+  App.vib = { run: run, MASS: MASS, AMU: AMU };
 })(typeof globalThis.App === "object" ? globalThis.App : (globalThis.App = {}));

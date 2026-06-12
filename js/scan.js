@@ -7,7 +7,7 @@
   var HA_TO_EV = App.energyChart.HA_TO_EV;
   var S = {
     preset: null, morse: null, points: null, Eplot: null, minIdx: 0, eqIdx: 0,
-    idx: 0, is3d: false, apply: null, raf: false
+    idx: 0, is3d: false, apply: null, raf: false, mu: null
   };
   var $ = function (id) { return document.getElementById(id); };
   var t = function (key, params) { return App.i18n.t(key, params); };
@@ -24,7 +24,7 @@
     App.energyChart.render($("energySvg"), S.morse,
       S.points ? { Rs: S.points.map(function (p) { return p.R; }), Eplot: S.Eplot, Efci: S.Efci,
                    minIdx: S.minIdx, method: S.method, basis: S.basis } : null,
-      S.idx);
+      S.idx, S.mu);
   }
 
   function readout() {
@@ -60,7 +60,7 @@
       t("scan.cap.base", { method: S.method, basis: S.basis }) +
       (S.Efci ? t("scan.cap.fci")
         : t(S.method === "UHF" ? "scan.cap.uhf" : "scan.cap.rhf")) +
-      t("scan.cap.tail");
+      t("scan.cap.tail") + t("energy.vlevels");
   }
 
   // re-render chart, readout and caption (language or theme switch)
@@ -85,12 +85,15 @@
     S.preset = preset;
     S.points = null;
     S.morse = preset && preset.morse;
+    S.mu = null;
     var row = $("scanRow");
     if (!S.morse) { row.style.display = "none"; return; }
     row.style.display = "";
     var token = preset.id;
     var atoms = result.atoms;
     var basisName = result.basisName || "STO-3G";
+    var m1 = App.vib.MASS[atoms[0].Z], m2 = App.vib.MASS[atoms[1].Z];
+    S.mu = m1 * m2 / (m1 + m2) * App.vib.AMU; // reduced mass, electron masses
     S.method = preset.mult > 1 ? "UHF" : "RHF";
     S.basis = basisName;
     $("rReadout").textContent = t("scan.start", { method: S.method });

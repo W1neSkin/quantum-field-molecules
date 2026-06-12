@@ -17,6 +17,8 @@ require("../js/localize.js");
 require("../js/engine.js");
 require("../js/optimize.js");
 require("../js/vib.js");
+require("../js/fields2d.js");
+require("../js/energy.js");
 
 var App = globalThis.App;
 
@@ -212,6 +214,93 @@ try {
 } catch (e) {
   failed++;
   console.log("FAIL opt/vib error:", e.message, e.stack);
+}
+
+// --- slice fields (ELF, Laplacian) and Morse vibrational levels ---
+try {
+  // H2 has a single electron pair: D(r) = 0 identically, so ELF = 1 wherever
+  // the density is non-negligible; the covalent bond concentrates charge,
+  // so lap(rho) < 0 at the midpoint
+  var fh2 = App.engine.compute("H 0 0 0\nH 0 0 0.7414", 0);
+  var mid = App.fields2d.probe(fh2, [0, 0, 0.7414 / 2 * 1.8897259886]);
+  check("ELF H2 midpoint", mid.elf > 0.95 && mid.elf <= 1 + 1e-9,
+    "ELF = " + mid.elf.toFixed(4) + " (one pair: exactly 1)");
+  check("lap H2 midpoint", mid.lap < 0,
+    "lap rho = " + mid.lap.toFixed(3) + " (covalent concentration: < 0)");
+  var far = App.fields2d.probe(fh2, [8, 8, 8]);
+  check("ELF far tail", far.elf >= 0 && far.elf < 0.05, "ELF(far) = " + far.elf.toExponential(1));
+
+  // Morse levels of H2 vs spectroscopy: omega_e = 4401 cm^-1, ZPE ~ 0.27 eV
+  var muH2 = 0.5 * App.vib.MASS[1] * App.vib.AMU;
+  var lev = App.energyChart.morseLevels({ De: 4.747, Re: 0.7414, a: 1.9426 }, muH2, 5);
+  check("Morse omega H2", Math.abs(lev.omega - 4401) < 60,
+    "omega_e = " + lev.omega.toFixed(0) + " cm^-1 (exp 4401)");
+  check("Morse ZPE H2", Math.abs(lev[0].E - 0.269) < 0.01,
+    "E0 = " + lev[0].E.toFixed(3) + " eV (ref ~0.269)");
+  // chi_v has exactly v sign changes
+  var rs = [];
+  for (var ri = 0; ri < 400; ri++) rs.push(0.3 + 1.7 * ri / 399);
+  var nodes = function (ps) {
+    var n = 0;
+    for (var i = 1; i < ps.length; i++) {
+      if (Math.abs(ps[i]) > 1e-6 && Math.abs(ps[i - 1]) > 1e-6 && ps[i] * ps[i - 1] < 0) n++;
+    }
+    return n;
+  };
+  check("Morse chi nodes", nodes(lev[0].sample(rs)) === 0 && nodes(lev[1].sample(rs)) === 1 &&
+    nodes(lev[2].sample(rs)) === 2,
+    "nodes(chi_0,1,2) = " + [0, 1, 2].map(function (v) { return nodes(lev[v].sample(rs)); }).join(", "));
+} catch (e) {
+  failed++;
+  console.log("FAIL fields/morse error:", e.message, e.stack);
+}
+
+// --- molecule builder: click-placement must land in the right minimum's basin ---
+try {
+  require("../js/builder.js");
+  var B = App.builder;
+  var dist = function (a, b) {
+    return Math.hypot(a.xyz[0] - b.xyz[0], a.xyz[1] - b.xyz[1], a.xyz[2] - b.xyz[2]);
+  };
+  var angle = function (a, c, b) { // a-c-b, degrees
+    var u = a.xyz.map(function (v, i) { return v - c.xyz[i]; });
+    var v2 = b.xyz.map(function (v, i) { return v - c.xyz[i]; });
+    var dot = u[0] * v2[0] + u[1] * v2[1] + u[2] * v2[2];
+    return Math.acos(dot / (Math.hypot.apply(0, u) * Math.hypot.apply(0, v2))) * 180 / Math.PI;
+  };
+
+  // water in three clicks: O, H, H (anchor stays on the O)
+  B.clear(); B.add(8); B.add(1); B.add(1);
+  var aw = B.getAtoms();
+  var hoh = angle(aw[1], aw[0], aw[2]);
+  check("builder H2O start", Math.abs(dist(aw[0], aw[1]) - 0.97) < 0.01 && hoh > 60 && hoh < 175,
+    "r(OH) = " + dist(aw[0], aw[1]).toFixed(3) + " A, HOH = " + hoh.toFixed(0) + " deg (not linear)");
+
+  var ow = App.optimize.run(B.toXyz(), 0, 1, "STO-3G");
+  var awo = App.engine.parseXYZ(ow.xyz).map(function (a) {
+    return { Z: a.Z, xyz: a.xyz.map(function (c) { return c * 0.529177210903; }) };
+  });
+  var hohOpt = angle(awo[1], awo[0], awo[2]);
+  check("builder H2O optimized", Math.abs(ow.E - (-74.9659)) < 2e-3 && Math.abs(hohOpt - 100) < 4,
+    "E = " + ow.E.toFixed(5) + " (ref -74.9659), HOH = " + hohOpt.toFixed(1) +
+    " deg (ref 100.0), " + ow.iters + " iters");
+
+  // methane in five clicks; no H-H clash from the placement heuristic
+  B.clear(); B.add(6); B.add(1); B.add(1); B.add(1); B.add(1);
+  var am = B.getAtoms(), minHH = 1e9, maxCH = 0;
+  for (var bi = 1; bi < 5; bi++) {
+    maxCH = Math.max(maxCH, Math.abs(dist(am[0], am[bi]) - 1.07));
+    for (var bj = bi + 1; bj < 5; bj++) minHH = Math.min(minHH, dist(am[bi], am[bj]));
+  }
+  check("builder CH4 start", maxCH < 0.01 && minHH > 1.3,
+    "r(CH) = 1.07 A, min r(HH) = " + minHH.toFixed(2) + " A (tetrahedral 1.75)");
+
+  var rt = App.engine.parseXYZ(B.toXyz());
+  check("builder xyz roundtrip", rt.length === 5 && rt[0].Z === 6,
+    "5 atoms parse back, first is C");
+} catch (e) {
+  failed++;
+  console.log("FAIL builder error:", e.message, e.stack);
 }
 
 // Benzene: performance smoke test (36 basis functions)

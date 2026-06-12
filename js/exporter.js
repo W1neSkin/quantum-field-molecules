@@ -34,7 +34,8 @@
   function cube() {
     var result = deps.getResult();
     var mode = deps.getMode();
-    if (mode.kind === "esp") mode = { kind: "total" }; // ESP is slice-only; export density
+    // ESP/ELF/Laplacian exist on the slice only; export the density instead
+    if (mode.kind === "esp" || mode.kind === "elf" || mode.kind === "lap") mode = { kind: "total" };
     deps.ensurePrep3d(function (prep) {
       var N = App.grid3d.N;
       var field = App.grid3d.fieldFloat(prep, mode);

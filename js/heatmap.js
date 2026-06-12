@@ -1,5 +1,6 @@
 // Electron field density renderer: 2D slice of <n(x)> through the molecule.
-// Modes: total density, deformation density, single MO amplitude (with sign).
+// Modes: total / deformation / spin density, MO amplitude (with sign),
+// ESP, ELF and the density Laplacian (the last three are built lazily).
 (function (App) {
   "use strict";
 
@@ -181,6 +182,8 @@
       return out;
     }
     if (mode.kind === "esp") return prep.espValues || out;
+    if (mode.kind === "elf") return prep.elfValues || out;
+    if (mode.kind === "lap") return prep.lapValues || out;
     if (mode.kind === "spin") {
       occPass(out, prep, bg, scf.C, scf.nocc, 1);
       occPass(out, prep, bg, scf.CB, scf.noccB, -1);
@@ -221,22 +224,29 @@
     var fctx = fieldCanvas.getContext("2d");
     var vals = fieldValues(prep, mode);
     var img = fctx.createImageData(W, H);
-    var isEsp = mode.kind === "esp";
+    var isEsp = mode.kind === "esp", isLap = mode.kind === "lap", isElf = mode.kind === "elf";
     var maxAbs = 1e-12;
     if (isEsp && prep.espScale) {
       // nuclei are +inf singularities; scale by the far-field extremum instead
       maxAbs = prep.espScale;
+    } else if (isLap && prep.lapScale) {
+      maxAbs = prep.lapScale;
+    } else if (isElf) {
+      maxAbs = 1; // ELF is bounded 0..1 by construction; keep the absolute scale
     } else {
       for (var pm = 0; pm < NPIX; pm++) if (Math.abs(vals[pm]) > maxAbs) maxAbs = Math.abs(vals[pm]);
     }
-    var diverging = mode.kind !== "total";
+    var diverging = mode.kind !== "total" && !isElf;
     for (var p = 0; p < NPIX; p++) {
       var c;
       if (diverging) {
-        // ESP follows the chemistry convention: orange/red = negative potential
-        var v = isEsp ? -vals[p] : vals[p];
+        // sign flips keep orange = "chemically interesting": ESP attractive to
+        // electrophiles, Laplacian charge concentration
+        var v = isEsp || isLap ? -vals[p] : vals[p];
         var s = Math.sign(v) * Math.pow(Math.min(Math.abs(v) / maxAbs, 1), 0.55);
         c = LUT_DIVERGING[Math.round((s + 1) / 2 * 255)];
+      } else if (isElf) {
+        c = LUT_DENSITY[Math.round(Math.min(Math.max(vals[p], 0), 1) * 255)];
       } else {
         c = LUT_DENSITY[Math.round(Math.pow(Math.min(vals[p] / maxAbs, 1), 0.4) * 255)];
       }
