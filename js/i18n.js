@@ -64,8 +64,11 @@
   function init() {
     var saved = null;
     try { saved = localStorage.getItem(KEY); } catch (e) { /* ignore */ }
+    // ?lang=xx wins: it makes language variants linkable (and crawlable via hreflang)
+    var url = null;
+    try { url = new URLSearchParams(location.search).get("lang"); } catch (e) { /* worker/node */ }
     var nav = (typeof navigator !== "undefined" && navigator.language || "en").slice(0, 2).toLowerCase();
-    App.LANG = App.I18N[saved] ? saved : (App.I18N[nav] ? nav : "en");
+    App.LANG = App.I18N[url] ? url : App.I18N[saved] ? saved : (App.I18N[nav] ? nav : "en");
     applyDom();
   }
 

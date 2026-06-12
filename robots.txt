@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://w1neskin.github.io/quantum-field-molecules/sitemap.xml

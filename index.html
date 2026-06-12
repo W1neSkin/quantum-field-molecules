@@ -14,7 +14,41 @@
   } catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
 })();
 </script>
-<title>Molecules through the eyes of quantum field theory</title>
+<title>Molecules through Quantum Field Theory - in-browser Hartree–Fock</title>
+<meta name="description" content="Free in-browser quantum chemistry: Hartree-Fock (RHF/UHF) calculations of real molecules - electron density, molecular orbitals, ESP and ELF maps, bond orders, geometry optimization, IR spectra. No installation.">
+<link rel="canonical" href="https://w1neskin.github.io/quantum-field-molecules/">
+<link rel="alternate" hreflang="en" href="https://w1neskin.github.io/quantum-field-molecules/">
+<link rel="alternate" hreflang="ru" href="https://w1neskin.github.io/quantum-field-molecules/?lang=ru">
+<link rel="alternate" hreflang="de" href="https://w1neskin.github.io/quantum-field-molecules/?lang=de">
+<link rel="alternate" hreflang="es" href="https://w1neskin.github.io/quantum-field-molecules/?lang=es">
+<link rel="alternate" hreflang="zh" href="https://w1neskin.github.io/quantum-field-molecules/?lang=zh">
+<link rel="alternate" hreflang="x-default" href="https://w1neskin.github.io/quantum-field-molecules/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://w1neskin.github.io/quantum-field-molecules/">
+<meta property="og:site_name" content="quantum-field-molecules">
+<meta property="og:title" content="Molecules through Quantum Field Theory">
+<meta property="og:description" content="Hartree-Fock quantum chemistry live in your browser: densities, orbitals, ESP, vibrations - 18 molecules or build your own. Free and open source.">
+<meta property="og:image" content="https://w1neskin.github.io/quantum-field-molecules/assets/og.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  "name": "Molecules through Quantum Field Theory",
+  "url": "https://w1neskin.github.io/quantum-field-molecules/",
+  "description": "In-browser Hartree-Fock quantum chemistry: electron density, molecular orbitals, electrostatic potential, ELF, geometry optimization, vibrational analysis with IR spectra.",
+  "applicationCategory": "EducationalApplication",
+  "operatingSystem": "Any (runs in the browser)",
+  "browserRequirements": "Requires JavaScript and WebGL",
+  "isAccessibleForFree": true,
+  "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+  "inLanguage": ["en", "ru", "de", "es", "zh"],
+  "license": "https://github.com/W1neSkin/quantum-field-molecules/blob/main/LICENSE",
+  "sameAs": "https://github.com/W1neSkin/quantum-field-molecules"
+}
+</script>
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -169,8 +203,18 @@ H 0 -0.7572 -0.4692</textarea>
     </div>
   </section>
 
+  <section class="card" id="aboutCard">
+    <header><span data-i18n="about.title">About this project</span></header>
+    <div class="body">
+      <p class="small sec" data-i18n="about.p1">This is a free, open-source quantum chemistry laboratory that runs entirely in your browser: no installation, no server, no sign-up. It solves the electronic structure of real molecules with the Hartree-Fock method (restricted and unrestricted, STO-3G, 6-31G and 6-31G* basis sets) and, for two-electron systems, the exact full CI - all in plain JavaScript, in seconds.</p>
+      <p class="small sec" data-i18n="about.p2">You can explore the electron density, canonical and Boys-localized molecular orbitals, electrostatic potential maps with electric field arrows, the electron localization function (ELF), the density Laplacian, spin density, 3D isosurfaces, MO level diagrams, Mulliken charges, Mayer bond orders, dipole moments and Koopmans ionization potentials. The toolset includes BFGS geometry optimization, harmonic vibrational analysis with IR spectra, Morse bond curves with vibrational wavefunctions, a click-to-build molecule editor and export to .cube, PNG and JSON.</p>
+      <p class="small sec" data-i18n="about.p3">Built as a teaching and self-study companion for chemistry and physics students: 18 preset molecules from H2 to benzene, an in-app guide with a glossary, and an interface in English, Russian, German, Spanish and Chinese. The QFT framing - molecules as bound states of the electron field - is explained in the built-in wiki.</p>
+    </div>
+  </section>
+
   <footer>
     <p class="small faint" data-i18n="footer"></p>
+    <p class="small faint"><a href="https://github.com/W1neSkin/quantum-field-molecules" rel="author"><span data-i18n="footer.src">Source code (MIT) on GitHub</span></a></p>
   </footer>
 </main>
 
