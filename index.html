@@ -76,33 +76,14 @@
       <span id="status" class="status">…</span>
 
       <div id="customPanel" style="display:none">
-        <canvas id="bldCanvas" width="560" height="380"></canvas>
-        <p id="bldInfo" class="small muted" style="margin:4px 0 6px;min-height:14px"></p>
-        <div class="pills" id="bldTabs">
-          <button id="tabBuild" class="pill active" data-i18n="custom.tab.build"></button>
-          <button id="tabText" class="pill" data-i18n="custom.tab.xyz"></button>
-        </div>
-        <div id="bldPane">
-          <div id="bldElems" class="pills" style="margin-top:6px"></div>
-          <div class="row" style="margin-top:4px;flex-wrap:wrap">
-            <button id="bldDel" class="btn" data-i18n="custom.del"></button>
-            <button id="bldClear" class="btn" data-i18n="custom.clear"></button>
-            <button id="bldFromCur" class="btn" data-i18n="custom.copycur" data-i18n-title="custom.copycur.tip"></button>
-          </div>
-          <p class="small faint" data-i18n="custom.bldhint" style="margin-top:6px"></p>
-        </div>
-        <div id="xyzPane" style="display:none">
-          <textarea id="xyzInput" data-i18n-ph="custom.ph" style="margin-top:6px">O 0 0 0.1173
-H 0 0.7572 -0.4692
-H 0 -0.7572 -0.4692</textarea>
-          <p id="xyzError" class="callout" style="display:none;margin-top:6px"></p>
-        </div>
-        <div class="row" style="margin-top:8px">
+        <button id="openBuilderBtn" class="btn" data-i18n="custom.open" data-i18n-title="custom.open.tip"></button>
+        <p id="customSummary" class="small muted"></p>
+        <div class="row" style="margin-top:6px">
           <span class="small muted" data-i18n="custom.charge"></span>
           <input id="chargeInput" type="number" value="0" step="1" data-i18n-title="custom.charge.tip">
           <button id="computeBtn" class="btn" data-i18n="custom.compute"></button>
-          <span class="small faint" data-i18n="custom.hint"></span>
         </div>
+        <p class="small faint" data-i18n="custom.hint"></p>
       </div>
 
       <div id="errorBox" class="callout" style="display:none"></div>
@@ -228,6 +209,67 @@ H 0 -0.7572 -0.4692</textarea>
     <p class="small faint"><a href="https://github.com/W1neSkin/quantum-field-molecules" rel="author"><span data-i18n="footer.src">Source code (MIT) on GitHub</span></a></p>
   </footer>
 </main>
+
+<div id="builderOverlay" style="display:none">
+  <div class="builder-modal" role="dialog" aria-modal="true">
+    <header>
+      <span data-i18n="custom.modal.title"></span>
+      <span class="row" style="gap:8px">
+        <button id="builderClose" class="btn" data-i18n="custom.modal.close"></button>
+      </span>
+    </header>
+    <div class="builder-body">
+      <div class="pills" id="bldTabs" style="margin-bottom:10px">
+        <button id="tabBuild" class="pill active" data-i18n="custom.tab.build"></button>
+        <button id="tabText" class="pill" data-i18n="custom.tab.xyz"></button>
+      </div>
+      <div id="bldPane" class="builder-grid">
+        <aside class="builder-tools">
+          <div id="bldModePills" class="pills">
+            <button id="bldModeChain" class="pill active" data-i18n="custom.mode.chain" data-i18n-title="custom.mode.chain.tip"></button>
+            <button id="bldModeBranch" class="pill" data-i18n="custom.mode.branch" data-i18n-title="custom.mode.branch.tip"></button>
+          </div>
+          <div id="bldElems" class="pills"></div>
+          <div class="grid" style="gap:8px">
+            <button id="bldUndo" class="btn" data-i18n="custom.undo"></button>
+            <button id="bldRedo" class="btn" data-i18n="custom.redo"></button>
+            <button id="bldDel" class="btn" data-i18n="custom.del"></button>
+            <button id="bldClear" class="btn" data-i18n="custom.clear"></button>
+            <button id="bldRelax" class="btn" data-i18n="custom.relax" data-i18n-title="custom.relax.tip"></button>
+            <button id="bldFromCur" class="btn" data-i18n="custom.copycur" data-i18n-title="custom.copycur.tip"></button>
+          </div>
+        </aside>
+        <section class="builder-canvas-pane">
+          <canvas id="bldCanvas" width="960" height="640"></canvas>
+          <p id="bldInfo" class="small muted" style="margin:8px 0 0;min-height:16px"></p>
+        </section>
+        <aside class="builder-side">
+          <div class="callout" style="margin-bottom:8px">
+            <p class="small muted" data-i18n="custom.warn.title" style="margin-bottom:6px"></p>
+            <div id="bldWarn" class="small sec"></div>
+          </div>
+          <div class="callout" style="margin-bottom:0">
+            <p class="small muted" data-i18n="custom.sel.title" style="margin-bottom:6px"></p>
+            <div id="bldSel" class="small sec"></div>
+          </div>
+        </aside>
+      </div>
+      <div id="xyzPane" style="display:none">
+        <textarea id="xyzInput" data-i18n-ph="custom.ph">O 0 0 0.1173
+H 0 0.7572 -0.4692
+H 0 -0.7572 -0.4692</textarea>
+        <p id="xyzError" class="callout" style="display:none;margin-top:8px"></p>
+      </div>
+      <div class="row" style="margin-top:10px;justify-content:space-between">
+        <span class="small faint" data-i18n="custom.bldhint"></span>
+        <span class="row" style="gap:8px">
+          <button id="builderApply" class="btn" data-i18n="custom.modal.apply"></button>
+          <button id="builderApplyRun" class="btn" data-i18n="custom.modal.applyrun"></button>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div id="helpOverlay" style="display:none">
   <div class="help-modal" role="dialog" aria-modal="true">

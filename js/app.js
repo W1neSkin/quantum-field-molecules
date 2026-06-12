@@ -493,6 +493,7 @@
   function selectPreset(id) {
     var p = App.getPreset(id);
     $("customPanel").style.display = id === "custom" ? "" : "none";
+    if (id !== "custom") $("builderOverlay").style.display = "none";
     if (p) loadMolecule(p.xyz, p.charge, p);
   }
 
@@ -582,24 +583,102 @@
     });
   }
 
-  // ---------- custom molecule panel: builder + xyz text, kept in sync ----------
+  // ---------- custom molecule editor (modal) ----------
   var BOHR_TO_A = 0.529177210903; // engine atoms are stored in bohr
 
-  function renderBldInfo() {
+  function atomTag(a, i) { return App.SYMBOLS[a.Z] + (i + 1); }
+
+  function bldIssues() {
     var atoms = App.builder.getAtoms();
-    if (!atoms.length) { $("bldInfo").textContent = ""; return; }
+    var warns = [];
+    if (atoms.length < 2) return warns;
+    var adj = atoms.map(function () { return []; });
+    var deg = atoms.map(function () { return 0; });
+    var vmax = { 1: 1, 3: 1, 4: 4, 5: 4, 6: 4, 7: 4, 8: 3, 9: 1 };
+    var i, j;
+
+    for (i = 0; i < atoms.length; i++) {
+      for (j = i + 1; j < atoms.length; j++) {
+        var dx = atoms[i].xyz[0] - atoms[j].xyz[0];
+        var dy = atoms[i].xyz[1] - atoms[j].xyz[1];
+        var dz = atoms[i].xyz[2] - atoms[j].xyz[2];
+        var d = Math.hypot(dx, dy, dz);
+        var r0 = App.builder.COV_R[atoms[i].Z] + App.builder.COV_R[atoms[j].Z];
+        if (d < 0.68 * r0) warns.push(t("custom.warn.close", {
+          a: atomTag(atoms[i], i), b: atomTag(atoms[j], j), d: d.toFixed(2)
+        }));
+        if (d < 1.25 * r0) { adj[i].push(j); adj[j].push(i); deg[i]++; deg[j]++; }
+      }
+    }
+    for (i = 0; i < atoms.length; i++) {
+      var vm = vmax[atoms[i].Z];
+      if (vm != null && deg[i] > vm) warns.push(t("custom.warn.valence", { a: atomTag(atoms[i], i), n: deg[i] }));
+    }
+
+    var seen = atoms.map(function () { return false; }), comp = 0;
+    for (i = 0; i < atoms.length; i++) {
+      if (seen[i]) continue;
+      comp++;
+      var q = [i];
+      seen[i] = true;
+      while (q.length) {
+        var v = q.pop();
+        adj[v].forEach(function (n) { if (!seen[n]) { seen[n] = true; q.push(n); } });
+      }
+    }
+    if (comp > 1) warns.push(t("custom.warn.frag", { n: comp }));
+    return warns;
+  }
+
+  function renderBldInfo(extra) {
+    var atoms = App.builder.getAtoms();
+    var warns = bldIssues();
+    var modeKey = App.builder.mode() === "branch" ? "custom.mode.branch" : "custom.mode.chain";
+    $("customSummary").textContent = atoms.length
+      ? t("custom.summary", { n: atoms.length, w: warns.length, mode: t(modeKey) })
+      : "";
+
+    if (!atoms.length) {
+      $("bldInfo").textContent = "";
+      $("bldWarn").innerHTML = "<p>" + t("custom.warn.ok") + "</p>";
+      $("bldSel").innerHTML = "<p>" + t("custom.sel.none") + "</p>";
+      $("bldUndo").disabled = !App.builder.canUndo();
+      $("bldRedo").disabled = !App.builder.canRedo();
+      return;
+    }
+
     var s = t("custom.natoms", { n: atoms.length });
     var sel = App.builder.selected();
     if (sel >= 0) {
-      s += t("custom.sel", { sym: App.SYMBOLS[atoms[sel].Z] + (sel + 1) });
+      s += t("custom.sel", { sym: atomTag(atoms[sel], sel) });
       var bonds = App.builder.selectionBonds();
       if (bonds && bonds.length) {
-        s += " (" + bonds.map(function (b) {
-          return b.label + " " + b.len.toFixed(2) + " \u00c5";
-        }).join(", ") + ")";
+        s += " (" + bonds.map(function (b) { return b.label + " " + b.len.toFixed(2) + " Å"; }).join(", ") + ")";
       }
     }
+    if (extra) s += " · " + extra;
     $("bldInfo").textContent = s;
+
+    $("bldWarn").innerHTML = warns.length
+      ? warns.slice(0, 5).map(function (w) { return "<p>• " + w + "</p>"; }).join("")
+      : "<p>" + t("custom.warn.ok") + "</p>";
+    if (warns.length > 5) $("bldWarn").innerHTML += "<p>• " + t("custom.warn.more", { n: warns.length - 5 }) + "</p>";
+
+    var selHtml;
+    if (sel < 0) selHtml = "<p>" + t("custom.sel.none") + "</p>";
+    else {
+      var sb = App.builder.selectionBonds();
+      selHtml = "<p>" + t("custom.sel.atom", { a: atomTag(atoms[sel], sel) }) + "</p>";
+      if (sb && sb.length) {
+        selHtml += sb.map(function (b) { return "<p>" + b.label + ": " + b.len.toFixed(2) + " Å</p>"; }).join("");
+      } else selHtml += "<p>" + t("custom.sel.nobonds") + "</p>";
+    }
+    $("bldSel").innerHTML = selHtml;
+
+    $("bldUndo").disabled = !App.builder.canUndo();
+    $("bldRedo").disabled = !App.builder.canRedo();
+    $("bldModeChain").classList.toggle("active", App.builder.mode() === "chain");
+    $("bldModeBranch").classList.toggle("active", App.builder.mode() === "branch");
   }
 
   function syncFromBuilder() {
@@ -630,8 +709,33 @@
     $("tabText").classList.toggle("active", !build);
   }
 
+  function openBuilder() {
+    $("builderOverlay").style.display = "";
+    setBldTab(true);
+    parseToBuilder();
+    App.builder.render();
+  }
+
+  function closeBuilder() { $("builderOverlay").style.display = "none"; }
+
+  function runCustomCompute(closeAfter) {
+    try {
+      App.engine.parseXYZ($("xyzInput").value);
+      $("xyzError").style.display = "none";
+    } catch (e) {
+      $("xyzError").textContent = e.message;
+      $("xyzError").style.display = "";
+      openBuilder();
+      setBldTab(false);
+      return;
+    }
+    if (closeAfter) closeBuilder();
+    loadMolecule($("xyzInput").value, parseInt($("chargeInput").value, 10) || 0, null);
+  }
+
   function initBuilder() {
     App.builder.init($("bldCanvas"), syncFromBuilder);
+    App.builder.setMode("chain");
     for (var z = 1; z <= 10; z++) {
       (function (z) {
         var b = document.createElement("button");
@@ -643,23 +747,47 @@
         $("bldElems").appendChild(b);
       })(z);
     }
+
+    $("bldModeChain").addEventListener("click", function () { App.builder.setMode("chain"); renderBldInfo(); });
+    $("bldModeBranch").addEventListener("click", function () { App.builder.setMode("branch"); renderBldInfo(); });
+    $("bldUndo").addEventListener("click", function () { App.builder.undo(); renderBldInfo(); });
+    $("bldRedo").addEventListener("click", function () { App.builder.redo(); renderBldInfo(); });
     $("bldDel").addEventListener("click", function () { App.builder.remove(); });
     $("bldClear").addEventListener("click", function () { App.builder.clear(); });
+    $("bldRelax").addEventListener("click", function () {
+      var r = App.builder.relax(28);
+      renderBldInfo(t("custom.relax.done", { i: r.iters, d: r.moved.toFixed(2) }));
+    });
     $("bldFromCur").addEventListener("click", function () {
       if (!state.result) return;
       App.builder.setAtoms(state.result.atoms.map(function (a) {
         return { Z: a.Z, xyz: a.xyz.map(function (c) { return c * BOHR_TO_A; }) };
-      }));
+      }), false, { resetHistory: true });
       syncFromBuilder();
     });
+
+    $("openBuilderBtn").addEventListener("click", openBuilder);
+    $("builderClose").addEventListener("click", closeBuilder);
+    $("builderApply").addEventListener("click", closeBuilder);
+    $("builderApplyRun").addEventListener("click", function () { runCustomCompute(true); });
+    $("computeBtn").addEventListener("click", function () { runCustomCompute(false); });
+
     $("tabBuild").addEventListener("click", function () { setBldTab(true); });
     $("tabText").addEventListener("click", function () { setBldTab(false); });
+    $("builderOverlay").addEventListener("click", function (e) {
+      if (e.target === $("builderOverlay")) closeBuilder();
+    });
+    document.addEventListener("keydown", function (e) {
+      if (e.key === "Escape" && $("builderOverlay").style.display !== "none") closeBuilder();
+    });
+
     var timer = null;
     $("xyzInput").addEventListener("input", function () {
       clearTimeout(timer);
       timer = setTimeout(parseToBuilder, 350);
     });
     parseToBuilder(); // seed the preview from the example geometry
+    renderBldInfo();
   }
 
   // reload whatever is currently selected (after a basis change)
@@ -744,9 +872,6 @@
     var sel = $("molSelect");
     fillMolSelect();
     sel.addEventListener("change", function () { selectPreset(sel.value); });
-    $("computeBtn").addEventListener("click", function () {
-      loadMolecule($("xyzInput").value, parseInt($("chargeInput").value, 10) || 0, null);
-    });
     initBuilder();
 
     var bsel = $("basisSelect");

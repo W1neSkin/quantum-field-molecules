@@ -105,6 +105,8 @@ select {
 }
 #bldElems .pill { min-width: 34px; text-align: center; }
 #customPanel .row .btn { width: auto; flex: 1; }
+#openBuilderBtn { width: 100%; }
+#customSummary:empty { display: none; }
 
 textarea {
   width: 100%; min-height: 110px; resize: vertical;
@@ -210,6 +212,34 @@ footer { margin-top: 20px; }
   line-height: 1; padding: 0; cursor: pointer; flex: none;
 }
 .help-q:hover { color: var(--text); border-color: var(--stroke); }
+
+/* molecule builder modal */
+#builderOverlay {
+  position: fixed; inset: 0; z-index: 58;
+  background: rgba(0,0,0,0.58); backdrop-filter: blur(2px);
+  display: flex; align-items: center; justify-content: center; padding: 20px;
+}
+.builder-modal {
+  background: var(--surface); border: 1px solid var(--stroke-2); border-radius: 10px;
+  width: min(1460px, 100%); height: min(900px, 100%);
+  display: flex; flex-direction: column; overflow: hidden;
+}
+.builder-modal > header {
+  display: flex; align-items: center; justify-content: space-between; gap: 10px;
+  padding: 10px 14px; border-bottom: 1px solid var(--stroke-2);
+  font-size: 14px; font-weight: 590;
+}
+.builder-body { flex: 1; overflow: auto; padding: 12px 14px 14px; }
+.builder-grid { display: grid; grid-template-columns: 230px minmax(0, 1fr) 280px; gap: 12px; align-items: start; }
+.builder-tools { display: grid; gap: 10px; align-content: start; }
+.builder-canvas-pane { min-width: 0; }
+.builder-side { display: grid; gap: 8px; align-content: start; min-width: 0; }
+#bldWarn p, #bldSel p { margin: 0 0 4px; }
+#bldWarn p:last-child, #bldSel p:last-child { margin-bottom: 0; }
+
+@media (max-width: 1100px) {
+  .builder-grid { grid-template-columns: minmax(0, 1fr); }
+}
 
 /* help modal */
 #helpOverlay {

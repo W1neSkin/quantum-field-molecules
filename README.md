@@ -108,11 +108,13 @@ the main thread (the UI may stutter on heavy molecules like benzene).
 
 ### Other
 
-- Molecule builder: click an element to add an atom bonded to the selected
-  one (covalent-radii bond length, VSEPR-like direction), rotate/select in a
-  live skeleton preview, then optimize; synced "XYZ text" tab with as-you-type
-  validation for pasting geometries. H–Ne, up to 30 atoms
-  (up to 90 basis functions for 6-31G*).
+- Molecule builder (large modal editor): chain/branch placement modes,
+  click-to-add atoms with covalent-radii bond lengths and VSEPR-like
+  directions, undo/redo history, quick-relax cleanup, live geometry warnings
+  (too-close atoms, disconnected fragments, obvious valence overflow), synced
+  "XYZ text" tab with as-you-type validation for pasted geometries, apply /
+  apply+compute flow. H–Ne, up to 30 atoms (up to 90 basis functions for
+  6-31G*).
 - Result cache in IndexedDB: reopening is instant
   (scans, optimizations and Hessians are cached too).
 
