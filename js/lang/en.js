@@ -55,6 +55,11 @@
     "loc.tip": "unitary rotation of the occupied MOs into compact \u201cbonds\u201d and \u201clone pairs\u201d (Foster\u2013Boys localization)",
 
     "ef.label": "arrows E = \u2212\u2207\u03c6 (electric field)",
+    "osc.label": "mode oscillation",
+    "osc.tip": "animate the standing wave of the field mode: Re \u03c8\u00b7e^(\u2212i\u03b5t/\u0127), slowed by ~10\u00b9\u2075",
+    "frame.label": "nuclei and bonds",
+    "frame.tip": "classical ball-and-stick scaffold for orientation; the field is the real picture",
+    "note.osc": "- the mode phase oscillates as Re \u03c8\u00b7e^(\u2212i\u03b5t/\u0127), slowed by ~10\u00b9\u2075",
     "ef.tip": "the static electric field of the molecule: the direction a positive test charge would be pushed; arrow length \u221d \u221a|E|",
 
     "pills.total": "\u03c1 - total",

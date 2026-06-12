@@ -54,6 +54,11 @@
     "loc.tip": "unitäre Drehung der besetzten MOs zu kompakten „Bindungen“ und „Paaren“ (Foster–Boys-Lokalisierung)",
 
     "ef.label": "Pfeile E = −∇φ (elektrisches Feld)",
+    "osc.label": "Modenschwingung",
+    "osc.tip": "stehende Welle der Feldmode animieren: Re ψ·e^(−iεt/ħ), um ~10¹⁵ verlangsamt",
+    "frame.label": "Kerne und Bindungen",
+    "frame.tip": "klassisches Kugel-Stab-Gerüst zur Orientierung; das eigentliche Bild ist das Feld",
+    "note.osc": "- die Modenphase schwingt als Re ψ·e^(−iεt/ħ), um ~10¹⁵ verlangsamt",
     "ef.tip": "das statische elektrische Feld des Moleküls: wohin eine positive Probeladung gedrückt würde; Pfeillänge ∝ √|E|",
 
     "pills.total": "ρ - gesamt",

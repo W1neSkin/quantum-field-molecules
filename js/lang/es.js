@@ -54,6 +54,11 @@
     "loc.tip": "rotación unitaria de los MO ocupados hacia «enlaces» y «pares» compactos (localización de Foster–Boys)",
 
     "ef.label": "flechas E = −∇φ (campo eléctrico)",
+    "osc.label": "oscilación del modo",
+    "osc.tip": "animar la onda estacionaria del modo del campo: Re ψ·e^(−iεt/ħ), ralentizada ~10¹⁵ veces",
+    "frame.label": "núcleos y enlaces",
+    "frame.tip": "armazón clásico de bolas y varillas para orientarse; la imagen real es el campo",
+    "note.osc": "- la fase del modo oscila como Re ψ·e^(−iεt/ħ), ralentizada ~10¹⁵ veces",
     "ef.tip": "el campo eléctrico estático de la molécula: hacia dónde sería empujada una carga de prueba positiva; longitud de la flecha ∝ √|E|",
 
     "pills.total": "ρ - total",

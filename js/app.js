@@ -9,7 +9,7 @@
   var state = {
     preset: null, result: null, prep: null, mode: { kind: "total" }, busy: false,
     view: "2d", prep3d: null, prep3dBuilding: false, volCache: {}, okStatus: "",
-    okInfo: null, basis: "STO-3G", efield: true
+    okInfo: null, basis: "STO-3G", efield: true, osc3d: true, frame3d: false
   };
 
   // these fields are computed on the slice plane only, never as a 3D volume
@@ -221,9 +221,13 @@
   }
 
   function updateNote() {
+    var is3d = state.view === "3d", isMo = state.mode.kind === "mo";
     $("modeNote").textContent = modeLabel(state.mode) +
-      (state.view === "3d" ? t("note.3d") : "");
+      (is3d ? t("note.3d") : "") +
+      (is3d && isMo && state.osc3d ? " " + t("note.osc") : "");
     $("efWrap").style.display = state.mode.kind === "esp" ? "inline-flex" : "none";
+    $("oscWrap").style.display = is3d && isMo ? "inline-flex" : "none";
+    $("frameWrap").style.display = is3d ? "inline-flex" : "none";
   }
 
   // ---------- 3D view ----------
@@ -266,6 +270,10 @@
     });
   }
 
+  function view3dOpts() {
+    return { osc: state.osc3d && state.mode.kind === "mo", frame: state.frame3d };
+  }
+
   function ensureVolume() {
     if (!state.result) return;
     if (!state.prep3d) {
@@ -275,6 +283,7 @@
     var key = volKey();
     if (state.volCache[key]) {
       App.view3d.setVolume(state.prep3d, state.volCache[key], state.result.atoms);
+      App.view3d.setOpts(view3dOpts());
       return;
     }
     App.grid3d.fieldVolume(state.prep3d, state.mode, function (f) {
@@ -284,6 +293,7 @@
       setStatus(state.okStatus, "ok");
       if (state.view === "3d" && volKey() === key) {
         App.view3d.setVolume(state.prep3d, volume, state.result.atoms);
+        App.view3d.setOpts(view3dOpts());
       }
     });
   }
@@ -782,10 +792,19 @@
       if (!state.result || state.busy) { this.checked = state.localized; return; }
       setLocalized(this.checked);
     });
-    $("efToggle").addEventListener("change", function () {
-      state.efield = this.checked;
-      drawMap();
-    });
+      $("efToggle").addEventListener("change", function () {
+        state.efield = this.checked;
+        drawMap();
+      });
+      $("oscToggle").addEventListener("change", function () {
+        state.osc3d = this.checked;
+        App.view3d.setOpts(view3dOpts());
+        updateNote();
+      });
+      $("frameToggle").addEventListener("change", function () {
+        state.frame3d = this.checked;
+        App.view3d.setOpts(view3dOpts());
+      });
     $("btnOpt").addEventListener("click", optimizeGeometry);
     $("vibBtn").addEventListener("click", runVib);
 

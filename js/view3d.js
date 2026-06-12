@@ -8,7 +8,7 @@
 
   var FS = "#version 300 es\nprecision highp float;precision highp sampler3D;\n" +
     "uniform sampler3D uVol;uniform vec3 uCam,uRight,uUp,uFwd,uBMin,uBMax;\n" +
-    "uniform vec2 uView;uniform float uTanF;uniform int uSigned;out vec4 oC;\n" +
+    "uniform vec2 uView;uniform float uTanF,uPhase;uniform int uSigned;out vec4 oC;\n" +
     "void main(){\n" +
     " vec2 ndc=(gl_FragCoord.xy/uView)*2.0-1.0;\n" +
     " vec3 dir=normalize(uFwd+uRight*ndc.x*uTanF*(uView.x/uView.y)+uUp*ndc.y*uTanF);\n" +
@@ -24,7 +24,8 @@
     "  vec3 uvw=(p-uBMin)/(uBMax-uBMin);\n" +
     "  float r=texture(uVol,uvw).r;\n" +
     "  float val;vec3 c;\n" +
-    "  if(uSigned==1){float q=r*2.0-1.0;val=abs(q*q);c=q>0.0?cOr:cBl;}\n" +
+    // uPhase = cos(eps*t/hbar): the mode amplitude Re[psi e^{-i eps t}]
+    "  if(uSigned==1){float q=(r*2.0-1.0)*uPhase;val=abs(q*q);c=q>0.0?cOr:cBl;}\n" +
     "  else{val=r*r;c=mix(cBl,cHi,smoothstep(0.03,0.55,val));}\n" +
     "  float a=1.0-exp(-2.6*pow(val,0.85)*dt);\n" +
     "  col+=(1.0-acc)*a*c;acc+=(1.0-acc)*a;\n" +
@@ -61,6 +62,26 @@
   var atomsCache = [];
   var cam = { yaw: 0.7, pitch: 0.3, dist: 2.4 };
   var box = null;
+  // opts.osc: animate the standing-wave phase of an MO mode; opts.frame:
+  // draw the classical scaffold (bond sticks, nucleus dots, volume box)
+  var opts = { osc: false, frame: false };
+  var phase = 1, rafId = null;
+
+  function tick(ts) {
+    rafId = null;
+    if (!opts.osc || !canvas.offsetParent) { phase = 1; return; }
+    phase = Math.cos(ts * 0.0025); // ~0.4 Hz; the real eps/hbar is ~10^15 Hz
+    render();
+    rafId = requestAnimationFrame(tick);
+  }
+
+  function setOpts(o) {
+    opts.osc = !!o.osc;
+    opts.frame = !!o.frame;
+    phase = 1;
+    if (opts.osc && !rafId) rafId = requestAnimationFrame(tick);
+    if (box) render();
+  }
 
   function compile(vsSrc, fsSrc) {
     function sh(type, src) {
@@ -199,20 +220,22 @@
     var up = cross(right, fwd);
     var tanF = Math.tan(20 * Math.PI / 180);
 
-    // orientation anchors under the cloud: volume frame, then bond sticks
-    gl.useProgram(progLine);
-    u3(progLine, "uCam", camPos); u3(progLine, "uRight", right); u3(progLine, "uUp", up); u3(progLine, "uFwd", fwd);
-    gl.uniform1f(gl.getUniformLocation(progLine, "uTanF"), tanF);
-    gl.uniform1f(gl.getUniformLocation(progLine, "uAspect"), w / h);
-    gl.enableVertexAttribArray(0);
-    gl.bindBuffer(gl.ARRAY_BUFFER, boxBuf);
-    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
-    gl.uniform4f(gl.getUniformLocation(progLine, "uColor"), 0.83, 0.83, 0.83, 0.10);
-    gl.drawArrays(gl.LINES, 0, 24);
-    gl.bindBuffer(gl.ARRAY_BUFFER, bondBuf);
-    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
-    gl.uniform4f(gl.getUniformLocation(progLine, "uColor"), 0.83, 0.83, 0.83, 0.30);
-    gl.drawArrays(gl.LINES, 0, nBondVerts);
+    // optional classical scaffold under the cloud: volume frame, bond sticks
+    if (opts.frame) {
+      gl.useProgram(progLine);
+      u3(progLine, "uCam", camPos); u3(progLine, "uRight", right); u3(progLine, "uUp", up); u3(progLine, "uFwd", fwd);
+      gl.uniform1f(gl.getUniformLocation(progLine, "uTanF"), tanF);
+      gl.uniform1f(gl.getUniformLocation(progLine, "uAspect"), w / h);
+      gl.enableVertexAttribArray(0);
+      gl.bindBuffer(gl.ARRAY_BUFFER, boxBuf);
+      gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
+      gl.uniform4f(gl.getUniformLocation(progLine, "uColor"), 0.83, 0.83, 0.83, 0.10);
+      gl.drawArrays(gl.LINES, 0, 24);
+      gl.bindBuffer(gl.ARRAY_BUFFER, bondBuf);
+      gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
+      gl.uniform4f(gl.getUniformLocation(progLine, "uColor"), 0.83, 0.83, 0.83, 0.30);
+      gl.drawArrays(gl.LINES, 0, nBondVerts);
+    }
 
     gl.useProgram(progVol);
     gl.activeTexture(gl.TEXTURE0);
@@ -222,19 +245,22 @@
     u3(progVol, "uBMax", [box.center[0] + box.half, box.center[1] + box.half, box.center[2] + box.half]);
     gl.uniform2f(gl.getUniformLocation(progVol, "uView"), w, h);
     gl.uniform1f(gl.getUniformLocation(progVol, "uTanF"), tanF);
+    gl.uniform1f(gl.getUniformLocation(progVol, "uPhase"), opts.osc ? phase : 1);
     gl.uniform1i(gl.getUniformLocation(progVol, "uSigned"), tex.signed);
     gl.uniform1i(gl.getUniformLocation(progVol, "uVol"), 0);
     gl.drawArrays(gl.TRIANGLES, 0, 3);
 
-    gl.useProgram(progPts);
-    gl.bindBuffer(gl.ARRAY_BUFFER, ptsBuf);
-    gl.enableVertexAttribArray(0);
-    gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
-    u3(progPts, "uCam", camPos); u3(progPts, "uRight", right); u3(progPts, "uUp", up); u3(progPts, "uFwd", fwd);
-    gl.uniform1f(gl.getUniformLocation(progPts, "uTanF"), tanF);
-    gl.uniform1f(gl.getUniformLocation(progPts, "uAspect"), w / h);
-    gl.uniform1f(gl.getUniformLocation(progPts, "uDist"), R);
-    gl.drawArrays(gl.POINTS, 0, nAtoms);
+    if (opts.frame) {
+      gl.useProgram(progPts);
+      gl.bindBuffer(gl.ARRAY_BUFFER, ptsBuf);
+      gl.enableVertexAttribArray(0);
+      gl.vertexAttribPointer(0, 3, gl.FLOAT, false, 0, 0);
+      u3(progPts, "uCam", camPos); u3(progPts, "uRight", right); u3(progPts, "uUp", up); u3(progPts, "uFwd", fwd);
+      gl.uniform1f(gl.getUniformLocation(progPts, "uTanF"), tanF);
+      gl.uniform1f(gl.getUniformLocation(progPts, "uAspect"), w / h);
+      gl.uniform1f(gl.getUniformLocation(progPts, "uDist"), R);
+      gl.drawArrays(gl.POINTS, 0, nAtoms);
+    }
 
     updateLabels(camPos, right, up, fwd, tanF, w / h);
   }
@@ -261,5 +287,5 @@
   function cross(a, b) { return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]]; }
   function norm(a) { var n = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0] / n, a[1] / n, a[2] / n]; }
 
-  App.view3d = { supported: supported, init: init, setVolume: setVolume, render: render };
+  App.view3d = { supported: supported, init: init, setVolume: setVolume, render: render, setOpts: setOpts };
 })(typeof globalThis.App === "object" ? globalThis.App : (globalThis.App = {}));
