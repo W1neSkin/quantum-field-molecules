@@ -182,6 +182,7 @@
     "status.optdone": "optimizado ({n} pasos, ΔE = {dE} eV) · ",
     "status.optnotconv": "optimización no convergida ({n} pasos, ΔE = {dE} eV) · ",
     "status.optfail": "error de optimización",
+    "status.localize": "localizando orbitales…",
     "status.locfail": "la localización falló: {msg}",
 
     "scan.const": "Constantes D\u2091, R\u2091, \u03c9\u2091 - Huber & Herzberg (NIST).",

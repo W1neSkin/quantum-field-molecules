@@ -182,6 +182,7 @@
     "status.optdone": "优化完成（{n} 步，ΔE = {dE} eV）· ",
     "status.optnotconv": "优化未收敛（{n} 步，ΔE = {dE} eV）· ",
     "status.optfail": "优化出错",
+    "status.localize": "正在定域化轨道…",
     "status.locfail": "定域化失败：{msg}",
 
     "scan.const": "常数 Dₑ、Rₑ、ωₑ 取自 Huber & Herzberg（NIST）。",

@@ -175,6 +175,8 @@ ever needed.
 ## Verification
 
 ```bash
+npm test
+# or
 node test/selfcheck.js
 ```
 
@@ -192,6 +194,9 @@ node test/selfcheck.js
 | Boys localization (H₂O) | core + 2 lone pairs + 2 bonds | density invariants |
 | H₂ optimum | R = 0.7122 Å | CCCBDB HF/STO-3G |
 | H₂ / H₂O frequencies | 5482 / 2170, 4140, 4391 cm⁻¹ | CCCBDB HF/STO-3G |
+
+The same self-check is run automatically on every push/PR via
+`.github/workflows/selfcheck.yml`.
 
 ## Physical caveats
 

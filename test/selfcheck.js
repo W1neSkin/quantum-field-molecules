@@ -14,6 +14,7 @@ require("../js/uhf.js");
 require("../js/props.js");
 require("../js/fci2.js");
 require("../js/localize.js");
+require("../js/localize-async.js");
 require("../js/engine.js");
 require("../js/optimize.js");
 require("../js/vib.js");
@@ -112,6 +113,32 @@ try {
     " (exact 2), virial = " + vir.toFixed(3) + ", " + (Date.now() - t0o) + "ms");
   check("O2 spin on atoms", Math.abs(o2.scf.spinPop[0] - 1) < 0.1 && Math.abs(o2.scf.spinPop[1] - 1) < 0.1,
     "spin = [" + o2.scf.spinPop.map(function (s) { return s.toFixed(2); }).join(", ") + "] (ref ~[1,1])");
+
+  // parser basics: XYZ header support and robust diagnostics
+  var xyzWithHeader = "3\nwater\nO 0 0 0\nH 0.758130 0 0.635742\nH -0.758130 0 0.635742";
+  var parsed = App.engine.parseXYZ(xyzWithHeader);
+  check("parseXYZ header", parsed.length === 3 && parsed[0].Z === 8 && parsed[1].Z === 1,
+    "3 atoms parsed with XYZ header");
+  var badElem = false, badCoords = false;
+  try { App.engine.parseXYZ("Xx 0 0 0"); } catch (e1) { badElem = !!e1; }
+  try { App.engine.parseXYZ("H a 0 0"); } catch (e2) { badCoords = !!e2; }
+  check("parseXYZ bad element", badElem, "unsupported element is rejected");
+  check("parseXYZ bad coords", badCoords, "non-numeric coordinates are rejected");
+
+  // Mulliken populations should conserve total charge.
+  var qsum = w.scf.mulliken.reduce(function (s, q) { return s + q; }, 0);
+  check("Mulliken charge sum", Math.abs(qsum - 0) < 1e-6,
+    "sum q = " + qsum.toExponential(2) + " (neutral water)");
+
+  // FCI is enabled for generic 2-electron closed-shell systems (e.g. HeH+).
+  var hehp = App.engine.compute(cases[1].xyz, 1);
+  check("FCI HeH+ available", !!(hehp.scf.fci && isFinite(hehp.scf.fci.Ecorr)),
+    "Ecorr = " + (hehp.scf.fci ? hehp.scf.fci.Ecorr.toFixed(5) : "n/a"));
+
+  // Open-shell smoke case besides O2.
+  var oh = App.engine.compute("O 0 0 0\nH 0 0 0.970", 0, 2);
+  check("UHF OH doublet", oh.scf.uhf && oh.scf.converged && Math.abs(oh.scf.S2 - 0.75) < 0.15,
+    "E = " + oh.scf.E.toFixed(4) + ", <S2> = " + oh.scf.S2.toFixed(3));
 } catch (e) {
   failed++;
   console.log("FAIL extras error:", e.message, e.stack);
@@ -348,4 +375,61 @@ try {
   console.log("FAIL C6H6 error:", e.message);
 }
 
-process.exit(failed ? 1 : 0);
+function runAsyncChecks() {
+  require("../js/client.js");
+
+  // cacheKey must be insensitive to harmless spacing changes.
+  var k1 = App.compute.cacheKey("H 0 0 0\nH 0 0 0.7408", 0, 0, "STO-3G");
+  var k2 = App.compute.cacheKey("H   0 0 0\n\nH 0  0   0.7408", 0, 0, "STO-3G");
+  check("cacheKey normalization", k1 === k2, "k1 == k2");
+
+  // Async Boys localization should return the same output shape as the sync path.
+  var wbAsync = App.engine.compute(cases[2].xyz, 0);
+  var locAsyncCheck = new Promise(function (resolve) {
+    if (typeof App.localize.boysAsync !== "function") {
+      check("Boys async", false, "boysAsync missing");
+      resolve();
+      return;
+    }
+    App.localize.boysAsync(wbAsync, null, function (loc) {
+      var ok = !!(loc && loc.C && loc.labels && loc.labels.length === wbAsync.scf.nocc);
+      check("Boys async", ok, "labels = " + (loc && loc.labels ? loc.labels.length : 0));
+      resolve();
+    }, function (err) {
+      check("Boys async", false, err.message);
+      resolve();
+    });
+  });
+
+  // In file:// fallback there is no worker cancellation primitive, so the client
+  // cancels queued jobs before they start and rejects with a tagged error.
+  var pSlow = null;
+  var pFast = null;
+  return locAsyncCheck.then(function () {
+    pSlow = App.compute.request({ xyz: bz, charge: 0, mult: 0, basis: "STO-3G" });
+    return new Promise(function (resolve) { setTimeout(resolve, 0); });
+  }).then(function () {
+    pFast = App.compute.request({ xyz: cases[0].xyz, charge: 0, mult: 0, basis: "STO-3G" });
+    return pSlow.then(function () {
+      check("request cancellation", false, "slow request unexpectedly resolved");
+    }).catch(function (err) {
+      check("request cancellation", App.compute.isCancelledError(err),
+        "cancelled flag = " + !!(err && err.cancelled));
+    });
+  }).then(function () {
+    return pFast.then(function (res) {
+      check("request after cancel", !!(res && res.scf && isFinite(res.scf.E)),
+        "E = " + res.scf.E.toFixed(6));
+    }).catch(function (err) {
+      check("request after cancel", false, err.message);
+    });
+  });
+}
+
+runAsyncChecks().then(function () {
+  process.exit(failed ? 1 : 0);
+}).catch(function (err) {
+  failed++;
+  console.log("FAIL async checks error:", err.message, err.stack);
+  process.exit(1);
+});

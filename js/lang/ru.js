@@ -183,6 +183,7 @@
     "status.optdone": "оптимизировано (шагов: {n}, ΔE = {dE} эВ) · ",
     "status.optnotconv": "оптимизация не сошлась (шагов: {n}, ΔE = {dE} эВ) · ",
     "status.optfail": "ошибка оптимизации",
+    "status.localize": "локализуем орбитали…",
     "status.locfail": "локализация не выполнена: {msg}",
 
     "scan.const": "Константы Dₑ, Rₑ, ωₑ - Huber & Herzberg (NIST).",

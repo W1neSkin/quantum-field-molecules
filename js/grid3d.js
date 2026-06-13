@@ -153,6 +153,37 @@
     return out;
   }
 
+  // asynchronous float field for exports (.cube); yields between occupied-orbital passes
+  function fieldFloatAsync(prep, mode, onProgress, done) {
+    var out = new Float32Array(NVOX);
+    var scf = prep.result.scf;
+    if (mode.kind === "mo") {
+      // Single-MO export has one heavy pass; run it on the next tick for responsiveness.
+      setTimeout(function () {
+        moPass(prep, moMatrix(scf, mode), mode.mo, out, 0);
+        if (onProgress) onProgress(1);
+        done(out);
+      }, 0);
+      return;
+    }
+    var plan = passPlan(scf, mode);
+    var total = plan.reduce(function (s, p) { return s + p.nocc; }, 0) || 1;
+    var pi = 0, m = 0, donePasses = 0;
+    function step() {
+      while (pi < plan.length && m >= plan[pi].nocc) { pi++; m = 0; }
+      if (pi < plan.length) {
+        moPass(prep, plan[pi].C, m, out, plan[pi].w);
+        m++; donePasses++;
+        if (onProgress) onProgress(donePasses / total);
+        setTimeout(step, 0);
+        return;
+      }
+      if (mode.kind === "diff") subtractPromolecule(prep, out);
+      done(out);
+    }
+    step();
+  }
+
   // index of basis fn within its atom (to address the occupation table)
   function fnPos(prep, idx) {
     var f = prep.result.basis[idx], pos = 0;
@@ -160,5 +191,6 @@
     return pos;
   }
 
-  App.grid3d = { N: N, buildBasisGrid: buildBasisGrid, fieldVolume: fieldVolume, fieldFloat: fieldFloat };
+  App.grid3d = { N: N, buildBasisGrid: buildBasisGrid, fieldVolume: fieldVolume,
+    fieldFloat: fieldFloat, fieldFloatAsync: fieldFloatAsync };
 })(typeof globalThis.App === "object" ? globalThis.App : (globalThis.App = {}));

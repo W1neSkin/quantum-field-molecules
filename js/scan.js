@@ -133,7 +133,8 @@
       sl.min = 0; sl.max = res.points.length - 1; sl.value = S.idx;
       setSliderEnabled();
       chart(); readout(); caption();
-    }).catch(function () {
+    }).catch(function (err) {
+      if (App.compute.isCancelledError && App.compute.isCancelledError(err)) return;
       if (S.preset && S.preset.id === token) $("rReadout").textContent = t("scan.fail");
     });
   }

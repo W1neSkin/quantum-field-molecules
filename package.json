@@ -1,0 +1,10 @@
+{
+  "name": "quantum-field-molecules",
+  "private": true,
+  "version": "1.0.0",
+  "description": "In-browser Hartree-Fock quantum chemistry playground.",
+  "scripts": {
+    "test": "node test/selfcheck.js",
+    "selfcheck": "node test/selfcheck.js"
+  }
+}

@@ -74,9 +74,8 @@
     return { origin: c, u: u, v: v };
   }
 
-  // Precompute everything reusable for a molecule: plane, extents, basis values on the grid.
-  function prepare(result) {
-    var atoms = result.atoms, basis = result.basis, nb = basis.length;
+  function makePrep(result) {
+    var atoms = result.atoms;
     var plane = pickPlane(atoms);
     var margin = 3.6; // bohr
     var maxU = 1, maxV = 1;
@@ -89,10 +88,56 @@
     });
     var halfU = maxU + margin, halfV = maxV + margin;
     if (halfV < halfU * H / W) halfV = halfU * H / W; else halfU = halfV * W / H;
+    return {
+      result: result, plane: plane, halfU: halfU, halfV: halfV, proj: proj,
+      basisGrid: null, nb: result.basis.length, offsetGrid: null
+    };
+  }
 
-    function gridAt(origin) {
-      var bg = new Float32Array(nb * NPIX);
-      for (var py = 0; py < H; py++) {
+  function buildGrid(prep, origin) {
+    var basis = prep.result.basis;
+    var plane = prep.plane;
+    var halfU = prep.halfU, halfV = prep.halfV, nb = prep.nb;
+    var bg = new Float32Array(nb * NPIX);
+    for (var py = 0; py < H; py++) {
+      var fv = (py / (H - 1) * 2 - 1) * -halfV;
+      for (var px = 0; px < W; px++) {
+        var fu = (px / (W - 1) * 2 - 1) * halfU;
+        var P = [
+          origin[0] + plane.u[0] * fu + plane.v[0] * fv,
+          origin[1] + plane.u[1] * fu + plane.v[1] * fv,
+          origin[2] + plane.u[2] * fu + plane.v[2] * fv
+        ];
+        var pix = py * W + px;
+        for (var i = 0; i < nb; i++) {
+          var f = basis[i];
+          var dx = P[0] - f.center[0], dy = P[1] - f.center[1], dz = P[2] - f.center[2];
+          var r2 = dx * dx + dy * dy + dz * dz;
+          var rad = 0;
+          for (var pidx = 0; pidx < f.exps.length; pidx++) {
+            var e = f.exps[pidx] * r2;
+            if (e < 30) rad += f.coefs[pidx] * Math.exp(-e);
+          }
+          if (rad !== 0 && (f.l || f.m || f.n)) {
+            rad *= Math.pow(dx, f.l) * Math.pow(dy, f.m) * Math.pow(dz, f.n);
+          }
+          bg[i * NPIX + pix] = rad;
+        }
+      }
+    }
+    return bg;
+  }
+
+  function buildGridAsync(prep, origin, onProgress, done) {
+    var basis = prep.result.basis;
+    var plane = prep.plane;
+    var halfU = prep.halfU, halfV = prep.halfV, nb = prep.nb;
+    var bg = new Float32Array(nb * NPIX);
+    var py = 0;
+    var chunkRows = 6;
+    (function step() {
+      var pyEnd = Math.min(py + chunkRows, H);
+      for (; py < pyEnd; py++) {
         var fv = (py / (H - 1) * 2 - 1) * -halfV;
         for (var px = 0; px < W; px++) {
           var fu = (px / (W - 1) * 2 - 1) * halfU;
@@ -118,26 +163,43 @@
           }
         }
       }
-      return bg;
-    }
+      if (onProgress) onProgress(py / H);
+      if (py < H) setTimeout(step, 0);
+      else done(bg);
+    })();
+  }
 
-    var prep = {
-      result: result, plane: plane, halfU: halfU, halfV: halfV, proj: proj,
-      basisGrid: gridAt(plane.origin), nb: nb, offsetGrid: null
-    };
-    // lazy slice shifted 0.5 A along the normal, for modes with a node in the main plane
+  function attachOffsetGridGetter(prep) {
     prep.getOffsetGrid = function () {
       if (!prep.offsetGrid) {
+        var plane = prep.plane;
         var nrm = norm3([
           plane.u[1] * plane.v[2] - plane.u[2] * plane.v[1],
           plane.u[2] * plane.v[0] - plane.u[0] * plane.v[2],
           plane.u[0] * plane.v[1] - plane.u[1] * plane.v[0]
         ]);
-        prep.offsetGrid = gridAt(v3(plane.origin, nrm, 0.5 * BOHR_PER_ANGSTROM));
+        prep.offsetGrid = buildGrid(prep, v3(plane.origin, nrm, 0.5 * BOHR_PER_ANGSTROM));
       }
       return prep.offsetGrid;
     };
+  }
+
+  // Precompute everything reusable for a molecule: plane, extents, basis values on the grid.
+  function prepare(result) {
+    var prep = makePrep(result);
+    prep.basisGrid = buildGrid(prep, prep.plane.origin);
+    attachOffsetGridGetter(prep);
     return prep;
+  }
+
+  // Async variant used by the app to avoid blocking the UI on heavy molecules.
+  function prepareAsync(result, onProgress, onDone) {
+    var prep = makePrep(result);
+    buildGridAsync(prep, prep.plane.origin, onProgress, function (bg) {
+      prep.basisGrid = bg;
+      attachOffsetGridGetter(prep);
+      onDone(prep);
+    });
   }
 
   function moValues(prep, bg, mo, C) {
@@ -283,7 +345,7 @@
   }
 
   App.heatmap = {
-    prepare: prepare, draw: draw, W: W, H: H, refreshTheme: refreshTheme,
+    prepare: prepare, prepareAsync: prepareAsync, draw: draw, W: W, H: H, refreshTheme: refreshTheme,
     LUT_DENSITY: LUT_DENSITY, LUT_DIVERGING: LUT_DIVERGING, ATOM_OCC: ATOM_OCC
   };
 })(typeof globalThis.App === "object" ? globalThis.App : (globalThis.App = {}));
