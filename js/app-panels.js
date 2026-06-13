@@ -120,6 +120,7 @@
       $("mulliken").innerHTML = html;
       renderProvenance();
       renderQualityChecks();
+      renderBenchmark();
     }
 
     function renderProvenance() {
@@ -156,6 +157,10 @@
       box.innerHTML = "<p class='small muted'>" + t("qual.title") + "</p>" + rows.map(function (r) {
         return "<div class='brow'><span>" + r[0] + "</span><b>" + r[1] + "</b></div>";
       }).join("");
+    }
+
+    function renderBenchmark() {
+      if (App.benchmark && App.benchmark.render) App.benchmark.render(state, t, $);
     }
 
     function renderFacts() {

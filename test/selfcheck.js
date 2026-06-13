@@ -381,6 +381,7 @@ function runAsyncChecks() {
   require("../js/cavity-sandbox.js");
   require("../js/scaling-lab.js");
   require("../js/cross-bridge.js");
+  require("../js/benchmark.js");
 
   // cacheKey must be insensitive to harmless spacing changes.
   var k1 = App.compute.cacheKey("H 0 0 0\nH 0 0 0.7408", 0, 0, "STO-3G");
@@ -414,6 +415,16 @@ function runAsyncChecks() {
     "R(128) = " + rScale.toFixed(3) + " (expected 2.000)");
   check("scaling span size", Math.abs(spanScale - 1) < 1e-9,
     "span = " + spanScale.toFixed(3) + " A (expected 1.000)");
+
+  var bPass = App.benchmark.evaluate(App.engine.compute(cases[0].xyz, 0), { id: "H2" });
+  var bBasis = App.benchmark.evaluate(App.engine.compute(cases[0].xyz, 0, 0, "6-31G"), { id: "H2" });
+  var bNone = App.benchmark.evaluate(App.engine.compute(cases[0].xyz, 0), { id: "C6H6" });
+  check("benchmark pass", bPass && bPass.available && bPass.pass && Math.abs(bPass.dE) < 1e-3,
+    "H2 delta = " + (bPass ? bPass.dE.toExponential(2) : "n/a"));
+  check("benchmark basis gate", bBasis && !bBasis.available && bBasis.reason === "basis",
+    "6-31G benchmark blocked as expected");
+  check("benchmark missing ref", bNone && !bNone.available && bNone.reason === "noref",
+    "unsupported preset returns noref");
 
   var bridgeTpl = App.crossBridge.makeTemplate("pyscf", {
     atoms: [{ sym: "H", xyz: [0, 0, 0] }, { sym: "H", xyz: [0, 0, 0.7414] }],
