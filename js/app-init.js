@@ -94,6 +94,13 @@
           getPreset: function () { return state.preset; }
         });
       }
+      if (App.crossBridge && App.crossBridge.init) {
+        App.crossBridge.init({
+          getResult: function () { return state.result; },
+          getPreset: function () { return state.preset; },
+          getProvenance: function () { return state.provenance || null; }
+        });
+      }
       ["btnPng", "btnCube", "btnJson"].forEach(function (id) {
         $(id).addEventListener("click", function () {
           if (!state.result || state.busy) return;

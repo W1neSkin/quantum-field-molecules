@@ -81,6 +81,7 @@
       App.scanCtl.refresh();
       if (App.cavitySandbox && App.cavitySandbox.refresh) App.cavitySandbox.refresh();
       if (App.scalingLab && App.scalingLab.refresh) App.scalingLab.refresh();
+      if (App.crossBridge && App.crossBridge.refresh) App.crossBridge.refresh();
     }
 
     // charts and canvases re-painted with the new palette on a theme switch
@@ -95,6 +96,7 @@
       App.scanCtl.refresh();
       if (App.cavitySandbox && App.cavitySandbox.refresh) App.cavitySandbox.refresh();
       if (App.scalingLab && App.scalingLab.refresh) App.scalingLab.refresh();
+      if (App.crossBridge && App.crossBridge.refresh) App.crossBridge.refresh();
     }
 
     function initOnboarding() {

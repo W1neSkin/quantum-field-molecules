@@ -380,6 +380,7 @@ function runAsyncChecks() {
   require("../js/provenance.js");
   require("../js/cavity-sandbox.js");
   require("../js/scaling-lab.js");
+  require("../js/cross-bridge.js");
 
   // cacheKey must be insensitive to harmless spacing changes.
   var k1 = App.compute.cacheKey("H 0 0 0\nH 0 0 0.7408", 0, 0, "STO-3G");
@@ -413,6 +414,27 @@ function runAsyncChecks() {
     "R(128) = " + rScale.toFixed(3) + " (expected 2.000)");
   check("scaling span size", Math.abs(spanScale - 1) < 1e-9,
     "span = " + spanScale.toFixed(3) + " A (expected 1.000)");
+
+  var bridgeTpl = App.crossBridge.makeTemplate("pyscf", {
+    atoms: [{ sym: "H", xyz: [0, 0, 0] }, { sym: "H", xyz: [0, 0, 0.7414] }],
+    basis: "STO-3G", charge: 0, multiplicity: 1, method: "RHF"
+  });
+  var bridgeText = App.crossBridge.parseResult(
+    "SCF_ENERGY_HA = -1.116717\nconverged = true\nHOMO-LUMO gap = 0.42\nRabi splitting = 0.31"
+  );
+  var bridgeJson = App.crossBridge.parseResult(
+    "{\"total_energy\":-40.1234,\"converged\":false,\"homo_lumo_gap\":5.2}"
+  );
+  check("bridge template", /gto\.M/.test(bridgeTpl) && /SCF_ENERGY_HA/.test(bridgeTpl),
+    "pyscf template contains core markers");
+  check("bridge parser text", bridgeText && bridgeText.energyHa != null &&
+    Math.abs(bridgeText.energyHa - (-1.116717)) < 1e-9 && bridgeText.converged === true &&
+    Math.abs(bridgeText.gapEv - 0.42) < 1e-9 && Math.abs(bridgeText.splitEv - 0.31) < 1e-9,
+  "text parser extracts energy/convergence/gap/splitting");
+  check("bridge parser json", bridgeJson && bridgeJson.source === "json" &&
+    Math.abs(bridgeJson.energyHa - (-40.1234)) < 1e-9 && bridgeJson.converged === false &&
+    Math.abs(bridgeJson.gapEv - 5.2) < 1e-9,
+  "json parser extracts metrics");
 
   // Async Boys localization should return the same output shape as the sync path.
   var wbAsync = App.engine.compute(cases[2].xyz, 0);

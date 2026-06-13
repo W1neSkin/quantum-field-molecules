@@ -223,6 +223,39 @@
         <p id="scaleNote" class="small faint" style="margin-top:6px"></p>
       </div>
     </section>
+
+    <section class="card" id="bridgeCard" style="margin-top:16px">
+      <header>
+        <span data-i18n="bridge.title"></span>
+        <span class="small faint" data-i18n="bridge.sub"></span>
+      </header>
+      <div class="body">
+        <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">
+          <label class="small muted">
+            <span data-i18n="bridge.target"></span>
+            <select id="bridgeTarget">
+              <option value="pyscf" data-i18n="bridge.target.pyscf"></option>
+              <option value="qedtddft" data-i18n="bridge.target.qedtddft"></option>
+              <option value="cavmd" data-i18n="bridge.target.cavmd"></option>
+            </select>
+          </label>
+          <div class="row" style="align-items:flex-end;gap:6px">
+            <button id="bridgeGenBtn" class="btn" data-i18n="bridge.gen"></button>
+            <button id="bridgeCopyBtn" class="btn" data-i18n="bridge.copy"></button>
+          </div>
+        </div>
+        <p id="bridgeMsg" class="small sec" style="margin-top:8px"></p>
+        <p class="small muted" style="margin:8px 0 4px" data-i18n="bridge.template"></p>
+        <textarea id="bridgeTemplate" readonly style="min-height:130px"></textarea>
+        <p class="small muted" style="margin:8px 0 4px" data-i18n="bridge.import"></p>
+        <textarea id="bridgeImport" data-i18n-ph="bridge.import.ph" style="min-height:90px"></textarea>
+        <div class="row" style="margin-top:8px">
+          <button id="bridgeParseBtn" class="btn" data-i18n="bridge.parse"></button>
+        </div>
+        <div id="bridgeParsed" class="callout small" style="margin-top:8px;white-space:pre-wrap"></div>
+        <p id="bridgeNote" class="small faint" style="margin-top:6px"></p>
+      </div>
+    </section>
     </div>
 
     <aside class="rail">
@@ -402,6 +435,7 @@ H 0 -0.7572 -0.4692</textarea>
 <script src="js/energy.js"></script>
 <script src="js/cavity-sandbox.js"></script>
 <script src="js/scaling-lab.js"></script>
+<script src="js/cross-bridge.js"></script>
 <script src="js/irchart.js"></script>
 <script src="js/scan.js"></script>
 <script src="js/molevels.js"></script>
