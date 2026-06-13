@@ -76,6 +76,7 @@
         getResult: function () { return state.result; },
         getMode: function () { return state.mode; },
         getPreset: function () { return state.preset; },
+        getProvenance: function () { return state.provenance || null; },
         getView: function () { return state.view; },
         getCanvas2d: function () { return $("density"); },
         getCanvasGl: function () { return $("gl"); },

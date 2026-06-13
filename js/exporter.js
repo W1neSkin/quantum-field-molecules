@@ -117,6 +117,7 @@
       nocc: scf.nocc, noccB: scf.noccB,
       C: scf.C, CB: scf.CB,
       mulliken: scf.mulliken, spinPop: scf.spinPop, S2: scf.S2,
+      provenance: deps.getProvenance ? deps.getProvenance() : undefined,
       properties: result.props,
       fci: scf.fci || undefined
     };

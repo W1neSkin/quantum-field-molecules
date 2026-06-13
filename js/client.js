@@ -23,12 +23,14 @@
         core.memSet(key, cached);
         return Object.assign({ fromCache: true }, cached);
       }
+      var transport = "worker";
       return new Promise(function (resolve, reject) {
         var id = core.addPending("compute", opts.onProgress, resolve, reject);
         var w = core.getWorker();
         if (w) {
           w.postMessage({ id: id, lang: App.LANG, xyz: opts.xyz, charge: opts.charge, mult: opts.mult, basis: opts.basis });
         } else {
+          transport = "main";
           // main-thread fallback: UI freezes during heavy jobs, documented for file://
           setTimeout(function () {
             var p = core.getPending(id);
@@ -49,6 +51,8 @@
           }, 30);
         }
       }).then(function (result) {
+        // remember where the fresh result came from; useful for provenance manifest
+        if (result && !result.__transport) result.__transport = transport;
         core.memSet(key, result);
         core.idbPut(key, result);
         return result;

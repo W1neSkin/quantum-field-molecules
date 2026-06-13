@@ -118,6 +118,21 @@
         }).join(" ");
       }
       $("mulliken").innerHTML = html;
+      renderProvenance();
+    }
+
+    function renderProvenance() {
+      var box = $("provenance");
+      if (!box) return;
+      if (!state.provenance || !App.provenance || !App.provenance.formatForUi) {
+        box.innerHTML = "";
+        return;
+      }
+      var rows = App.provenance.formatForUi(state.provenance, t);
+      box.innerHTML = "<p class='small muted'>" + t("prov.title") + "</p>" + rows.map(function (r) {
+        var v = r.mono ? "<code>" + r.value + "</code>" : r.value;
+        return "<div class='brow'><span>" + r.key + "</span><b>" + v + "</b></div>";
+      }).join("");
     }
 
     function renderFacts() {

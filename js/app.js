@@ -7,7 +7,7 @@
   var t = function (key, params) { return App.i18n.t(key, params); };
 
   var state = {
-    preset: null, result: null, prep: null, mode: { kind: "total" }, busy: false,
+    preset: null, result: null, provenance: null, prep: null, mode: { kind: "total" }, busy: false,
     view: "2d", prep3d: null, prep3dBuilding: false, volCache: {}, okStatus: "",
     okInfo: null, basis: "STO-3G", efield: true, osc3d: true, frame3d: false,
     resultGen: 0, volLru: [], prep3dWaiters: [], scanTarget: null

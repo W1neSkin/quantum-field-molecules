@@ -377,11 +377,20 @@ try {
 
 function runAsyncChecks() {
   require("../js/client.js");
+  require("../js/provenance.js");
 
   // cacheKey must be insensitive to harmless spacing changes.
   var k1 = App.compute.cacheKey("H 0 0 0\nH 0 0 0.7408", 0, 0, "STO-3G");
   var k2 = App.compute.cacheKey("H   0 0 0\n\nH 0  0   0.7408", 0, 0, "STO-3G");
   check("cacheKey normalization", k1 === k2, "k1 == k2");
+
+  var pRes = App.engine.compute(cases[0].xyz, 0);
+  var pMeta = App.provenance.build({
+    result: pRes, xyz: cases[0].xyz, charge: 0, mult: 0, basis: "STO-3G"
+  });
+  check("provenance manifest", pMeta && pMeta.schema === "qfm-provenance-v1" &&
+    pMeta.requestKey === k1 && pMeta.testReference === "test/selfcheck.js",
+  "source = " + (pMeta ? pMeta.source : "n/a"));
 
   // Async Boys localization should return the same output shape as the sync path.
   var wbAsync = App.engine.compute(cases[2].xyz, 0);

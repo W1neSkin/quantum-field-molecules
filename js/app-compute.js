@@ -45,6 +45,15 @@
       }).then(function (result) {
         if (gen !== state.resultGen) return;
         state.result = result;
+        state.provenance = App.provenance && App.provenance.build
+          ? App.provenance.build({
+            result: result,
+            xyz: xyz,
+            charge: charge,
+            mult: preset && preset.mult,
+            basis: state.basis
+          })
+          : null;
         setStatus(t("status.map"), "busy");
         App.heatmap.prepareAsync(result, null, function (prep) {
           if (gen !== state.resultGen) return;
