@@ -8,6 +8,8 @@
   var worker = null, workerBroken = false;
   var pending = {}, nextId = 1;
   var memCache = {};
+  var memLru = [];
+  var MEM_CACHE_MAX = 36;
 
   function cacheKey(xyz, charge, mult, basis) {
     var norm = xyz.split("\n").map(function (l) { return l.trim().replace(/\s+/g, " "); })
@@ -48,6 +50,24 @@
     });
   }
 
+  function touchMem(key, value) {
+    if (value !== undefined) memCache[key] = value;
+    var i = memLru.indexOf(key);
+    if (i >= 0) memLru.splice(i, 1);
+    memLru.push(key);
+    while (memLru.length > MEM_CACHE_MAX) {
+      delete memCache[memLru.shift()];
+    }
+  }
+
+  function rejectAllPending(message) {
+    var all = pending;
+    pending = {};
+    Object.keys(all).forEach(function (id) {
+      all[id].reject(new Error(message || "Worker error"));
+    });
+  }
+
   function getWorker() {
     if (workerBroken) return null;
     if (worker) return worker;
@@ -61,7 +81,11 @@
         if (msg.type === "result") p.resolve(msg.result);
         else p.reject(new Error(msg.error));
       };
-      worker.onerror = function () { workerBroken = true; };
+      worker.onerror = function () {
+        workerBroken = true;
+        rejectAllPending("Computation worker failed");
+        worker = null;
+      };
       return worker;
     } catch (e) {
       workerBroken = true; // file:// or CSP: fall back to main thread
@@ -72,11 +96,14 @@
   // request({xyz, charge, mult, basis, onProgress}) -> Promise<result and {fromCache}>
   function request(opts) {
     var key = cacheKey(opts.xyz, opts.charge, opts.mult, opts.basis);
-    if (memCache[key]) return Promise.resolve(Object.assign({ fromCache: true }, memCache[key]));
+    if (memCache[key]) {
+      touchMem(key);
+      return Promise.resolve(Object.assign({ fromCache: true }, memCache[key]));
+    }
 
     return idbGet(key).then(function (cached) {
       if (cached) {
-        memCache[key] = cached;
+        touchMem(key, cached);
         return Object.assign({ fromCache: true }, cached);
       }
       return new Promise(function (resolve, reject) {
@@ -93,7 +120,7 @@
           }, 30);
         }
       }).then(function (result) {
-        memCache[key] = result;
+        touchMem(key, result);
         idbPut(key, result);
         return result;
       });
@@ -103,9 +130,12 @@
   // requestScan({key, sym:[s1,s2], charge, mult, rs, onProgress}) -> Promise<{points}>
   // Same worker/cache plumbing as request(); cached whole-scan under the key.
   function requestScan(opts) {
-    if (memCache[opts.key]) return Promise.resolve(memCache[opts.key]);
+    if (memCache[opts.key]) {
+      touchMem(opts.key);
+      return Promise.resolve(memCache[opts.key]);
+    }
     return idbGet(opts.key).then(function (cached) {
-      if (cached) { memCache[opts.key] = cached; return cached; }
+      if (cached) { touchMem(opts.key, cached); return cached; }
       return new Promise(function (resolve, reject) {
         var w = getWorker();
         if (w) {
@@ -127,7 +157,7 @@
           })();
         }
       }).then(function (result) {
-        memCache[opts.key] = result;
+        touchMem(opts.key, result);
         idbPut(opts.key, result);
         return result;
       });
@@ -137,9 +167,9 @@
   // requestOpt({xyz, charge, mult, basis, onProgress}) -> Promise<opt summary>
   function requestOpt(opts) {
     var key = "opt:" + cacheKey(opts.xyz, opts.charge, opts.mult, opts.basis);
-    if (memCache[key]) return Promise.resolve(memCache[key]);
+    if (memCache[key]) { touchMem(key); return Promise.resolve(memCache[key]); }
     return idbGet(key).then(function (cached) {
-      if (cached) { memCache[key] = cached; return cached; }
+      if (cached) { touchMem(key, cached); return cached; }
       return new Promise(function (resolve, reject) {
         var w = getWorker();
         if (w) {
@@ -154,7 +184,7 @@
           }, 30);
         }
       }).then(function (result) {
-        memCache[key] = result;
+        touchMem(key, result);
         idbPut(key, result);
         return result;
       });
@@ -164,9 +194,9 @@
   // requestVib({xyz, charge, mult, basis, onProgress}) -> Promise<{modes, nimag}>
   function requestVib(opts) {
     var key = "vib:" + cacheKey(opts.xyz, opts.charge, opts.mult, opts.basis);
-    if (memCache[key]) return Promise.resolve(memCache[key]);
+    if (memCache[key]) { touchMem(key); return Promise.resolve(memCache[key]); }
     return idbGet(key).then(function (cached) {
-      if (cached) { memCache[key] = cached; return cached; }
+      if (cached) { touchMem(key, cached); return cached; }
       return new Promise(function (resolve, reject) {
         var w = getWorker();
         if (w) {
@@ -181,7 +211,7 @@
           }, 30);
         }
       }).then(function (result) {
-        memCache[key] = result;
+        touchMem(key, result);
         idbPut(key, result);
         return result;
       });

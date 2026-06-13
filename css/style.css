@@ -98,15 +98,18 @@ select {
 .status.busy { color: var(--yellow); border-color: var(--yellow); }
 .status.ok { color: var(--green); }
 .status.error { color: var(--red); border-color: var(--red); }
+body[data-busy="1"] .shell { opacity: 0.94; }
 
 #bldCanvas {
   width: 100%; display: block; border: 1px solid var(--stroke-2);
   border-radius: 8px; cursor: grab; touch-action: none; background: var(--surface);
 }
 #bldElems .pill { min-width: 34px; text-align: center; }
+#bldFragments .pill { min-width: 44px; text-align: center; }
 #customPanel .row .btn { width: auto; flex: 1; }
 #openBuilderBtn { width: 100%; }
 #customSummary:empty { display: none; }
+#onbBox { margin-bottom: 14px; }
 
 textarea {
   width: 100%; min-height: 110px; resize: vertical;

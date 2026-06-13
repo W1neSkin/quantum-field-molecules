@@ -67,6 +67,12 @@
     </span>
   </div>
   <p class="lead" data-i18n="app.lead"></p>
+  <div id="onbBox" class="callout" style="display:none">
+    <div class="row" style="justify-content:space-between;align-items:flex-start;gap:12px">
+      <p class="small sec" style="margin:0" data-i18n="onb.text"></p>
+      <button id="onbClose" class="btn" data-i18n="onb.close"></button>
+    </div>
+  </div>
 
   <div class="shell">
     <aside class="side">
@@ -229,6 +235,12 @@
             <button id="bldModeChain" class="pill active" data-i18n="custom.mode.chain" data-i18n-title="custom.mode.chain.tip"></button>
             <button id="bldModeBranch" class="pill" data-i18n="custom.mode.branch" data-i18n-title="custom.mode.branch.tip"></button>
           </div>
+          <p class="small muted" data-i18n="custom.fragments"></p>
+          <div id="bldFragments" class="pills">
+            <button class="pill" data-frag="CH3" data-i18n-title="custom.frag.ch3.tip">CH3</button>
+            <button class="pill" data-frag="OH" data-i18n-title="custom.frag.oh.tip">OH</button>
+            <button class="pill" data-frag="NH2" data-i18n-title="custom.frag.nh2.tip">NH2</button>
+          </div>
           <div id="bldElems" class="pills"></div>
           <div class="grid" style="gap:8px">
             <button id="bldUndo" class="btn" data-i18n="custom.undo"></button>
@@ -247,6 +259,14 @@
           <div class="callout" style="margin-bottom:8px">
             <p class="small muted" data-i18n="custom.warn.title" style="margin-bottom:6px"></p>
             <div id="bldWarn" class="small sec"></div>
+          </div>
+          <div class="callout" style="margin-bottom:8px">
+            <p class="small muted" data-i18n="custom.connect.title" style="margin-bottom:6px"></p>
+            <div class="row" style="gap:6px">
+              <select id="bldConnectTo" style="flex:1"></select>
+              <button id="bldConnectBtn" class="btn" data-i18n="custom.connect.btn"></button>
+            </div>
+            <p class="small faint" data-i18n="custom.connect.hint" style="margin-top:6px"></p>
           </div>
           <div class="callout" style="margin-bottom:0">
             <p class="small muted" data-i18n="custom.sel.title" style="margin-bottom:6px"></p>
@@ -308,7 +328,7 @@ H 0 -0.7572 -0.4692</textarea>
 <script src="js/heatmap.js"></script>
 <script src="js/esp.js"></script>
 <script src="js/fields2d.js"></script>
-<script src="js/builder.js"></script>
+<script src="js/builder.js?v=20260613fh"></script>
 <script src="js/localize.js"></script>
 <script src="js/grid3d.js"></script>
 <script src="js/view3d.js"></script>

@@ -16,6 +16,8 @@
   var sel = -1;
   var mode = "branch"; // chain: keep growing from the new atom; branch: keep anchor
   var cam = { yaw: 0.5, pitch: 0.25 };
+  var viewCenter = null;
+  var viewRadius = 0.8;
   var canvas = null, onChange = null;
   var past = [], future = [];
 
@@ -26,11 +28,37 @@
   function cloneAtoms(xs) {
     return xs.map(function (a) { return { Z: a.Z, xyz: a.xyz.slice() }; });
   }
-  function snapshot() { return { atoms: cloneAtoms(atoms), sel: sel, mode: mode }; }
+  function centroidAtoms() {
+    if (!atoms.length) return [0, 0, 0];
+    var c = [0, 0, 0];
+    atoms.forEach(function (a) {
+      c[0] += a.xyz[0]; c[1] += a.xyz[1]; c[2] += a.xyz[2];
+    });
+    return [c[0] / atoms.length, c[1] / atoms.length, c[2] / atoms.length];
+  }
+  function radiusAround(c) {
+    if (!atoms.length) return 0.8;
+    var r = 0.8;
+    atoms.forEach(function (a) {
+      r = Math.max(r, len3(sub(a.xyz, c)));
+    });
+    return r;
+  }
+  function snapshot() {
+    return {
+      atoms: cloneAtoms(atoms),
+      sel: sel,
+      mode: mode,
+      center: (viewCenter || centroidAtoms()).slice(),
+      radius: viewRadius
+    };
+  }
   function restore(s) {
     atoms = cloneAtoms(s.atoms);
     sel = s.sel;
     mode = s.mode || mode;
+    viewCenter = (s.center || centroidAtoms()).slice();
+    viewRadius = s.radius || radiusAround(viewCenter);
     render();
   }
   function checkpoint() {
@@ -39,6 +67,9 @@
     future = [];
   }
   function bondLim(a, b) { return 1.25 * (COV_R[a.Z] + COV_R[b.Z]); }
+  function bonded(i, j) {
+    return len3(sub(atoms[i].xyz, atoms[j].xyz)) < bondLim(atoms[i], atoms[j]);
+  }
   function cross(a, b) {
     return [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
   }
@@ -50,10 +81,26 @@
     var out = [];
     for (var j = 0; j < atoms.length; j++) {
       if (j === i) continue;
-      var lim = bondLim(atoms[i], atoms[j]);
-      if (len3(sub(atoms[i].xyz, atoms[j].xyz)) < lim) out.push(j);
+      if (bonded(i, j)) out.push(j);
     }
     return out;
+  }
+
+  // move the connected fragment that contains "start"; never crosses "blocked"
+  function componentFrom(start, blocked) {
+    var seen = {};
+    var q = [start];
+    seen[start] = 1;
+    while (q.length) {
+      var i = q.shift();
+      for (var j = 0; j < atoms.length; j++) {
+        if (j === blocked || j === i || seen[j]) continue;
+        if (!bonded(i, j)) continue;
+        seen[j] = 1;
+        q.push(j);
+      }
+    }
+    return Object.keys(seen).map(function (k) { return +k; });
   }
 
   // direction for a new bond from anchor a, given its current neighbours
@@ -116,6 +163,8 @@
     if (!keepSel || sel >= atoms.length) sel = atoms.length ? 0 : -1;
     if (opts.mode === "chain" || opts.mode === "branch") mode = opts.mode;
     if (opts.resetHistory) { past = []; future = []; }
+    viewCenter = centroidAtoms();
+    viewRadius = radiusAround(viewCenter);
     if (opts.emit) changed();
     else render();
   }
@@ -139,6 +188,34 @@
   function setMode(m) {
     mode = m === "branch" ? "branch" : "chain";
     render();
+  }
+
+  function setSelected(i) {
+    if (i < 0 || i >= atoms.length) return false;
+    sel = i;
+    changed();
+    return true;
+  }
+
+  // explicit bond edit: place atom b (or its fragment) at a covalent distance from a
+  function connectAtoms(a, b) {
+    if (a < 0 || b < 0 || a >= atoms.length || b >= atoms.length || a === b) return false;
+    checkpoint();
+    var A = atoms[a], B = atoms[b];
+    var target = COV_R[A.Z] + COV_R[B.Z];
+    var d = sub(B.xyz, A.xyz);
+    var r = len3(d);
+    var dir = r > 1e-6 ? unit(d) : newBondDir(a);
+    var goal = add3(A.xyz, dir, target);
+    var shift = sub(goal, B.xyz);
+    componentFrom(b, a).forEach(function (idx) {
+      atoms[idx].xyz[0] += shift[0];
+      atoms[idx].xyz[1] += shift[1];
+      atoms[idx].xyz[2] += shift[2];
+    });
+    sel = b;
+    changed();
+    return true;
   }
 
   function toXyz() {
@@ -219,28 +296,43 @@
   }
 
   function changed() {
+    viewCenter = centroidAtoms();
+    viewRadius = radiusAround(viewCenter);
     render();
     if (onChange) onChange();
   }
 
   // ---------- preview rendering (orthographic, orbit by drag) ----------
-  function project() {
-    var c = [0, 0, 0];
-    atoms.forEach(function (a) { c = add3(c, a.xyz, 1 / atoms.length); });
+  function projectInfo() {
+    var c = (viewCenter || centroidAtoms()).slice();
     var cy = Math.cos(cam.yaw), sy = Math.sin(cam.yaw);
     var cp = Math.cos(cam.pitch), sp = Math.sin(cam.pitch);
-    var maxR = 0.8;
     var pts = atoms.map(function (a) {
       var d = sub(a.xyz, c);
-      maxR = Math.max(maxR, len3(d));
       var x = cy * d[0] + sy * d[2], z1 = -sy * d[0] + cy * d[2];
       return [x, cp * d[1] - sp * z1, sp * d[1] + cp * z1];
     });
     var W = canvas.width, H = canvas.height;
-    var k = (Math.min(W, H) / 2 - 26) / (maxR + 0.6);
-    return pts.map(function (p) {
-      return { x: W / 2 + p[0] * k, y: H / 2 - p[1] * k, z: p[2] };
-    });
+    var k = (Math.min(W, H) / 2 - 26) / (Math.max(viewRadius, 0.8) + 0.6);
+    return {
+      k: k,
+      pts: pts.map(function (p) {
+        return { x: W / 2 + p[0] * k, y: H / 2 - p[1] * k, z: p[2] };
+      })
+    };
+  }
+
+  function project() { return projectInfo().pts; }
+
+  function screenDeltaToWorld(dxPx, dyPx, k) {
+    var dx = dxPx / (k || 1), dy = -dyPx / (k || 1);
+    var cy = Math.cos(cam.yaw), sy = Math.sin(cam.yaw);
+    var cp = Math.cos(cam.pitch), sp = Math.sin(cam.pitch);
+    return [
+      cy * dx + sy * sp * dy,
+      cp * dy,
+      sy * dx - cy * sp * dy
+    ];
   }
 
   function render() {
@@ -297,44 +389,93 @@
 
   function pickAt(px, py) {
     if (!atoms.length) return -1;
+    var n = nearestAt(px, py);
+    return n.d2 <= 36 * 36 ? n.idx : -1;
+  }
+
+  function nearestAt(px, py) {
+    if (!atoms.length) return { idx: -1, d2: 1e12 };
     var pts = project();
-    var best = -1, bd = 28 * 28;
+    var best = -1, bd = 1e12;
     pts.forEach(function (p, k) {
       var d = (p.x - px) * (p.x - px) + (p.y - py) * (p.y - py);
       if (d < bd) { bd = d; best = k; }
     });
-    return best;
+    return { idx: best, d2: bd };
   }
 
   function init(canvasEl, changeCb) {
     canvas = canvasEl;
     onChange = changeCb;
-    var down = null, moved = 0;
+    var drag = null;
     var toCanvas = function (e) {
       var r = canvas.getBoundingClientRect();
       return [(e.clientX - r.left) * canvas.width / r.width,
               (e.clientY - r.top) * canvas.height / r.height];
     };
     canvas.addEventListener("pointerdown", function (e) {
-      down = [e.clientX, e.clientY];
-      moved = 0;
+      var p = toCanvas(e);
+      var near = nearestAt(p[0], p[1]);
+      var hit = near.idx;
+      if (!e.altKey && atoms.length) {
+        // Left-drag must be deterministic across browsers: move an atom.
+        // Prefer a nearby atom when the pointer is close; otherwise keep the current selection.
+        if (near.d2 > 96 * 96 && sel >= 0) hit = sel;
+      } else if (e.shiftKey && sel >= 0) {
+        hit = sel;
+      } else if (near.d2 > 72 * 72) {
+        hit = -1;
+      }
+      drag = {
+        type: !e.altKey && atoms.length ? "atom" : "orbit",
+        idx: hit, moved: 0, started: false, dirty: false,
+        lastX: e.clientX, lastY: e.clientY
+      };
+      canvas.style.cursor = drag.type === "atom" ? "move" : "grabbing";
+      if (drag.type === "atom" && hit >= 0 && sel !== hit) {
+        sel = hit;
+        render();
+        if (onChange) onChange();
+      }
       try { canvas.setPointerCapture(e.pointerId); } catch (err) { /* synthetic events */ }
     });
     canvas.addEventListener("pointermove", function (e) {
-      if (!down) return;
-      moved += Math.abs(e.clientX - down[0]) + Math.abs(e.clientY - down[1]);
-      cam.yaw += (e.clientX - down[0]) * 0.01;
-      cam.pitch = Math.max(-1.5, Math.min(1.5, cam.pitch + (e.clientY - down[1]) * 0.01));
-      down = [e.clientX, e.clientY];
-      render();
+      if (!drag) return;
+      var dx = e.clientX - drag.lastX, dy = e.clientY - drag.lastY;
+      drag.moved += Math.abs(dx) + Math.abs(dy);
+      if (drag.type === "orbit") {
+        cam.yaw += dx * 0.01;
+        cam.pitch = Math.max(-1.5, Math.min(1.5, cam.pitch + dy * 0.01));
+        render();
+      } else if (drag.idx >= 0) {
+        if (!drag.started && (dx || dy)) { checkpoint(); drag.started = true; }
+        if (drag.started) {
+          var pinfo = projectInfo();
+          var dw = screenDeltaToWorld(dx, dy, pinfo.k);
+          atoms[drag.idx].xyz[0] += dw[0];
+          atoms[drag.idx].xyz[1] += dw[1];
+          atoms[drag.idx].xyz[2] += dw[2];
+          render();
+          drag.dirty = true;
+        }
+      }
+      drag.lastX = e.clientX;
+      drag.lastY = e.clientY;
     });
     canvas.addEventListener("pointerup", function (e) {
-      if (down && moved < 5) {
+      if (!drag) return;
+      if (drag.type === "orbit" && drag.moved < 5) {
         var p = toCanvas(e);
         var hit = pickAt(p[0], p[1]);
-        if (hit >= 0) { sel = hit; changed(); }
+        if (hit >= 0 && sel !== hit) { sel = hit; changed(); }
       }
-      down = null;
+      if (drag.type === "atom" && drag.dirty && onChange) onChange();
+      drag = null;
+      canvas.style.cursor = "grab";
+    });
+    canvas.addEventListener("pointercancel", function () {
+      drag = null;
+      canvas.style.cursor = "grab";
     });
   }
 
@@ -345,6 +486,8 @@
     selected: function () { return sel; },
     mode: function () { return mode; },
     setMode: setMode,
+    setSelected: setSelected,
+    connect: connectAtoms,
     undo: undo, redo: redo,
     canUndo: function () { return past.length > 0; },
     canRedo: function () { return future.length > 0; },

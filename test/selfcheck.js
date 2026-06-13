@@ -298,6 +298,29 @@ try {
   var rt = App.engine.parseXYZ(B.toXyz());
   check("builder xyz roundtrip", rt.length === 5 && rt[0].Z === 6,
     "5 atoms parse back, first is C");
+
+  // explicit bond edit: connect a free atom to any selected target
+  B.setAtoms([
+    { Z: 6, xyz: [0, 0, 0] },
+    { Z: 1, xyz: [4.5, 0, 0] }
+  ], false, { resetHistory: true });
+  B.connect(1, 0);
+  var ac = B.getAtoms();
+  check("builder connect free atom", Math.abs(dist(ac[0], ac[1]) - (B.COV_R[6] + B.COV_R[1])) < 1e-3,
+    "r(CH) = " + dist(ac[0], ac[1]).toFixed(3) + " A after connect");
+
+  // when connecting fragments, internal geometry of the moved fragment is preserved
+  B.setAtoms([
+    { Z: 6, xyz: [0, 0, 0] },
+    { Z: 8, xyz: [5, 0, 0] },
+    { Z: 1, xyz: [5.96, 0, 0] }
+  ], false, { resetHistory: true });
+  var beforeOH = dist(B.getAtoms()[1], B.getAtoms()[2]);
+  B.connect(1, 0);
+  var af = B.getAtoms();
+  var afterOH = dist(af[1], af[2]);
+  check("builder connect fragment shift", Math.abs(afterOH - beforeOH) < 1e-6,
+    "r(OH) preserved: " + beforeOH.toFixed(3) + " -> " + afterOH.toFixed(3) + " A");
 } catch (e) {
   failed++;
   console.log("FAIL builder error:", e.message, e.stack);

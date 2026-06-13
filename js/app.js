@@ -9,8 +9,10 @@
   var state = {
     preset: null, result: null, prep: null, mode: { kind: "total" }, busy: false,
     view: "2d", prep3d: null, prep3dBuilding: false, volCache: {}, okStatus: "",
-    okInfo: null, basis: "STO-3G", efield: true, osc3d: true, frame3d: false
+    okInfo: null, basis: "STO-3G", efield: true, osc3d: true, frame3d: false,
+    resultGen: 0, volLru: [], prep3dWaiters: []
   };
+  var MAX_VOL_CACHE = 8;
 
   // these fields are computed on the slice plane only, never as a 3D volume
   var SLICE_ONLY = { esp: 1, elf: 1, lap: 1 };
@@ -20,6 +22,24 @@
     s.textContent = text;
     s.className = "status " + (cls || "");
     if (cls === "ok") state.okStatus = text;
+  }
+
+  function syncBusyUi() {
+    if (typeof document === "undefined") return;
+    document.body.setAttribute("data-busy", state.busy ? "1" : "0");
+    var m = $("molSelect"), b = $("basisSelect"), c = $("computeBtn"),
+      o = $("btnOpt"), v = $("vibBtn"), open = $("openBuilderBtn");
+    if (m) m.disabled = state.busy;
+    if (b) b.disabled = state.busy;
+    if (c) c.disabled = state.busy;
+    if (o) o.disabled = state.busy;
+    if (v) v.disabled = state.busy;
+    if (open) open.disabled = state.busy;
+  }
+
+  function setBusy(on) {
+    state.busy = !!on;
+    syncBusyUi();
   }
 
   function fmtEv(ha) { return (ha * HA_TO_EV).toFixed(1) + t("u.ev"); }
@@ -247,7 +267,7 @@
   }
 
   function volKey() {
-    return state.mode.kind + (state.mode.kind === "mo"
+    return state.resultGen + ":" + state.mode.kind + (state.mode.kind === "mo"
       ? ":" + state.mode.mo + (state.mode.spin || "a") + (state.mode.localized ? "L" : "")
       : "");
   }
@@ -255,18 +275,24 @@
   // builds (or reuses) the 3D basis grid, then calls cb(prep3d)
   function ensurePrep3d(cb) {
     if (!state.result) return;
-    if (state.prep3d) { cb(state.prep3d); return; }
-    state.prep3dWaiters = (state.prep3dWaiters || []).concat(cb);
+    var gen = state.resultGen;
+    if (state.prep3d && state.prep3d.gen === gen) { cb(state.prep3d); return; }
+    state.prep3dWaiters.push({ gen: gen, fn: cb });
     if (state.prep3dBuilding) return;
     state.prep3dBuilding = true;
     App.grid3d.buildBasisGrid(state.result, function (f) {
       setStatus(t("status.grid", { p: Math.round(f * 100) }), "busy");
     }, function (prep) {
+      if (gen !== state.resultGen) { state.prep3dBuilding = false; return; }
+      prep.gen = gen;
       state.prep3d = prep;
       state.prep3dBuilding = false;
       setStatus(state.okStatus, "ok");
-      var ws = state.prep3dWaiters; state.prep3dWaiters = [];
-      ws.forEach(function (w) { w(prep); });
+      var ws = state.prep3dWaiters;
+      state.prep3dWaiters = [];
+      ws.forEach(function (w) {
+        if (w.gen === gen) w.fn(prep);
+      });
     });
   }
 
@@ -276,12 +302,16 @@
 
   function ensureVolume() {
     if (!state.result) return;
+    var gen = state.resultGen;
     if (!state.prep3d) {
       ensurePrep3d(function () { ensureVolume(); });
       return;
     }
     var key = volKey();
     if (state.volCache[key]) {
+      var k = state.volLru.indexOf(key);
+      if (k >= 0) state.volLru.splice(k, 1);
+      state.volLru.push(key);
       App.view3d.setVolume(state.prep3d, state.volCache[key], state.result.atoms);
       App.view3d.setOpts(view3dOpts());
       return;
@@ -289,7 +319,13 @@
     App.grid3d.fieldVolume(state.prep3d, state.mode, function (f) {
       setStatus(t("status.volume", { p: Math.round(f * 100) }), "busy");
     }, function (volume) {
+      if (gen !== state.resultGen) return;
       state.volCache[key] = volume;
+      state.volLru.push(key);
+      while (state.volLru.length > MAX_VOL_CACHE) {
+        var old = state.volLru.shift();
+        delete state.volCache[old];
+      }
       setStatus(state.okStatus, "ok");
       if (state.view === "3d" && volKey() === key) {
         App.view3d.setVolume(state.prep3d, volume, state.result.atoms);
@@ -407,7 +443,12 @@
 
   // scan slider moved: show the density map for that geometry (null = back to Re)
   function applyScanGeometry(scanResult) {
-    state.prep = scanResult ? App.heatmap.prepare(scanResult) : state.prepMain;
+    if (!scanResult) state.prep = state.prepMain;
+    else {
+      // scan slider revisits points often; memoize per point to keep scrubbing smooth
+      if (!scanResult._prep) scanResult._prep = App.heatmap.prepare(scanResult);
+      state.prep = scanResult._prep;
+    }
     drawMap();
     updateNote();
   }
@@ -415,7 +456,10 @@
   function renderAll() {
     state.mode = { kind: "total" };
     state.prep3d = null;
+    state.prep3dBuilding = false;
+    state.prep3dWaiters = [];
     state.volCache = {};
+    state.volLru = [];
     state.localized = false;
     state.vib = null;
     state.vibPick = -1;
@@ -437,7 +481,9 @@
   // ---------- compute flow ----------
   function loadMolecule(xyz, charge, preset) {
     if (state.busy) return;
-    state.busy = true;
+    var gen = state.resultGen + 1;
+    state.resultGen = gen;
+    setBusy(true);
     state.preset = preset || null;
     state.lastXyz = xyz;
     state.lastCharge = charge;
@@ -451,9 +497,11 @@
         else if (p.stage === "scf") setStatus(t("status.scf"), "busy");
       }
     }).then(function (result) {
+      if (gen !== state.resultGen) return;
       state.result = result;
       setStatus(t("status.map"), "busy");
       setTimeout(function () {
+        if (gen !== state.resultGen) return;
         state.prep = App.heatmap.prepare(result);
         state.prepMain = state.prep;
         renderAll();
@@ -467,14 +515,15 @@
         };
         state.optInfo = null;
         renderOkStatus();
-        state.busy = false;
+        setBusy(false);
       }, 30);
     }).catch(function (err) {
+      if (gen !== state.resultGen) return;
       setStatus(t("status.error"), "error");
       var box = $("errorBox");
       box.textContent = err.message;
       box.style.display = "";
-      state.busy = false;
+      setBusy(false);
     });
   }
 
@@ -531,7 +580,7 @@
 
   function runVib() {
     if (!state.result || state.busy) return;
-    state.busy = true;
+    setBusy(true);
     $("errorBox").style.display = "none";
     var vs = $("vibStatus");
     App.compute.requestVib({
@@ -541,7 +590,7 @@
         if (p.stage === "vib") vs.textContent = t("vib.progress", { p: Math.round(p.frac * 100) });
       }
     }).then(function (res) {
-      state.busy = false;
+      setBusy(false);
       state.vib = res;
       state.vibPick = -1;
       vs.textContent = t("vib.summary", { n: res.modes.length,
@@ -549,14 +598,14 @@
           .map(function (m) { return m.freq.toFixed(0); }).join(", ") });
       renderVib();
     }).catch(function (err) {
-      state.busy = false;
+      setBusy(false);
       vs.textContent = t("vib.fail", { msg: err.message });
     });
   }
 
   function optimizeGeometry() {
     if (!state.result || state.busy) return;
-    state.busy = true;
+    setBusy(true);
     $("errorBox").style.display = "none";
     setStatus(t("status.optimizing"), "busy");
     var charge = state.lastCharge;
@@ -570,12 +619,12 @@
         }
       }
     }).then(function (opt) {
-      state.busy = false;
+      setBusy(false);
       $("xyzInput").value = opt.xyz; // optimized coordinates, ready to copy
       state.optInfo = { dE: opt.E - opt.E0, iters: opt.iters, converged: opt.converged };
       loadMolecule(opt.xyz, charge, state.preset);
     }).catch(function (err) {
-      state.busy = false;
+      setBusy(false);
       setStatus(t("status.optfail"), "error");
       var box = $("errorBox");
       box.textContent = err.message;
@@ -630,6 +679,27 @@
     return warns;
   }
 
+  function renderConnectOptions(atoms, sel) {
+    var s = $("bldConnectTo");
+    s.innerHTML = "";
+    if (sel < 0 || atoms.length < 2) {
+      var empty = document.createElement("option");
+      empty.value = "";
+      empty.textContent = t("custom.connect.none");
+      s.appendChild(empty);
+      $("bldConnectBtn").disabled = true;
+      return;
+    }
+    atoms.forEach(function (a, i) {
+      if (i === sel) return;
+      var o = document.createElement("option");
+      o.value = i;
+      o.textContent = atomTag(a, i);
+      s.appendChild(o);
+    });
+    $("bldConnectBtn").disabled = s.options.length === 0;
+  }
+
   function renderBldInfo(extra) {
     var atoms = App.builder.getAtoms();
     var warns = bldIssues();
@@ -642,6 +712,7 @@
       $("bldInfo").textContent = "";
       $("bldWarn").innerHTML = "<p>" + t("custom.warn.ok") + "</p>";
       $("bldSel").innerHTML = "<p>" + t("custom.sel.none") + "</p>";
+      renderConnectOptions(atoms, -1);
       $("bldUndo").disabled = !App.builder.canUndo();
       $("bldRedo").disabled = !App.builder.canRedo();
       return;
@@ -674,6 +745,7 @@
       } else selHtml += "<p>" + t("custom.sel.nobonds") + "</p>";
     }
     $("bldSel").innerHTML = selHtml;
+    renderConnectOptions(atoms, sel);
 
     $("bldUndo").disabled = !App.builder.canUndo();
     $("bldRedo").disabled = !App.builder.canRedo();
@@ -733,6 +805,40 @@
     loadMolecule($("xyzInput").value, parseInt($("chargeInput").value, 10) || 0, null);
   }
 
+  function addFragment(kind) {
+    var oldMode = App.builder.mode();
+    var ok = true;
+    function safeAdd(z) {
+      if (App.builder.add(z) >= 0) return true;
+      renderBldInfo(t("err.parse.maxatoms"));
+      return false;
+    }
+    if (kind === "CH3") {
+      App.builder.setMode("chain");
+      if (!safeAdd(6)) ok = false;
+      if (ok) {
+        var c = App.builder.selected();
+        App.builder.setMode("branch");
+        ok = safeAdd(1) && safeAdd(1) && safeAdd(1);
+        App.builder.setSelected(c);
+      }
+    } else if (kind === "OH") {
+      App.builder.setMode("chain");
+      ok = safeAdd(8) && safeAdd(1);
+    } else if (kind === "NH2") {
+      App.builder.setMode("chain");
+      if (!safeAdd(7)) ok = false;
+      if (ok) {
+        var n = App.builder.selected();
+        App.builder.setMode("branch");
+        ok = safeAdd(1) && safeAdd(1);
+        App.builder.setSelected(n);
+      }
+    }
+    App.builder.setMode(oldMode);
+    if (ok) renderBldInfo(t("custom.frag.done"));
+  }
+
   function initBuilder() {
     App.builder.init($("bldCanvas"), syncFromBuilder);
     App.builder.setMode("chain");
@@ -764,6 +870,18 @@
         return { Z: a.Z, xyz: a.xyz.map(function (c) { return c * BOHR_TO_A; }) };
       }), false, { resetHistory: true });
       syncFromBuilder();
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("#bldFragments [data-frag]"), function (b) {
+      b.addEventListener("click", function () { addFragment(b.dataset.frag); });
+    });
+    $("bldConnectBtn").addEventListener("click", function () {
+      var from = App.builder.selected();
+      var to = parseInt($("bldConnectTo").value, 10);
+      if (from < 0 || !isFinite(to)) return;
+      if (App.builder.connect(from, to)) {
+        var atoms = App.builder.getAtoms();
+        renderBldInfo(t("custom.connect.done", { a: atomTag(atoms[from], from), b: atomTag(atoms[to], to) }));
+      }
     });
 
     $("openBuilderBtn").addEventListener("click", openBuilder);
@@ -853,6 +971,19 @@
     App.scanCtl.refresh();
   }
 
+  function initOnboarding() {
+    var box = $("onbBox");
+    var close = $("onbClose");
+    if (!box || !close) return;
+    var dismissed = false;
+    try { dismissed = localStorage.getItem("qft.onb.dismissed") === "1"; } catch (e) { /* noop */ }
+    box.style.display = dismissed ? "none" : "";
+    close.addEventListener("click", function () {
+      box.style.display = "none";
+      try { localStorage.setItem("qft.onb.dismissed", "1"); } catch (e) { /* noop */ }
+    });
+  }
+
   // ---------- init ----------
   function init() {
     App.theme.init();
@@ -868,10 +999,14 @@
     App.i18n.onChange(rerenderText);
     App.theme.onChange(rerenderTheme);
     App.help.init();
+    initOnboarding();
 
     var sel = $("molSelect");
     fillMolSelect();
-    sel.addEventListener("change", function () { selectPreset(sel.value); });
+    sel.addEventListener("change", function () {
+      if (state.busy) return;
+      selectPreset(sel.value);
+    });
     initBuilder();
 
     var bsel = $("basisSelect");
@@ -934,6 +1069,7 @@
     $("vibBtn").addEventListener("click", runVib);
 
     App.diagrams.renderExchange($("exchange"));
+    syncBusyUi();
     selectPreset("H2");
   }
 
