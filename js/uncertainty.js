@@ -4,6 +4,36 @@
   "use strict";
 
   function clamp(x, a, b) { return Math.max(a, Math.min(b, x)); }
+  function round(x, n) {
+    var p = Math.pow(10, n || 0);
+    return Math.round(x * p) / p;
+  }
+
+  function basisBaseEnergyHa(basis) {
+    if (basis === "6-31G*") return 0.004;
+    if (basis === "6-31G") return 0.008;
+    if (basis === "STO-3G") return 0.015;
+    return 0.010;
+  }
+
+  function estimateBands(result, score) {
+    var scf = result && result.scf;
+    var props = result && result.props;
+    if (!scf) return null;
+    var factor = 1 + (score || 0) / 6;
+    var bands = {
+      energyHa: round(basisBaseEnergyHa(result.basisName || "STO-3G") * factor, 4),
+      dipoleD: null,
+      gapEv: null
+    };
+    if (props && props.dipole && isFinite(props.dipole.debye)) {
+      bands.dipoleD = round(0.08 * factor, 2);
+    }
+    if (scf.eps && scf.nocc != null && scf.nocc < scf.eps.length) {
+      bands.gapEv = round(0.25 * factor, 2);
+    }
+    return bands;
+  }
 
   function evaluate(result, preset, provenance) {
     if (!result || !result.scf) return { level: "na", score: 0, confidence: 0, reasons: [] };
@@ -47,7 +77,8 @@
       confidence: confidence,
       reasons: reasons,
       basis: basis,
-      virial: virial
+      virial: virial,
+      bands: estimateBands(result, score)
     };
   }
 
@@ -62,6 +93,11 @@
       [t("unc.score"), String(u.score) + "/8"],
       [t("unc.conf"), Math.round(u.confidence * 100) + "%"]
     ];
+    if (u.bands) {
+      rows.push([t("unc.bandE"), "±" + u.bands.energyHa.toFixed(4) + " Ha"]);
+      if (u.bands.dipoleD != null) rows.push([t("unc.bandDip"), "±" + u.bands.dipoleD.toFixed(2) + " D"]);
+      if (u.bands.gapEv != null) rows.push([t("unc.bandGap"), "±" + u.bands.gapEv.toFixed(2) + " eV"]);
+    }
     var reasons = u.reasons.length
       ? "<p class='small faint'>" + t("unc.reasons") + ": " + u.reasons.map(function (k) {
         return t("unc.r." + k);

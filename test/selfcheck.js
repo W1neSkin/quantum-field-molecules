@@ -441,6 +441,9 @@ function runAsyncChecks() {
     "low-risk mock gets low uncertainty");
   check("uncertainty high", uHigh && uHigh.level === "high" && uHigh.score >= 6,
     "high-risk mock gets high uncertainty");
+  check("uncertainty bands", uLow && uHigh && uLow.bands && uHigh.bands &&
+    uHigh.bands.energyHa > uLow.bands.energyHa && uHigh.bands.gapEv >= uLow.bands.gapEv,
+  "high-risk mock gets wider uncertainty bands");
 
   var bridgeTpl = App.crossBridge.makeTemplate("pyscf", {
     atoms: [{ sym: "H", xyz: [0, 0, 0] }, { sym: "H", xyz: [0, 0, 0.7414] }],
@@ -489,12 +492,12 @@ function runAsyncChecks() {
   );
   check("report pack", /Journal-ready report/.test(repPack.reportMd) &&
     /Methods appendix/.test(repPack.methodsMd) && /Validity checklist/.test(repPack.reportMd) &&
-    /Uncertainty hint/.test(repPack.reportMd) &&
+    /Uncertainty hint/.test(repPack.reportMd) && /Bands:/.test(repPack.reportMd) &&
     repPack.figurePack.figures.length >= 3,
   "report/methods/figure-pack artifacts are generated");
   check("report manifest", repPack.manifest.requestKey === "abc123" &&
     repPack.manifest.source === "worker" && !!repPack.manifest.validityChecklist &&
-    !!repPack.manifest.uncertainty,
+    !!repPack.manifest.uncertainty && !!(repPack.manifest.uncertainty.bands),
   "manifest keeps provenance, validity checklist and uncertainty");
 
   // Async Boys localization should return the same output shape as the sync path.

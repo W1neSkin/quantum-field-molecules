@@ -171,7 +171,8 @@
         level: uncertainty.level,
         score: uncertainty.score,
         confidence: uncertainty.confidence,
-        reasons: uncertainty.reasons
+        reasons: uncertainty.reasons,
+        bands: uncertainty.bands || null
       };
     }
     var reportMd = [
@@ -202,6 +203,11 @@
       uncertainty
         ? ("- Level: " + uncertainty.level + " (score " + uncertainty.score + "/8, confidence " + Math.round(uncertainty.confidence * 100) + "%).")
         : "- n/a",
+      uncertainty && uncertainty.bands
+        ? ("- Bands: ±" + uncertainty.bands.energyHa.toFixed(4) + " Ha (E)" +
+          (uncertainty.bands.dipoleD != null ? ", ±" + uncertainty.bands.dipoleD.toFixed(2) + " D (dipole)" : "") +
+          (uncertainty.bands.gapEv != null ? ", ±" + uncertainty.bands.gapEv.toFixed(2) + " eV (gap)" : ""))
+        : "- Bands: n/a",
       uncertainty && uncertainty.reasons && uncertainty.reasons.length
         ? ("- Drivers: " + uncertainty.reasons.join(", "))
         : "- Drivers: none detected",
