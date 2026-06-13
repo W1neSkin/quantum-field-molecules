@@ -119,6 +119,7 @@
       }
       $("mulliken").innerHTML = html;
       renderProvenance();
+      renderQualityChecks();
     }
 
     function renderProvenance() {
@@ -132,6 +133,28 @@
       box.innerHTML = "<p class='small muted'>" + t("prov.title") + "</p>" + rows.map(function (r) {
         var v = r.mono ? "<code>" + r.value + "</code>" : r.value;
         return "<div class='brow'><span>" + r.key + "</span><b>" + v + "</b></div>";
+      }).join("");
+    }
+
+    function renderQualityChecks() {
+      var box = $("qualityChecks");
+      if (!box) return;
+      var scf = state.result && state.result.scf;
+      if (!scf) { box.innerHTML = ""; return; }
+      var virial = scf.ET ? (-(scf.EVne + scf.EJ + scf.EK + scf.Enuc) / scf.ET) : null;
+      var virialOk = virial != null && Math.abs(virial - 2) < 0.2;
+      var spinOk = (!scf.uhf || scf.S2exact == null || scf.S2 == null) ? null : Math.abs(scf.S2 - scf.S2exact) < 0.35;
+      var hasReqKey = !!(state.provenance && state.provenance.requestKey);
+      var rows = [
+        [t("qual.scf"), scf.converged === false ? t("qual.warn") : t("qual.ok")],
+        [t("qual.virial"), virial == null ? t("qual.na")
+          : virial.toFixed(3) + " (" + (virialOk ? t("qual.ok") : t("qual.warn")) + ")"],
+        [t("qual.spin"), spinOk == null ? t("qual.na")
+          : scf.S2.toFixed(3) + "/" + scf.S2exact.toFixed(3) + " (" + (spinOk ? t("qual.ok") : t("qual.warn")) + ")"],
+        [t("qual.repro"), hasReqKey ? t("qual.ok") : t("qual.missing")]
+      ];
+      box.innerHTML = "<p class='small muted'>" + t("qual.title") + "</p>" + rows.map(function (r) {
+        return "<div class='brow'><span>" + r[0] + "</span><b>" + r[1] + "</b></div>";
       }).join("");
     }
 
