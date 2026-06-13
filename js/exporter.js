@@ -27,6 +27,9 @@
     var name = preset.name || {};
     return name[App.LANG] || name.en || "";
   }
+  function methodTag(result) {
+    return result && result.scf && result.scf.uhf ? "UHF" : "RHF";
+  }
 
   function png() {
     var canvas = deps.getView() === "3d" ? deps.getCanvasGl() : deps.getCanvas2d();
@@ -125,8 +128,95 @@
       baseName() + "-result.json");
   }
 
+  function buildJournalPack(result, preset, mode, provenance, base) {
+    var scf = result.scf;
+    var basis = result.basisName || "STO-3G";
+    var method = methodTag(result);
+    var molecule = preset ? (preset.formula + " " + presetDisplayName(preset)).trim() : "custom molecule";
+    var modeFile = base + "-" + modeTag(mode) + ".png";
+    var figurePack = {
+      schema: "qfm-figure-pack-v1",
+      title: molecule,
+      generatedAt: new Date().toISOString(),
+      figures: [
+        { id: "density-map", file: modeFile, how: "auto-exported on report click" },
+        { id: "cube-field", file: base + "-" + modeTag(mode) + ".cube", how: "optional: export with .cube button" },
+        { id: "raw-result", file: base + "-result.json", how: "optional: export with JSON button" }
+      ]
+    };
+    var manifest = provenance || {
+      schema: "qfm-repro-v1",
+      generatedAt: new Date().toISOString(),
+      method: method,
+      basis: basis,
+      charge: preset ? preset.charge : 0,
+      multiplicity: result.mult,
+      source: "browser"
+    };
+    var reportMd = [
+      "# Journal-ready report",
+      "",
+      "Generated: " + new Date().toISOString(),
+      "",
+      "## System",
+      "- Molecule: " + molecule,
+      "- Method/Basis: " + method + "/" + basis,
+      "- Charge/Multiplicity: " + (preset ? preset.charge : 0) + " / " + result.mult,
+      "",
+      "## Key electronic results",
+      "- SCF total energy: " + scf.E.toFixed(8) + " Ha",
+      "- Iterations: " + scf.iterations,
+      "- HOMO energy: " + scf.eps[scf.nocc - 1].toFixed(6) + " Ha",
+      "- LUMO energy: " + scf.eps[scf.nocc].toFixed(6) + " Ha",
+      "",
+      "## Figure pack",
+      "- " + modeFile + " (current field snapshot)",
+      "- " + base + "-result.json (structured data; optional export)",
+      "- " + base + "-" + modeTag(mode) + ".cube (3D field; optional export)",
+      "",
+      "## Companion files",
+      "- " + base + "-methods-appendix.md",
+      "- " + base + "-reproducibility-manifest.json",
+      "- " + base + "-figure-pack.json"
+    ].join("\n");
+    var methodsMd = [
+      "# Methods appendix",
+      "",
+      "## Computational setup",
+      "- Engine: in-browser JavaScript implementation",
+      "- Method: " + method,
+      "- Basis set: " + basis,
+      "- Coordinates: fixed nuclei (Born-Oppenheimer)",
+      "",
+      "## Approximations and guardrails",
+      "- Hartree-Fock-level electronic structure (RHF/UHF).",
+      "- For two-electron cases, full CI is available in the same basis.",
+      "- Intended for qualitative trends and rapid hypothesis checks.",
+      "",
+      "## Reproducibility notes",
+      "- Request key: " + ((manifest && manifest.requestKey) || "n/a"),
+      "- Source: " + ((manifest && manifest.source) || "browser"),
+      "- See reproducibility manifest JSON for structured metadata."
+    ].join("\n");
+    return { reportMd: reportMd, methodsMd: methodsMd, figurePack: figurePack, manifest: manifest };
+  }
+
+  // Journal-ready bundle: one-click text artifacts + current map PNG.
+  function report() {
+    var result = deps.getResult(), preset = deps.getPreset(), mode = deps.getMode();
+    if (!result) return;
+    var base = baseName();
+    var pack = buildJournalPack(result, preset, mode, deps.getProvenance ? deps.getProvenance() : null, base);
+    png(); // figure #1 in the pack: current density/map snapshot
+    download(new Blob([pack.reportMd], { type: "text/markdown" }), base + "-journal-report.md");
+    download(new Blob([pack.methodsMd], { type: "text/markdown" }), base + "-methods-appendix.md");
+    download(new Blob([JSON.stringify(pack.figurePack, null, 1)], { type: "application/json" }), base + "-figure-pack.json");
+    download(new Blob([JSON.stringify(pack.manifest, null, 1)], { type: "application/json" }), base + "-reproducibility-manifest.json");
+  }
+
   App.exporter = {
     init: function (d) { deps = d; },
-    png: png, cube: cube, json: json
+    png: png, cube: cube, json: json, report: report,
+    buildJournalPack: buildJournalPack
   };
 })(typeof globalThis.App === "object" ? globalThis.App : (globalThis.App = {}));

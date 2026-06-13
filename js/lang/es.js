@@ -83,6 +83,8 @@
     "card.png.tip": "captura de la vista actual",
     "card.cube.tip": "archivo Gaussian cube del campo actual - se abre en VMD, Avogadro, Multiwfn",
     "card.json.tip": "energías, orbitales y propiedades en JSON",
+    "card.report": "REPORTE",
+    "card.report.tip": "paquete journal-ready: lista de figure, methods appendix, reproducibility manifest",
 
     "sliceHint.2d": "observable ⟨n̂(x)⟩, corte a través de los núcleos",
     "sliceHint.3d": "representación volumétrica de ⟨n̂(x)⟩",

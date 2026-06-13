@@ -436,6 +436,18 @@ function runAsyncChecks() {
     Math.abs(bridgeJson.gapEv - 5.2) < 1e-9,
   "json parser extracts metrics");
 
+  require("../js/exporter.js");
+  var repRes = App.engine.compute(cases[0].xyz, 0);
+  var repPack = App.exporter.buildJournalPack(
+    repRes, { formula: "H2", charge: 0, name: { en: "Hydrogen" } }, { kind: "total" },
+    { requestKey: "abc123", source: "worker" }, "h2"
+  );
+  check("report pack", /Journal-ready report/.test(repPack.reportMd) &&
+    /Methods appendix/.test(repPack.methodsMd) && repPack.figurePack.figures.length >= 3,
+  "report/methods/figure-pack artifacts are generated");
+  check("report manifest", repPack.manifest.requestKey === "abc123" &&
+    repPack.manifest.source === "worker", "manifest keeps provenance metadata");
+
   // Async Boys localization should return the same output shape as the sync path.
   var wbAsync = App.engine.compute(cases[2].xyz, 0);
   var locAsyncCheck = new Promise(function (resolve) {

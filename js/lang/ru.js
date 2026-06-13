@@ -84,6 +84,8 @@
     "card.png.tip": "снимок текущего вида",
     "card.cube.tip": "файл Gaussian cube текущего поля - открывается в VMD, Avogadro, Multiwfn",
     "card.json.tip": "энергии, орбитали и свойства в формате JSON",
+    "card.report": "ОТЧЕТ",
+    "card.report.tip": "пакет для статьи: список figure, methods appendix, reproducibility manifest",
 
     "sliceHint.2d": "наблюдаемая ⟨n̂(x)⟩, сечение через ядра",
     "sliceHint.3d": "объёмная визуализация ⟨n̂(x)⟩",

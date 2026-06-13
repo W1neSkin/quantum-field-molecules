@@ -83,6 +83,8 @@
     "card.png.tip": "Momentaufnahme der aktuellen Ansicht",
     "card.cube.tip": "Gaussian-cube-Datei des aktuellen Feldes - für VMD, Avogadro, Multiwfn",
     "card.json.tip": "Energien, Orbitale und Eigenschaften als JSON",
+    "card.report": "BERICHT",
+    "card.report.tip": "journal-ready Paket: figure-Liste, methods appendix, reproducibility manifest",
 
     "sliceHint.2d": "Observable ⟨n̂(x)⟩, Schnitt durch die Kerne",
     "sliceHint.3d": "Volumendarstellung von ⟨n̂(x)⟩",

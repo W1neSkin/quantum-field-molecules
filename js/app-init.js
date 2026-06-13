@@ -101,12 +101,13 @@
           getProvenance: function () { return state.provenance || null; }
         });
       }
-      ["btnPng", "btnCube", "btnJson"].forEach(function (id) {
+      ["btnPng", "btnCube", "btnJson", "btnReport"].forEach(function (id) {
         $(id).addEventListener("click", function () {
           if (!state.result || state.busy) return;
           if (id === "btnPng") App.exporter.png();
           else if (id === "btnCube") App.exporter.cube();
-          else App.exporter.json();
+          else if (id === "btnJson") App.exporter.json();
+          else App.exporter.report();
         });
       });
 

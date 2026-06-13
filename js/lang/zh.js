@@ -83,6 +83,8 @@
     "card.png.tip": "当前视图快照",
     "card.cube.tip": "当前场的 Gaussian cube 文件 - 可在 VMD、Avogadro、Multiwfn 中打开",
     "card.json.tip": "以 JSON 导出能量、轨道与性质",
+    "card.report": "报告",
+    "card.report.tip": "journal-ready 包：figure 列表、methods appendix、reproducibility manifest",
 
     "sliceHint.2d": "可观测量 ⟨n̂(x)⟩，过原子核的截面",
     "sliceHint.3d": "⟨n̂(x)⟩ 的体渲染",

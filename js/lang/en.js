@@ -84,6 +84,8 @@
     "card.png.tip": "snapshot of the current view",
     "card.cube.tip": "Gaussian cube file of the current field - opens in VMD, Avogadro, Multiwfn",
     "card.json.tip": "energies, orbitals and properties as JSON",
+    "card.report": "REPORT",
+    "card.report.tip": "journal-ready pack: figure list, methods appendix, reproducibility manifest",
 
     "sliceHint.2d": "observable \u27e8n\u0302(x)\u27e9, slice through the nuclei",
     "sliceHint.3d": "volume rendering of \u27e8n\u0302(x)\u27e9",
