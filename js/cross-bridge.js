@@ -101,25 +101,77 @@
     return null;
   }
 
+  function toHa(v, unit) {
+    if (!(typeof v === "number" && isFinite(v))) return null;
+    var u = (unit || "").toLowerCase();
+    if (u.indexOf("mev") >= 0) return v / 27211.386;
+    if (u.indexOf("ev") >= 0) return v / 27.211386;
+    return v;
+  }
+
+  function toEv(v, unit) {
+    if (!(typeof v === "number" && isFinite(v))) return null;
+    var u = (unit || "").toLowerCase();
+    if (u.indexOf("mev") >= 0) return v / 1000;
+    if (u.indexOf("cm") >= 0) return v / 8065.54429;
+    if (/ha|eh|hartree|a\.u/.test(u)) return v * 27.211386;
+    return v;
+  }
+
+  function firstMatchNum(s, specs, conv) {
+    for (var i = 0; i < specs.length; i++) {
+      var spec = specs[i];
+      var re = spec.re || spec;
+      var m = s.match(re);
+      if (!m) continue;
+      var num = parseFloat(m[spec.num || 1]);
+      if (!isFinite(num)) continue;
+      var unitA = m[spec.unitA || 2] || "";
+      var unitB = m[spec.unitB || 3] || "";
+      return conv(num, unitA, unitB, m);
+    }
+    return null;
+  }
+
   function parseResult(text) {
     if (!text || !String(text).trim()) return { ok: false, source: "none" };
     var s = String(text).trim(), energy = null, gap = null, split = null, conv = null;
     try {
       var j = JSON.parse(s);
       energy = firstNum(j, ["energy", "E", "total_energy", "scf_energy", "etot"]);
+      if (energy == null && j.scf) energy = firstNum(j.scf, ["E", "energy", "total"]);
+      if (energy == null && j.results) energy = firstNum(j.results, ["energy", "total_energy"]);
       gap = firstNum(j, ["gap", "homo_lumo_gap", "gap_ev"]);
+      if (gap == null && j.scf) gap = firstNum(j.scf, ["gap", "homo_lumo_gap", "gap_ev"]);
       split = firstNum(j, ["split", "rabi_split", "splitting_ev"]);
+      if (split == null && j.cavity) split = firstNum(j.cavity, ["split", "rabi_split", "splitting_ev"]);
       if (typeof j.converged === "boolean") conv = j.converged;
+      else if (j.scf && typeof j.scf.converged === "boolean") conv = j.scf.converged;
       return { ok: true, source: "json", energyHa: energy, gapEv: gap, splitEv: split, converged: conv };
     } catch (e) { /* text mode */ }
-    var m = s.match(/(?:SCF[_\s-]*ENERGY[_\s-]*HA|total[_\s-]*energy|E\(tot\)|Etot)\s*[:=]\s*(-?\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?)/i);
-    if (m) energy = parseFloat(m[1]);
-    m = s.match(/(?:HOMO[-\s]*LUMO(?:\s+gap)?|gap)\s*[:=]\s*(\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?)/i);
-    if (m) gap = parseFloat(m[1]);
-    m = s.match(/(?:Rabi|polariton)?\s*split(?:ting)?\s*[:=]\s*(\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?)/i);
-    if (m) split = parseFloat(m[1]);
-    if (/not\s+converged|failed\s+to\s+converge/i.test(s)) conv = false;
-    else if (/converged|SCF done/i.test(s)) conv = true;
+    energy = firstMatchNum(s, [
+      /SCF[_\s-]*ENERGY[_\s-]*HA\s*[:=]\s*(-?\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?)/i,
+      /converged\s+SCF\s+energy\s*=\s*(-?\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?)\s*([A-Za-z\.\-\^0-9]+)?/i,
+      /total\s+energy\s+in\s+the\s+final\s+basis\s+set\s*=\s*(-?\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?)\s*([A-Za-z\.\-\^0-9]+)?/i,
+      /FINAL\s+SINGLE\s+POINT\s+ENERGY\s+(-?\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?)\s*([A-Za-z\.\-\^0-9]+)?/i,
+      /Total\s+Energy\s*[:=]\s*(-?\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?)\s*([A-Za-z\.\-\^0-9]+)?/i,
+      /E\(tot\)\s*=\s*(-?\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?)/i,
+      /\bEtot\b\s*[:=]\s*(-?\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?)/i
+    ], toHa);
+    gap = firstMatchNum(s, [
+      { re: /HOMO[-\s]*LUMO(?:\s+gap)?(?:\s*\(([^)]+)\)|\s*\[([^\]]+)\])?\s*[:=]\s*(\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?)/i, num: 3, unitA: 1, unitB: 2 },
+      { re: /\bgap\b(?:\s*\(([^)]+)\)|\s*\[([^\]]+)\])?\s*[:=]\s*(\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?)/i, num: 3, unitA: 1, unitB: 2 }
+    ], function (v, unitA, unitB) { return toEv(v, unitA || unitB); });
+    var m = s.match(/HOMO(?:\s+Eigenvalue)?\s*[:=]\s*(-?\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?)\s*([A-Za-z\.\-\^0-9]+)?[\s\S]{0,80}?LUMO(?:\s+Eigenvalue)?\s*[:=]\s*(-?\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?)\s*([A-Za-z\.\-\^0-9]+)?/i);
+    if (gap == null && m) gap = toEv(parseFloat(m[3]) - parseFloat(m[1]), m[2] || m[4] || "Ha");
+    split = firstMatchNum(s, [
+      { re: /(?:Rabi|polariton)?\s*split(?:ting)?(?:\s*\(([^)]+)\)|\s*\[([^\]]+)\])?\s*[:=]\s*(\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?)/i, num: 3, unitA: 1, unitB: 2 },
+      /\b2g\b\s*[:=]\s*(\d+(?:\.\d+)?(?:[Ee][+-]?\d+)?)\s*([A-Za-z\.\-\^0-9]+)?/i
+    ], function (v, unitA, unitB) { return toEv(v, unitA || unitB); });
+    if (/converged\s*[:=]\s*false/i.test(s)) conv = false;
+    else if (/converged\s*[:=]\s*true/i.test(s)) conv = true;
+    else if (/not\s+converged|failed\s+to\s+converge/i.test(s)) conv = false;
+    else if (/converged\s+SCF|SCF\s+converged|SCF done|FINAL\s+SINGLE\s+POINT\s+ENERGY|TOTAL\s+SCF\s+ENERGY/i.test(s)) conv = true;
     return { ok: true, source: "text", energyHa: energy, gapEv: gap, splitEv: split, converged: conv };
   }
 

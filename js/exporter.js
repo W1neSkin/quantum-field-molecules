@@ -132,6 +132,7 @@
     var scf = result.scf;
     var basis = result.basisName || "STO-3G";
     var method = methodTag(result);
+    var charge = preset ? preset.charge : 0;
     var molecule = preset ? (preset.formula + " " + presetDisplayName(preset)).trim() : "custom molecule";
     var modeFile = base + "-" + modeTag(mode) + ".png";
     var figurePack = {
@@ -149,10 +150,19 @@
       generatedAt: new Date().toISOString(),
       method: method,
       basis: basis,
-      charge: preset ? preset.charge : 0,
+      charge: charge,
       multiplicity: result.mult,
       source: "browser"
     };
+    var virial = scf.ET ? -(scf.EVne + scf.EJ + scf.EK + scf.Enuc) / scf.ET : null;
+    var s2Exact = scf.S2exact != null ? scf.S2exact : null;
+    var checklist = {
+      scfConverged: scf.converged !== false,
+      virialNearTwo: virial != null ? Math.abs(virial - 2) < 0.2 : false,
+      spinConsistent: !scf.uhf || s2Exact == null || scf.S2 == null ? true : Math.abs(scf.S2 - s2Exact) < 0.35,
+      hasRequestKey: !!(manifest && manifest.requestKey)
+    };
+    manifest.validityChecklist = checklist;
     var reportMd = [
       "# Journal-ready report",
       "",
@@ -161,13 +171,21 @@
       "## System",
       "- Molecule: " + molecule,
       "- Method/Basis: " + method + "/" + basis,
-      "- Charge/Multiplicity: " + (preset ? preset.charge : 0) + " / " + result.mult,
+      "- Charge/Multiplicity: " + charge + " / " + result.mult,
       "",
       "## Key electronic results",
       "- SCF total energy: " + scf.E.toFixed(8) + " Ha",
       "- Iterations: " + scf.iterations,
       "- HOMO energy: " + scf.eps[scf.nocc - 1].toFixed(6) + " Ha",
       "- LUMO energy: " + scf.eps[scf.nocc].toFixed(6) + " Ha",
+      "",
+      "## Validity checklist",
+      "- [" + (checklist.scfConverged ? "x" : " ") + "] SCF converged.",
+      "- [" + (checklist.virialNearTwo ? "x" : " ") + "] Virial ratio near 2 (current: " + (virial != null ? virial.toFixed(3) : "n/a") + ").",
+      "- [" + (checklist.spinConsistent ? "x" : " ") + "] Spin consistency check passed" +
+        (scf.uhf && s2Exact != null ? " (S2=" + scf.S2.toFixed(3) + ", exact=" + s2Exact.toFixed(3) + ")." : "."),
+      "- [" + (checklist.hasRequestKey ? "x" : " ") + "] Reproducibility request key present.",
+      "- [ ] External benchmark/reference attached manually.",
       "",
       "## Figure pack",
       "- " + modeFile + " (current field snapshot)",

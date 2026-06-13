@@ -425,6 +425,15 @@ function runAsyncChecks() {
   var bridgeJson = App.crossBridge.parseResult(
     "{\"total_energy\":-40.1234,\"converged\":false,\"homo_lumo_gap\":5.2}"
   );
+  var bridgePy = App.crossBridge.parseResult(
+    "converged SCF energy = -75.983948637\na1 HOMO = -0.278 Ha  b1 LUMO = 0.114 Ha"
+  );
+  var bridgeQchem = App.crossBridge.parseResult(
+    "SCF converged\nTotal energy in the final basis set = -76.026760"
+  );
+  var bridgeOrca = App.crossBridge.parseResult(
+    "FINAL SINGLE POINT ENERGY     -75.123456\nHOMO-LUMO GAP [eV] : 6.540\nRabi splitting (cm-1) = 806.554"
+  );
   check("bridge template", /gto\.M/.test(bridgeTpl) && /SCF_ENERGY_HA/.test(bridgeTpl),
     "pyscf template contains core markers");
   check("bridge parser text", bridgeText && bridgeText.energyHa != null &&
@@ -435,6 +444,15 @@ function runAsyncChecks() {
     Math.abs(bridgeJson.energyHa - (-40.1234)) < 1e-9 && bridgeJson.converged === false &&
     Math.abs(bridgeJson.gapEv - 5.2) < 1e-9,
   "json parser extracts metrics");
+  check("bridge parser pyscf", bridgePy && Math.abs(bridgePy.energyHa - (-75.983948637)) < 1e-12 &&
+    bridgePy.converged === true && bridgePy.gapEv > 10,
+  "pyscf-style text is parsed");
+  check("bridge parser qchem", bridgeQchem && Math.abs(bridgeQchem.energyHa - (-76.026760)) < 1e-9 &&
+    bridgeQchem.converged === true,
+  "qchem-style energy line is parsed");
+  check("bridge parser orca", bridgeOrca && Math.abs(bridgeOrca.energyHa - (-75.123456)) < 1e-9 &&
+    Math.abs(bridgeOrca.gapEv - 6.54) < 1e-9 && Math.abs(bridgeOrca.splitEv - 0.1) < 5e-4,
+  "orca-style output and cm^-1 conversion are parsed");
 
   require("../js/exporter.js");
   var repRes = App.engine.compute(cases[0].xyz, 0);
@@ -443,10 +461,12 @@ function runAsyncChecks() {
     { requestKey: "abc123", source: "worker" }, "h2"
   );
   check("report pack", /Journal-ready report/.test(repPack.reportMd) &&
-    /Methods appendix/.test(repPack.methodsMd) && repPack.figurePack.figures.length >= 3,
+    /Methods appendix/.test(repPack.methodsMd) && /Validity checklist/.test(repPack.reportMd) &&
+    repPack.figurePack.figures.length >= 3,
   "report/methods/figure-pack artifacts are generated");
   check("report manifest", repPack.manifest.requestKey === "abc123" &&
-    repPack.manifest.source === "worker", "manifest keeps provenance metadata");
+    repPack.manifest.source === "worker" && !!repPack.manifest.validityChecklist,
+  "manifest keeps provenance and validity checklist");
 
   // Async Boys localization should return the same output shape as the sync path.
   var wbAsync = App.engine.compute(cases[2].xyz, 0);
