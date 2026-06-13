@@ -82,6 +82,12 @@
         getCanvasGl: function () { return $("gl"); },
         ensurePrep3d: ensurePrep3d
       });
+      if (App.cavitySandbox && App.cavitySandbox.init) {
+        App.cavitySandbox.init({
+          getResult: function () { return state.result; },
+          getPreset: function () { return state.preset; }
+        });
+      }
       ["btnPng", "btnCube", "btnJson"].forEach(function (id) {
         $(id).addEventListener("click", function () {
           if (!state.result || state.busy) return;

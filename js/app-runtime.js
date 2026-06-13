@@ -72,6 +72,7 @@
       renderBudget();
       renderFacts();
       renderEnergyCard();
+      if (App.cavitySandbox && App.cavitySandbox.refresh) App.cavitySandbox.refresh();
       if (state.view === "3d") ensureVolume();
       updateNote();
     }

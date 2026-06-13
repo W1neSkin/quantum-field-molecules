@@ -378,6 +378,7 @@ try {
 function runAsyncChecks() {
   require("../js/client.js");
   require("../js/provenance.js");
+  require("../js/cavity-sandbox.js");
 
   // cacheKey must be insensitive to harmless spacing changes.
   var k1 = App.compute.cacheKey("H 0 0 0\nH 0 0 0.7408", 0, 0, "STO-3G");
@@ -391,6 +392,14 @@ function runAsyncChecks() {
   check("provenance manifest", pMeta && pMeta.schema === "qfm-provenance-v1" &&
     pMeta.requestKey === k1 && pMeta.testReference === "test/selfcheck.js",
   "source = " + (pMeta ? pMeta.source : "n/a"));
+
+  // Toy cavity model sanity: on resonance splitting is 2g; perpendicular is weaker.
+  var cavPar = App.cavitySandbox.solve(8, 8, 0.20, "parallel");
+  var cavPerp = App.cavitySandbox.solve(8, 8, 0.20, "perp");
+  check("cavity split resonance", Math.abs(cavPar.split - 0.40) < 1e-9,
+    "split = " + cavPar.split.toFixed(3) + " eV (expected 0.400)");
+  check("cavity polarization", cavPerp.split < cavPar.split,
+    "split_perp = " + cavPerp.split.toFixed(3) + " < split_parallel = " + cavPar.split.toFixed(3));
 
   // Async Boys localization should return the same output shape as the sync path.
   var wbAsync = App.engine.compute(cases[2].xyz, 0);

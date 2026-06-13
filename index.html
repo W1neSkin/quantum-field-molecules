@@ -161,6 +161,38 @@
       </div>
     </section>
     </div>
+
+    <section class="card" id="cavityCard" style="margin-top:16px">
+      <header>
+        <span data-i18n="cavity.title"></span>
+        <span class="small faint" data-i18n="cavity.sub"></span>
+      </header>
+      <div class="body">
+        <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px">
+          <label class="small muted">
+            <span data-i18n="cavity.wc"></span>
+            <input id="cavityWc" type="range" min="0.5" max="15" step="0.05" value="8">
+            <span id="cavityWcVal" class="small sec"></span>
+          </label>
+          <label class="small muted">
+            <span data-i18n="cavity.g"></span>
+            <input id="cavityG" type="range" min="0.00" max="1.50" step="0.01" value="0.20">
+            <span id="cavityGVal" class="small sec"></span>
+          </label>
+          <label class="small muted">
+            <span data-i18n="cavity.pol"></span>
+            <select id="cavityPol">
+              <option value="parallel" data-i18n="cavity.pol.parallel"></option>
+              <option value="perp" data-i18n="cavity.pol.perp"></option>
+            </select>
+          </label>
+        </div>
+        <p id="cavitySummary" class="small sec" style="margin-top:8px"></p>
+        <svg id="cavitySpectrum" style="width:100%;height:auto;display:block;margin-top:8px"></svg>
+        <svg id="cavityPes" style="width:100%;height:auto;display:block;margin-top:8px"></svg>
+        <p id="cavityNote" class="small faint" style="margin-top:6px"></p>
+      </div>
+    </section>
     </div>
 
     <aside class="rail">
@@ -338,6 +370,7 @@ H 0 -0.7572 -0.4692</textarea>
 <script src="js/view3d.js"></script>
 <script src="js/vib.js"></script>
 <script src="js/energy.js"></script>
+<script src="js/cavity-sandbox.js"></script>
 <script src="js/irchart.js"></script>
 <script src="js/scan.js"></script>
 <script src="js/molevels.js"></script>

@@ -79,6 +79,7 @@
           : t("vib.hint");
       }
       App.scanCtl.refresh();
+      if (App.cavitySandbox && App.cavitySandbox.refresh) App.cavitySandbox.refresh();
     }
 
     // charts and canvases re-painted with the new palette on a theme switch
@@ -91,6 +92,7 @@
       renderLevels();
       renderVib();
       App.scanCtl.refresh();
+      if (App.cavitySandbox && App.cavitySandbox.refresh) App.cavitySandbox.refresh();
     }
 
     function initOnboarding() {
