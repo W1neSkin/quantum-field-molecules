@@ -120,6 +120,7 @@
       $("mulliken").innerHTML = html;
       renderProvenance();
       renderQualityChecks();
+      renderUncertainty();
       renderBenchmark();
     }
 
@@ -161,6 +162,10 @@
 
     function renderBenchmark() {
       if (App.benchmark && App.benchmark.render) App.benchmark.render(state, t, $);
+    }
+
+    function renderUncertainty() {
+      if (App.uncertainty && App.uncertainty.render) App.uncertainty.render(state, t, $);
     }
 
     function renderFacts() {

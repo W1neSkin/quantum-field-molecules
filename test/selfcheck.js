@@ -382,6 +382,7 @@ function runAsyncChecks() {
   require("../js/scaling-lab.js");
   require("../js/cross-bridge.js");
   require("../js/benchmark.js");
+  require("../js/uncertainty.js");
 
   // cacheKey must be insensitive to harmless spacing changes.
   var k1 = App.compute.cacheKey("H 0 0 0\nH 0 0 0.7408", 0, 0, "STO-3G");
@@ -425,6 +426,21 @@ function runAsyncChecks() {
     "6-31G benchmark blocked as expected");
   check("benchmark missing ref", bNone && !bNone.available && bNone.reason === "noref",
     "unsupported preset returns noref");
+
+  var uLow = App.uncertainty.evaluate({
+    basisName: "6-31G*",
+    scf: { converged: true, ET: 1, EVne: -2, EJ: 0, EK: 0, Enuc: 0, uhf: false },
+    props: { dipole: { debye: 1.00 } }
+  }, { exp: { dipole: 1.00 } }, { requestKey: "rk" });
+  var uHigh = App.uncertainty.evaluate({
+    basisName: "STO-3G",
+    scf: { converged: false, ET: 1, EVne: -1, EJ: 0, EK: 0, Enuc: 0, uhf: true, S2: 2.0, S2exact: 0.75 },
+    props: { dipole: { debye: 3.0 } }
+  }, { exp: { dipole: 1.0 } }, null);
+  check("uncertainty low", uLow && uLow.level === "low" && uLow.score <= 1,
+    "low-risk mock gets low uncertainty");
+  check("uncertainty high", uHigh && uHigh.level === "high" && uHigh.score >= 6,
+    "high-risk mock gets high uncertainty");
 
   var bridgeTpl = App.crossBridge.makeTemplate("pyscf", {
     atoms: [{ sym: "H", xyz: [0, 0, 0] }, { sym: "H", xyz: [0, 0, 0.7414] }],
@@ -473,11 +489,13 @@ function runAsyncChecks() {
   );
   check("report pack", /Journal-ready report/.test(repPack.reportMd) &&
     /Methods appendix/.test(repPack.methodsMd) && /Validity checklist/.test(repPack.reportMd) &&
+    /Uncertainty hint/.test(repPack.reportMd) &&
     repPack.figurePack.figures.length >= 3,
   "report/methods/figure-pack artifacts are generated");
   check("report manifest", repPack.manifest.requestKey === "abc123" &&
-    repPack.manifest.source === "worker" && !!repPack.manifest.validityChecklist,
-  "manifest keeps provenance and validity checklist");
+    repPack.manifest.source === "worker" && !!repPack.manifest.validityChecklist &&
+    !!repPack.manifest.uncertainty,
+  "manifest keeps provenance, validity checklist and uncertainty");
 
   // Async Boys localization should return the same output shape as the sync path.
   var wbAsync = App.engine.compute(cases[2].xyz, 0);

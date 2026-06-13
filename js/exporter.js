@@ -162,7 +162,18 @@
       spinConsistent: !scf.uhf || s2Exact == null || scf.S2 == null ? true : Math.abs(scf.S2 - s2Exact) < 0.35,
       hasRequestKey: !!(manifest && manifest.requestKey)
     };
+    var uncertainty = App.uncertainty && App.uncertainty.evaluate
+      ? App.uncertainty.evaluate(result, preset, manifest)
+      : null;
     manifest.validityChecklist = checklist;
+    if (uncertainty) {
+      manifest.uncertainty = {
+        level: uncertainty.level,
+        score: uncertainty.score,
+        confidence: uncertainty.confidence,
+        reasons: uncertainty.reasons
+      };
+    }
     var reportMd = [
       "# Journal-ready report",
       "",
@@ -186,6 +197,14 @@
         (scf.uhf && s2Exact != null ? " (S2=" + scf.S2.toFixed(3) + ", exact=" + s2Exact.toFixed(3) + ")." : "."),
       "- [" + (checklist.hasRequestKey ? "x" : " ") + "] Reproducibility request key present.",
       "- [ ] External benchmark/reference attached manually.",
+      "",
+      "## Uncertainty hint",
+      uncertainty
+        ? ("- Level: " + uncertainty.level + " (score " + uncertainty.score + "/8, confidence " + Math.round(uncertainty.confidence * 100) + "%).")
+        : "- n/a",
+      uncertainty && uncertainty.reasons && uncertainty.reasons.length
+        ? ("- Drivers: " + uncertainty.reasons.join(", "))
+        : "- Drivers: none detected",
       "",
       "## Figure pack",
       "- " + modeFile + " (current field snapshot)",
