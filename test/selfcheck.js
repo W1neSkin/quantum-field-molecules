@@ -379,6 +379,7 @@ function runAsyncChecks() {
   require("../js/client.js");
   require("../js/provenance.js");
   require("../js/cavity-sandbox.js");
+  require("../js/scaling-lab.js");
 
   // cacheKey must be insensitive to harmless spacing changes.
   var k1 = App.compute.cacheKey("H 0 0 0\nH 0 0 0.7408", 0, 0, "STO-3G");
@@ -400,6 +401,18 @@ function runAsyncChecks() {
     "split = " + cavPar.split.toFixed(3) + " eV (expected 0.400)");
   check("cavity polarization", cavPerp.split < cavPar.split,
     "split_perp = " + cavPerp.split.toFixed(3) + " < split_parallel = " + cavPar.split.toFixed(3));
+
+  var aScale = App.scalingLab.predictAlpha(6, 3, 10, 4);
+  var rScale = App.scalingLab.predictRvdw(128, 1, 1, 1 / 7);
+  var spanScale = App.scalingLab.sizeSpanAngstrom({
+    atoms: [{ xyz: [0, 0, 0] }, { xyz: [App.engine.ANGSTROM_TO_BOHR, 0, 0] }]
+  });
+  check("scaling alpha power", Math.abs(aScale - 160) < 1e-9,
+    "alpha(6A) = " + aScale.toFixed(1) + " (expected 160)");
+  check("scaling rvdw power", Math.abs(rScale - 2) < 1e-9,
+    "R(128) = " + rScale.toFixed(3) + " (expected 2.000)");
+  check("scaling span size", Math.abs(spanScale - 1) < 1e-9,
+    "span = " + spanScale.toFixed(3) + " A (expected 1.000)");
 
   // Async Boys localization should return the same output shape as the sync path.
   var wbAsync = App.engine.compute(cases[2].xyz, 0);

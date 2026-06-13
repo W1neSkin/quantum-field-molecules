@@ -88,6 +88,12 @@
           getPreset: function () { return state.preset; }
         });
       }
+      if (App.scalingLab && App.scalingLab.init) {
+        App.scalingLab.init({
+          getResult: function () { return state.result; },
+          getPreset: function () { return state.preset; }
+        });
+      }
       ["btnPng", "btnCube", "btnJson"].forEach(function (id) {
         $(id).addEventListener("click", function () {
           if (!state.result || state.busy) return;

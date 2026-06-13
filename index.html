@@ -193,6 +193,36 @@
         <p id="cavityNote" class="small faint" style="margin-top:6px"></p>
       </div>
     </section>
+
+    <section class="card" id="scalingCard" style="margin-top:16px">
+      <header>
+        <span data-i18n="scale.title"></span>
+        <span class="small faint" data-i18n="scale.sub"></span>
+      </header>
+      <div class="body">
+        <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px">
+          <label class="small muted">
+            <span data-i18n="scale.L"></span>
+            <input id="scaleL" type="range" min="0.8" max="10.0" step="0.05" value="3.0">
+            <span id="scaleLVal" class="small sec"></span>
+          </label>
+          <label class="small muted">
+            <span data-i18n="scale.A0"></span>
+            <input id="scaleA0" type="range" min="2" max="40" step="0.2" value="10.0">
+            <span id="scaleA0Val" class="small sec"></span>
+          </label>
+          <label class="small muted">
+            <span data-i18n="scale.R0"></span>
+            <input id="scaleR0" type="range" min="1.0" max="3.2" step="0.02" value="1.9">
+            <span id="scaleR0Val" class="small sec"></span>
+          </label>
+        </div>
+        <p id="scaleSummary" class="small sec" style="margin-top:8px"></p>
+        <svg id="scaleAlpha" style="width:100%;height:auto;display:block;margin-top:8px"></svg>
+        <svg id="scaleRvdw" style="width:100%;height:auto;display:block;margin-top:8px"></svg>
+        <p id="scaleNote" class="small faint" style="margin-top:6px"></p>
+      </div>
+    </section>
     </div>
 
     <aside class="rail">
@@ -371,6 +401,7 @@ H 0 -0.7572 -0.4692</textarea>
 <script src="js/vib.js"></script>
 <script src="js/energy.js"></script>
 <script src="js/cavity-sandbox.js"></script>
+<script src="js/scaling-lab.js"></script>
 <script src="js/irchart.js"></script>
 <script src="js/scan.js"></script>
 <script src="js/molevels.js"></script>
