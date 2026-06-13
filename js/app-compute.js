@@ -12,6 +12,17 @@
     var renderAll = ctx.renderAll;
     var renderVib = ctx.renderVib;
     var HA_TO_EV = ctx.haToEv;
+    var MAP_PREP_TIMEOUT_MS = 6000;
+
+    function showError(err, statusKey) {
+      setStatus(t(statusKey || "status.error"), "error");
+      var box = $("errorBox");
+      if (box) {
+        box.textContent = (err && err.message) ? err.message : String(err || "Unknown error");
+        box.style.display = "";
+      }
+      setBusy(false);
+    }
 
     function renderOkStatus() {
       var i = state.okInfo;
@@ -33,7 +44,8 @@
       state.preset = preset || null;
       state.lastXyz = xyz;
       state.lastCharge = charge;
-      $("errorBox").style.display = "none";
+      var errBox = $("errorBox");
+      if (errBox) errBox.style.display = "none";
       setStatus(t("status.compute"), "busy");
 
       App.compute.request({
@@ -55,8 +67,20 @@
           })
           : null;
         setStatus(t("status.map"), "busy");
-        App.heatmap.prepareAsync(result, null, function (prep) {
-          if (gen !== state.resultGen) return;
+        var finished = false;
+        var prepTimer = setTimeout(function () {
+          if (finished || gen !== state.resultGen) return;
+          try {
+            completeMapPrep(App.heatmap.prepare(result));
+          } catch (e) {
+            failMapPrep(new Error("Map preparation timeout: " + ((e && e.message) || e)));
+          }
+        }, MAP_PREP_TIMEOUT_MS);
+
+        function completeMapPrep(prep) {
+          if (finished || gen !== state.resultGen) return;
+          finished = true;
+          clearTimeout(prepTimer);
           state.prep = prep;
           state.prepMain = prep;
           renderAll();
@@ -71,25 +95,35 @@
           state.optInfo = null;
           renderOkStatus();
           setBusy(false);
-        });
+        }
+
+        function failMapPrep(err) {
+          if (finished || gen !== state.resultGen) return;
+          finished = true;
+          clearTimeout(prepTimer);
+          showError(err);
+        }
+
+        try {
+          App.heatmap.prepareAsync(result, null, completeMapPrep);
+        } catch (e) {
+          failMapPrep(e);
+        }
       }).catch(function (err) {
         if (gen !== state.resultGen) return;
         if (App.compute.isCancelledError && App.compute.isCancelledError(err)) {
           setBusy(false);
           return;
         }
-        setStatus(t("status.error"), "error");
-        var box = $("errorBox");
-        box.textContent = err.message;
-        box.style.display = "";
-        setBusy(false);
+        showError(err);
       });
     }
 
     function runVib() {
       if (!state.result || state.busy) return;
       setBusy(true);
-      $("errorBox").style.display = "none";
+      var errBox = $("errorBox");
+      if (errBox) errBox.style.display = "none";
       var vs = $("vibStatus");
       App.compute.requestVib({
         xyz: state.lastXyz, charge: state.lastCharge,
@@ -114,7 +148,8 @@
     function optimizeGeometry() {
       if (!state.result || state.busy) return;
       setBusy(true);
-      $("errorBox").style.display = "none";
+      var errBox = $("errorBox");
+      if (errBox) errBox.style.display = "none";
       setStatus(t("status.optimizing"), "busy");
       var charge = state.lastCharge;
       App.compute.requestOpt({
@@ -132,11 +167,7 @@
         state.optInfo = { dE: opt.E - opt.E0, iters: opt.iters, converged: opt.converged };
         loadMolecule(opt.xyz, charge, state.preset);
       }).catch(function (err) {
-        setBusy(false);
-        setStatus(t("status.optfail"), "error");
-        var box = $("errorBox");
-        box.textContent = err.message;
-        box.style.display = "";
+        showError(err, "status.optfail");
       });
     }
 

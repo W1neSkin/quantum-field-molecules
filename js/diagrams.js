@@ -11,7 +11,7 @@
     return e;
   }
   function txt(parent, x, y, s, fill, anchor, size) {
-    var t = el("text", { x: x, y: y, "font-size": size || 10, fill: fill, "text-anchor": anchor || "start" }, parent);
+    var t = el("text", { x: x, y: y, "font-size": size || 9, fill: fill, "text-anchor": anchor || "start" }, parent);
     t.textContent = s;
     return t;
   }
@@ -33,29 +33,29 @@
 
   function renderExchange(svg) {
     while (svg.firstChild) svg.removeChild(svg.firstChild);
-    svg.setAttribute("viewBox", "0 0 220 170");
+    svg.setAttribute("viewBox", "0 0 240 190");
     var t = App.i18n.t, C = App.theme.color;
     var photon = C("curve-calc");
     var line = C("text-2"), faint = C("chart-grid"), text3 = C("chart-axis");
 
-    el("line", { x1: 16, y1: 150, x2: 16, y2: 32, stroke: faint }, svg);
-    el("polygon", { points: "12,34 20,34 16,24", fill: faint }, svg);
-    txt(svg, 13, 18, "t", text3);
+    el("line", { x1: 20, y1: 166, x2: 20, y2: 38, stroke: faint }, svg);
+    el("polygon", { points: "16,40 24,40 20,30", fill: faint }, svg);
+    txt(svg, 17, 22, "t", text3);
 
-    el("line", { x1: 62, y1: 152, x2: 62, y2: 22, stroke: line, "stroke-width": 1.6 }, svg);
-    el("line", { x1: 168, y1: 152, x2: 168, y2: 22, stroke: line, "stroke-width": 1.6 }, svg);
-    arrowUp(svg, 62, 48, line); arrowUp(svg, 168, 48, line);
-    arrowUp(svg, 62, 130, line); arrowUp(svg, 168, 130, line);
+    el("line", { x1: 70, y1: 168, x2: 70, y2: 30, stroke: line, "stroke-width": 1.6 }, svg);
+    el("line", { x1: 190, y1: 168, x2: 190, y2: 30, stroke: line, "stroke-width": 1.6 }, svg);
+    arrowUp(svg, 70, 56, line); arrowUp(svg, 190, 56, line);
+    arrowUp(svg, 70, 140, line); arrowUp(svg, 190, 140, line);
 
-    el("path", { d: wavy(62, 87, 168, 87, 4, 5), fill: "none", stroke: photon, "stroke-width": 1.5 }, svg);
-    el("circle", { cx: 62, cy: 87, r: 2.5, fill: line }, svg);
-    el("circle", { cx: 168, cy: 87, r: 2.5, fill: line }, svg);
-    txt(svg, 115, 76, "γ*", photon, "middle", 11);
+    el("path", { d: wavy(70, 98, 190, 98, 4, 5), fill: "none", stroke: photon, "stroke-width": 1.5 }, svg);
+    el("circle", { cx: 70, cy: 98, r: 2.5, fill: line }, svg);
+    el("circle", { cx: 190, cy: 98, r: 2.5, fill: line }, svg);
+    txt(svg, 130, 86, "γ*", photon, "middle", 10);
 
-    txt(svg, 62, 166, t("ex.electron"), line, "middle", 11);
-    txt(svg, 168, 166, t("ex.nucleus"), line, "middle", 11);
-    txt(svg, 62, 14, t("ex.electron"), line, "middle", 11);
-    txt(svg, 168, 14, t("ex.nucleus"), line, "middle", 11);
+    txt(svg, 70, 184, t("ex.electron"), line, "middle", 9);
+    txt(svg, 190, 184, t("ex.nucleus"), line, "middle", 9);
+    txt(svg, 70, 20, t("ex.electron"), line, "middle", 9);
+    txt(svg, 190, 20, t("ex.nucleus"), line, "middle", 9);
   }
 
   // Numbers of pairwise photon-exchange channels in the molecule.

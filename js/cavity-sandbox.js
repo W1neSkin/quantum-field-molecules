@@ -61,21 +61,43 @@
     if (dash) attrs["stroke-dasharray"] = dash;
     el("path", attrs, svg);
   }
-  function label(svg, x, y, s, c, anchor) {
-    var t = el("text", { x: x, y: y, "font-size": 9, fill: c, "text-anchor": anchor || "start" }, svg);
+  function label(svg, x, y, s, c, anchor, cls) {
+    var t = el("text", {
+      x: x, y: y, fill: c,
+      "text-anchor": anchor || "start",
+      "class": cls || "chart-label"
+    }, svg);
     t.textContent = s;
+  }
+  function shortLegend(s, maxChars) {
+    var v = String(s || "");
+    if (v.length <= maxChars) return v;
+    return v.slice(0, Math.max(1, maxChars - 1)).trim() + "…";
+  }
+  function legendLine(svg, x, y, color, dash) {
+    var attrs = { x1: x, y1: y, x2: x + 14, y2: y, stroke: color, "stroke-width": 1.8 };
+    if (dash) attrs["stroke-dasharray"] = dash;
+    el("line", attrs, svg);
   }
   function colors() {
     var C = App.theme && App.theme.color ? App.theme.color : null;
-    return { axis: C ? C("chart-axis") : "#9aa1ab", grid: C ? C("chart-grid") : "#6c737d", text: C ? C("text-2") : "#b9c0ca",
-      calc: C ? C("curve-calc") : "#e3a153", exp: C ? C("curve-exp") : "#6aa0dc", fci: C ? C("curve-fci") : "#7fbf7f" };
+    return {
+      axis: C ? C("chart-axis") : "#9aa1ab",
+      grid: C ? C("chart-grid") : "#6c737d",
+      text: C ? C("text-2") : "#b9c0ca",
+      calc: C ? C("curve-calc") : "#e3a153",
+      exp: C ? C("curve-exp") : "#6aa0dc",
+      fci: C ? C("curve-fci") : "#7fbf7f",
+      surface: C ? C("surface") : "#181818",
+      stroke2: C ? C("stroke-2") : "rgba(255,255,255,0.12)"
+    };
   }
   function drawCrossing(data, Eex) {
     var svg = $("cavitySpectrum");
     if (!svg) return;
     clear(svg);
-    svg.setAttribute("viewBox", "0 0 340 190");
-    var c = colors(), t = App.i18n.t, W = 340, H = 190, L = 40, R = 12, T = 10, B = 26;
+    svg.setAttribute("viewBox", "0 0 360 200");
+    var c = colors(), t = App.i18n.t, W = 360, H = 200, L = 42, R = 14, T = 14, B = 30;
     var yMin = Math.min.apply(null, data.lp.concat(data.exc, data.cav)) - 0.3;
     var yMax = Math.max.apply(null, data.up.concat(data.exc, data.cav)) + 0.3;
     var sx = function (x) { return L + (x - data.wc[0]) / (data.wc[data.wc.length - 1] - data.wc[0]) * (W - L - R); };
@@ -91,20 +113,36 @@
     el("line", { x1: sx(S.wc), y1: T, x2: sx(S.wc), y2: H - B, stroke: c.grid, "stroke-dasharray": "2 2" }, svg);
     el("circle", { cx: sx(S.wc), cy: sy(s.minus), r: 3.2, fill: c.calc }, svg);
     el("circle", { cx: sx(S.wc), cy: sy(s.plus), r: 3.2, fill: c.fci }, svg);
-    label(svg, W - R, H - 4, t("cavity.axis.wc"), c.text, "end");
-    label(svg, 6, T + 3, t("cavity.axis.E"), c.text);
-    label(svg, L + 3, T + 10, t("cavity.legend.exc"), c.exp);
-    label(svg, L + 3, T + 21, t("cavity.legend.cav"), c.text);
-    label(svg, L + 128, T + 10, t("cavity.legend.lp"), c.calc);
-    label(svg, L + 128, T + 21, t("cavity.legend.up"), c.fci);
+    label(svg, W - R, H - 4, t("cavity.axis.wc"), c.text, "end", "chart-label axis-label");
+    label(svg, 6, T + 4, t("cavity.axis.E"), c.text, "start", "chart-label axis-label");
+    var legendItems = [
+      { label: shortLegend(t("cavity.legend.exc"), 30), color: c.exp, dash: "4 3" },
+      { label: shortLegend(t("cavity.legend.cav"), 30), color: c.text, dash: "4 3" },
+      { label: shortLegend(t("cavity.legend.lp"), 30), color: c.calc, dash: null },
+      { label: shortLegend(t("cavity.legend.up"), 30), color: c.fci, dash: null }
+    ];
+    var legendX = L + 4;
+    var legendY = T + 4;
+    var legendH = 6 + legendItems.length * 12;
+    el("rect", {
+      x: legendX, y: legendY, width: 198, height: legendH,
+      rx: 4, ry: 4,
+      fill: c.surface, opacity: 0.95,
+      stroke: c.stroke2
+    }, svg);
+    legendItems.forEach(function (it, i) {
+      var ly = legendY + 10 + i * 12;
+      legendLine(svg, legendX + 6, ly - 1, it.color, it.dash);
+      label(svg, legendX + 24, ly + 3, it.label, it.color, "start", "chart-label legend-label");
+    });
   }
   function drawPes(data) {
     var svg = $("cavityPes");
     if (!svg) return;
     clear(svg);
     if (!data) return;
-    svg.setAttribute("viewBox", "0 0 340 190");
-    var c = colors(), t = App.i18n.t, W = 340, H = 190, L = 40, R = 12, T = 10, B = 26;
+    svg.setAttribute("viewBox", "0 0 360 200");
+    var c = colors(), t = App.i18n.t, W = 360, H = 200, L = 42, R = 14, T = 14, B = 30;
     var yMin = Math.min.apply(null, data.bare.concat(data.lp)) - 0.3;
     var yMax = Math.max.apply(null, data.bare.concat(data.lp)) + 0.3;
     var sx = function (x) { return L + (x - data.r[0]) / (data.r[data.r.length - 1] - data.r[0]) * (W - L - R); };
@@ -113,10 +151,26 @@
     el("line", { x1: L, y1: H - B, x2: W - R, y2: H - B, stroke: c.axis }, svg);
     path(svg, data.r, data.bare, sx, sy, c.exp, "4 3");
     path(svg, data.r, data.lp, sx, sy, c.calc);
-    label(svg, W - R, H - 4, "R, Å", c.text, "end");
-    label(svg, 6, T + 3, t("cavity.axis.E"), c.text);
-    label(svg, L + 3, T + 10, t("cavity.pes.bare"), c.exp);
-    label(svg, L + 3, T + 21, t("cavity.pes.lp"), c.calc);
+    label(svg, W - R, H - 4, "R, Å", c.text, "end", "chart-label axis-label");
+    label(svg, 6, T + 4, t("cavity.axis.E"), c.text, "start", "chart-label axis-label");
+    var legendItems = [
+      { label: shortLegend(t("cavity.pes.bare"), 30), color: c.exp, dash: "4 3" },
+      { label: shortLegend(t("cavity.pes.lp"), 30), color: c.calc, dash: null }
+    ];
+    var legendX = L + 4;
+    var legendY = T + 4;
+    var legendH = 6 + legendItems.length * 12;
+    el("rect", {
+      x: legendX, y: legendY, width: 210, height: legendH,
+      rx: 4, ry: 4,
+      fill: c.surface, opacity: 0.95,
+      stroke: c.stroke2
+    }, svg);
+    legendItems.forEach(function (it, i) {
+      var ly = legendY + 10 + i * 12;
+      legendLine(svg, legendX + 6, ly - 1, it.color, it.dash);
+      label(svg, legendX + 24, ly + 3, it.label, it.color, "start", "chart-label legend-label");
+    });
   }
   function syncControlLabels() {
     if ($("cavityWcVal")) $("cavityWcVal").textContent = S.wc.toFixed(2) + " eV";

@@ -139,6 +139,9 @@ try {
   var oh = App.engine.compute("O 0 0 0\nH 0 0 0.970", 0, 2);
   check("UHF OH doublet", oh.scf.uhf && oh.scf.converged && Math.abs(oh.scf.S2 - 0.75) < 0.15,
     "E = " + oh.scf.E.toFixed(4) + ", <S2> = " + oh.scf.S2.toFixed(3));
+  var no = App.engine.compute("N 0 0 0\nO 0 0 1.1508", 0, 2);
+  check("UHF NO doublet", no.scf.uhf && no.scf.converged && Math.abs(no.scf.S2 - 0.75) < 0.3,
+    "E = " + no.scf.E.toFixed(4) + ", <S2> = " + no.scf.S2.toFixed(3));
 } catch (e) {
   failed++;
   console.log("FAIL extras error:", e.message, e.stack);
@@ -426,6 +429,19 @@ function runAsyncChecks() {
     "6-31G benchmark blocked as expected");
   check("benchmark missing ref", bNone && !bNone.available && bNone.reason === "noref",
     "unsupported preset returns noref");
+  var benchSuiteCheck = new Promise(function (resolve) {
+    if (!App.benchmark || typeof App.benchmark.runSuite !== "function") {
+      check("benchmark suite", false, "runSuite missing");
+      resolve();
+      return;
+    }
+    App.benchmark.runSuite({ basis: "STO-3G" }, null, function (sum) {
+      var ok = !!(sum && sum.total >= 5 && sum.pass >= 4 && sum.fail <= 1);
+      check("benchmark suite", ok,
+        sum ? (sum.pass + "/" + sum.total + " pass") : "suite summary missing");
+      resolve();
+    });
+  });
 
   var uLow = App.uncertainty.evaluate({
     basisName: "6-31G*",
@@ -522,7 +538,9 @@ function runAsyncChecks() {
   // cancels queued jobs before they start and rejects with a tagged error.
   var pSlow = null;
   var pFast = null;
-  return locAsyncCheck.then(function () {
+  return benchSuiteCheck.then(function () {
+    return locAsyncCheck;
+  }).then(function () {
     pSlow = App.compute.request({ xyz: bz, charge: 0, mult: 0, basis: "STO-3G" });
     return new Promise(function (resolve) { setTimeout(resolve, 0); });
   }).then(function () {

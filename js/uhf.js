@@ -5,6 +5,7 @@
   "use strict";
 
   var LA;
+  var UHF_MAX_ITER = 600;
 
   function density1(C, nb, nocc) {
     var D = new Float64Array(nb * nb);
@@ -89,8 +90,9 @@
     var Da = density1(sol0.C, nb, na), Db = density1(sol0.C, nb, nbe);
     var Eold = 0, result = null;
     var dFa = [], dFb = [], dE = [];
+    var prevRms = Infinity, prevErrNorm = Infinity;
 
-    for (var iter = 1; iter <= 300; iter++) {
+    for (var iter = 1; iter <= UHF_MAX_ITER; iter++) {
       var fk = buildFocks(H, Da, Db, eri, nb);
       var Fa = fk.Fa, Fb = fk.Fb;
       var Dt = new Float64Array(nb * nb);
@@ -100,9 +102,15 @@
       var eb = diisError(fk.Fb, Db, ints.S, X, nb);
       var err = new Float64Array(2 * nb * nb);
       err.set(ea); err.set(eb, nb * nb);
+      var errNorm = 0;
+      for (var k = 0; k < err.length; k++) errNorm += err[k] * err[k];
+      if (iter > 8 && isFinite(prevErrNorm) && errNorm > prevErrNorm * 1.4) {
+        dFa.length = 0; dFb.length = 0; dE.length = 0;
+      }
+      prevErrNorm = errNorm;
       dFa.push(fk.Fa); dFb.push(fk.Fb); dE.push(err);
       if (dFa.length > 8) { dFa.shift(); dFb.shift(); dE.shift(); }
-      var nd = iter <= 3 ? 0 : dFa.length; // damped start, DIIS after
+      var nd = iter <= 5 ? 0 : dFa.length; // damped start, DIIS after
       if (nd >= 2) {
         var B = [], rhs = [];
         for (i = 0; i < nd; i++) {
@@ -136,12 +144,15 @@
         rms += d * d;
       }
       rms = Math.sqrt(rms / (nb * nb));
-      if (iter <= 3) {
+      var damping = iter <= 8 ? 0.5 : 0;
+      if (iter > 8 && rms > prevRms * 0.98) damping = 0.2;
+      if (damping > 0) {
         for (i = 0; i < nb * nb; i++) {
-          Da[i] = 0.5 * Da[i] + 0.5 * DaN[i];
-          Db[i] = 0.5 * Db[i] + 0.5 * DbN[i];
+          Da[i] = damping * Da[i] + (1 - damping) * DaN[i];
+          Db[i] = damping * Db[i] + (1 - damping) * DbN[i];
         }
       } else { Da = DaN; Db = DbN; }
+      prevRms = rms;
 
       if (Math.abs(Eelec - Eold) < 1e-9 && rms < 1e-7) {
         var Ds = new Float64Array(nb * nb);

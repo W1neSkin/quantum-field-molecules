@@ -58,7 +58,7 @@
     // everything text-bearing, re-rendered on a language switch
     function rerenderText() {
       fillMolSelect();
-      App.diagrams.renderExchange($("exchange"));
+      if (App.diagrams && App.diagrams.renderExchange) App.diagrams.renderExchange($("exchange"));
       App.builder.render();
       var b = getBuilderCtl();
       if (b) b.renderInfo();
@@ -78,7 +78,7 @@
                 .map(function (m) { return m.freq.toFixed(0); }).join(", ") })
           : t("vib.hint");
       }
-      App.scanCtl.refresh();
+      if (App.scanCtl && App.scanCtl.refresh) App.scanCtl.refresh();
       if (App.cavitySandbox && App.cavitySandbox.refresh) App.cavitySandbox.refresh();
       if (App.scalingLab && App.scalingLab.refresh) App.scalingLab.refresh();
       if (App.crossBridge && App.crossBridge.refresh) App.crossBridge.refresh();
@@ -87,13 +87,13 @@
     // charts and canvases re-painted with the new palette on a theme switch
     function rerenderTheme() {
       App.heatmap.refreshTheme();
-      App.diagrams.renderExchange($("exchange"));
+      if (App.diagrams && App.diagrams.renderExchange) App.diagrams.renderExchange($("exchange"));
       App.builder.render();
       if (!state.result) return;
       drawMap();
       renderLevels();
       renderVib();
-      App.scanCtl.refresh();
+      if (App.scanCtl && App.scanCtl.refresh) App.scanCtl.refresh();
       if (App.cavitySandbox && App.cavitySandbox.refresh) App.cavitySandbox.refresh();
       if (App.scalingLab && App.scalingLab.refresh) App.scalingLab.refresh();
       if (App.crossBridge && App.crossBridge.refresh) App.crossBridge.refresh();

@@ -20,6 +20,8 @@
 <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
 <title>Molecules through Quantum Field Theory - in-browser Hartree–Fock</title>
 <meta name="description" content="Free in-browser quantum chemistry: Hartree-Fock (RHF/UHF) calculations of real molecules - electron density, molecular orbitals, ESP and ELF maps, bond orders, geometry optimization, IR spectra. No installation.">
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
+<meta name="googlebot" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
 <link rel="canonical" href="https://w1neskin.github.io/quantum-field-molecules/">
 <link rel="alternate" hreflang="en" href="https://w1neskin.github.io/quantum-field-molecules/">
 <link rel="alternate" hreflang="ru" href="https://w1neskin.github.io/quantum-field-molecules/?lang=ru">
@@ -35,13 +37,22 @@
 <meta property="og:image" content="https://w1neskin.github.io/quantum-field-molecules/assets/og.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
+<meta property="og:locale" content="en_US">
+<meta property="og:locale:alternate" content="ru_RU">
+<meta property="og:locale:alternate" content="de_DE">
+<meta property="og:locale:alternate" content="es_ES">
+<meta property="og:locale:alternate" content="zh_CN">
 <meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Molecules through Quantum Field Theory">
+<meta name="twitter:description" content="In-browser Hartree-Fock quantum chemistry with densities, orbitals, ESP/ELF, optimization and IR spectra.">
+<meta name="twitter:image" content="https://w1neskin.github.io/quantum-field-molecules/assets/og.png">
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
   "@type": "WebApplication",
   "name": "Molecules through Quantum Field Theory",
   "url": "https://w1neskin.github.io/quantum-field-molecules/",
+  "image": "https://w1neskin.github.io/quantum-field-molecules/assets/og.png",
   "description": "In-browser Hartree-Fock quantum chemistry: electron density, molecular orbitals, electrostatic potential, ELF, geometry optimization, vibrational analysis with IR spectra.",
   "applicationCategory": "EducationalApplication",
   "operatingSystem": "Any (runs in the browser)",
@@ -143,7 +154,7 @@
         </span>
       </header>
       <div class="body">
-        <svg id="energySvg" style="width:100%;height:auto;display:block"></svg>
+        <svg id="energySvg" class="chart-svg"></svg>
         <div id="scanRow" class="row" style="margin-top:8px;display:none">
           <input id="rSlider" type="range" min="0" max="0" value="0" step="1" disabled style="flex:1">
           <span id="rReadout" class="small muted" style="white-space:nowrap"></span>
@@ -155,103 +166,118 @@
     <section class="card">
       <header><span data-i18n="card.exchange"></span><button class="help-q" data-help="qft">?</button></header>
       <div class="body">
-        <div class="grid" style="grid-template-columns: minmax(0,1fr) minmax(0,1.2fr); gap:12px">
-          <svg id="exchange" style="width:100%;height:auto;display:block"></svg>
+        <div class="grid exchange-grid">
+          <svg id="exchange" class="chart-svg"></svg>
           <p id="pairs" class="small sec" style="margin:0"></p>
         </div>
       </div>
     </section>
     </div>
 
-    <section class="card" id="cavityCard" style="margin-top:16px">
+    <div id="labTabs" class="pills">
+      <button class="pill active" data-lab-target="cavityCard" data-i18n="lab.cavity" data-i18n-title="lab.cavity.tip"></button>
+      <button class="pill" data-lab-target="scalingCard" data-i18n="lab.scaling" data-i18n-title="lab.scaling.tip"></button>
+      <button class="pill" data-lab-target="bridgeCard" data-i18n="lab.bridge" data-i18n-title="lab.bridge.tip"></button>
+    </div>
+
+    <section class="card" id="cavityCard" data-lab-panel style="margin-top:0">
       <header>
         <span data-i18n="cavity.title"></span>
-        <span class="small faint" data-i18n="cavity.sub"></span>
+        <span class="row" style="gap:6px">
+          <span class="small faint" data-i18n="cavity.sub"></span>
+          <button class="help-q" data-help="cavity">?</button>
+        </span>
       </header>
       <div class="body">
         <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px">
           <label class="small muted">
             <span data-i18n="cavity.wc"></span>
-            <input id="cavityWc" type="range" min="0.5" max="15" step="0.05" value="8">
+            <input id="cavityWc" type="range" min="0.5" max="15" step="0.05" value="8" data-i18n-title="cavity.wc.tip">
             <span id="cavityWcVal" class="small sec"></span>
           </label>
           <label class="small muted">
             <span data-i18n="cavity.g"></span>
-            <input id="cavityG" type="range" min="0.00" max="1.50" step="0.01" value="0.20">
+            <input id="cavityG" type="range" min="0.00" max="1.50" step="0.01" value="0.20" data-i18n-title="cavity.g.tip">
             <span id="cavityGVal" class="small sec"></span>
           </label>
           <label class="small muted">
             <span data-i18n="cavity.pol"></span>
-            <select id="cavityPol">
+            <select id="cavityPol" data-i18n-title="cavity.pol.tip">
               <option value="parallel" data-i18n="cavity.pol.parallel"></option>
               <option value="perp" data-i18n="cavity.pol.perp"></option>
             </select>
           </label>
         </div>
         <p id="cavitySummary" class="small sec" style="margin-top:8px"></p>
-        <svg id="cavitySpectrum" style="width:100%;height:auto;display:block;margin-top:8px"></svg>
-        <svg id="cavityPes" style="width:100%;height:auto;display:block;margin-top:8px"></svg>
+        <svg id="cavitySpectrum" class="chart-svg" style="margin-top:8px"></svg>
+        <svg id="cavityPes" class="chart-svg" style="margin-top:8px"></svg>
         <p id="cavityNote" class="small faint" style="margin-top:6px"></p>
       </div>
     </section>
 
-    <section class="card" id="scalingCard" style="margin-top:16px">
+    <section class="card" id="scalingCard" data-lab-panel style="margin-top:0">
       <header>
         <span data-i18n="scale.title"></span>
-        <span class="small faint" data-i18n="scale.sub"></span>
+        <span class="row" style="gap:6px">
+          <span class="small faint" data-i18n="scale.sub"></span>
+          <button class="help-q" data-help="scaling">?</button>
+        </span>
       </header>
       <div class="body">
         <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px">
           <label class="small muted">
             <span data-i18n="scale.L"></span>
-            <input id="scaleL" type="range" min="0.8" max="10.0" step="0.05" value="3.0">
+            <input id="scaleL" type="range" min="0.8" max="10.0" step="0.05" value="3.0" data-i18n-title="scale.L.tip">
             <span id="scaleLVal" class="small sec"></span>
           </label>
           <label class="small muted">
             <span data-i18n="scale.A0"></span>
-            <input id="scaleA0" type="range" min="2" max="40" step="0.2" value="10.0">
+            <input id="scaleA0" type="range" min="2" max="40" step="0.2" value="10.0" data-i18n-title="scale.A0.tip">
             <span id="scaleA0Val" class="small sec"></span>
           </label>
           <label class="small muted">
             <span data-i18n="scale.R0"></span>
-            <input id="scaleR0" type="range" min="1.0" max="3.2" step="0.02" value="1.9">
+            <input id="scaleR0" type="range" min="1.0" max="3.2" step="0.02" value="1.9" data-i18n-title="scale.R0.tip">
             <span id="scaleR0Val" class="small sec"></span>
           </label>
         </div>
         <p id="scaleSummary" class="small sec" style="margin-top:8px"></p>
-        <svg id="scaleAlpha" style="width:100%;height:auto;display:block;margin-top:8px"></svg>
-        <svg id="scaleRvdw" style="width:100%;height:auto;display:block;margin-top:8px"></svg>
+        <svg id="scaleAlpha" class="chart-svg" style="margin-top:8px"></svg>
+        <svg id="scaleRvdw" class="chart-svg" style="margin-top:8px"></svg>
         <p id="scaleNote" class="small faint" style="margin-top:6px"></p>
       </div>
     </section>
 
-    <section class="card" id="bridgeCard" style="margin-top:16px">
+    <section class="card" id="bridgeCard" data-lab-panel style="margin-top:0">
       <header>
         <span data-i18n="bridge.title"></span>
-        <span class="small faint" data-i18n="bridge.sub"></span>
+        <span class="row" style="gap:6px">
+          <span class="small faint" data-i18n="bridge.sub"></span>
+          <button class="help-q" data-help="bridge">?</button>
+        </span>
       </header>
       <div class="body">
         <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">
           <label class="small muted">
             <span data-i18n="bridge.target"></span>
-            <select id="bridgeTarget">
+            <select id="bridgeTarget" data-i18n-title="bridge.target.tip">
               <option value="pyscf" data-i18n="bridge.target.pyscf"></option>
               <option value="qedtddft" data-i18n="bridge.target.qedtddft"></option>
               <option value="cavmd" data-i18n="bridge.target.cavmd"></option>
             </select>
           </label>
           <div class="row" style="align-items:flex-end;gap:6px">
-            <button id="bridgeGenBtn" class="btn" data-i18n="bridge.gen"></button>
-            <button id="bridgeCopyBtn" class="btn" data-i18n="bridge.copy"></button>
+            <button id="bridgeGenBtn" class="btn" data-i18n="bridge.gen" data-i18n-title="bridge.gen.tip"></button>
+            <button id="bridgeCopyBtn" class="btn" data-i18n="bridge.copy" data-i18n-title="bridge.copy.tip"></button>
           </div>
         </div>
         <p id="bridgeMsg" class="small sec" style="margin-top:8px"></p>
         <p class="small muted" style="margin:8px 0 4px" data-i18n="bridge.template"></p>
         <textarea id="bridgeTemplate" readonly style="min-height:130px"></textarea>
         <p class="small muted" style="margin:8px 0 4px" data-i18n="bridge.import"></p>
-        <textarea id="bridgeImport" data-i18n-ph="bridge.import.ph" style="min-height:90px"></textarea>
+        <textarea id="bridgeImport" data-i18n-ph="bridge.import.ph" data-i18n-title="bridge.import.tip" style="min-height:90px"></textarea>
         <div class="row" style="margin-top:8px">
-          <button id="bridgeParseBtn" class="btn" data-i18n="bridge.parse"></button>
+          <button id="bridgeParseBtn" class="btn" data-i18n="bridge.parse" data-i18n-title="bridge.parse.tip"></button>
         </div>
         <div id="bridgeParsed" class="callout small" style="margin-top:8px;white-space:pre-wrap"></div>
         <p id="bridgeNote" class="small faint" style="margin-top:6px"></p>
@@ -277,10 +303,18 @@
         </div>
       </section>
       <section class="card" id="benchCard" style="display:none">
-        <header><span data-i18n="bench.title"></span></header>
+        <header>
+          <span data-i18n="bench.title"></span>
+          <button class="help-q" data-help="bench">?</button>
+        </header>
         <div class="body">
           <div id="benchRows"></div>
           <p id="benchNote" class="small muted" style="margin-top:8px"></p>
+          <div class="row" style="margin-top:8px">
+            <button id="benchRunBtn" class="btn" data-i18n="bench.run" data-i18n-title="bench.run.tip"></button>
+            <span id="benchSuiteStatus" class="small muted"></span>
+          </div>
+          <div id="benchSuiteRows" class="small muted" style="margin-top:8px"></div>
         </div>
       </section>
     </aside>
@@ -296,11 +330,11 @@
     </header>
     <div class="body">
       <div class="row">
-        <button id="vibBtn" class="btn" data-i18n="vib.btn"></button>
+        <button id="vibBtn" class="btn" data-i18n="vib.btn" data-i18n-title="vib.btn.tip"></button>
         <span id="vibStatus" class="small muted" data-i18n="vib.hint"></span>
       </div>
       <div id="vibResult" style="display:none;margin-top:8px">
-        <svg id="irSvg" style="width:100%;height:auto;display:block"></svg>
+        <svg id="irSvg" class="chart-svg"></svg>
         <div id="vibModes" class="pills" style="margin-top:6px"></div>
         <p id="vibCaption" class="small faint" style="margin-top:6px"></p>
       </div>
@@ -455,6 +489,7 @@ H 0 -0.7572 -0.4692</textarea>
 <script src="js/exporter.js"></script>
 <script src="js/help.js"></script>
 <script src="js/tooltip.js"></script>
+<script src="js/lab-tabs.js"></script>
 <script src="js/app-map.js"></script>
 <script src="js/app-view.js"></script>
 <script src="js/app-panels.js"></script>

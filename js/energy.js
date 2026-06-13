@@ -60,10 +60,25 @@
     if (parent) parent.appendChild(e);
     return e;
   }
-  function txt(parent, x, y, s, fill, anchor) {
-    var t = el("text", { x: x, y: y, "font-size": 9, fill: fill, "text-anchor": anchor || "start" }, parent);
+  function txt(parent, x, y, s, fill, anchor, cls) {
+    var t = el("text", {
+      x: x, y: y, fill: fill,
+      "text-anchor": anchor || "start",
+      "class": cls || "chart-label"
+    }, parent);
     t.textContent = s;
     return t;
+  }
+  // Keep chart legends compact: translated strings can be very long.
+  function shortLegend(s, maxChars) {
+    var v = String(s || "");
+    if (v.length <= maxChars) return v;
+    return v.slice(0, Math.max(1, maxChars - 1)).trim() + "…";
+  }
+  function legendLine(svg, x, y, color, dash) {
+    var attrs = { x1: x, y1: y, x2: x + 14, y2: y, stroke: color, "stroke-width": 1.8 };
+    if (dash) attrs["stroke-dasharray"] = dash;
+    el("line", attrs, svg);
   }
 
   // scan: null | { Rs: [A], Eplot: [eV, minima-aligned], minIdx }, idx: current
@@ -71,7 +86,7 @@
   function render(svg, morse, scan, idx, mu) {
     while (svg.firstChild) svg.removeChild(svg.firstChild);
     var t = App.i18n.t, C = App.theme.color;
-    var W = 340, H = 190, L = 40, R = 12, T = 12, B = 28;
+    var W = 360, H = 200, L = 42, R = 14, T = 14, B = 30;
     svg.setAttribute("viewBox", "0 0 " + W + " " + H);
 
     var De = morse.De, Re = morse.Re, a = morse.a;
@@ -92,17 +107,17 @@
     for (var k = 0; k <= 4; k++) {
       var r = Rmin + rStep * k;
       el("line", { x1: sx(r), y1: H - B, x2: sx(r), y2: H - B + 4, stroke: stroke }, svg);
-      txt(svg, sx(r), H - B + 15, r.toFixed(1), text3, "middle");
+      txt(svg, sx(r), H - B + 16, r.toFixed(1), text3, "middle", "chart-label axis-label");
     }
     [0, -De / 2, -De].forEach(function (e) {
       el("line", { x1: L - 4, y1: sy(e), x2: L, y2: sy(e), stroke: stroke }, svg);
-      txt(svg, L - 7, sy(e) + 3, e.toFixed(1), text3, "end");
+      txt(svg, L - 7, sy(e) + 3, e.toFixed(1), text3, "end", "chart-label axis-label");
     });
-    txt(svg, W - R, H - 4, "R, Å", text3, "end");
-    txt(svg, 6, T + 2, t("energy.axis"), text3);
+    txt(svg, W - R, H - 4, "R, Å", text3, "end", "chart-label axis-label");
+    txt(svg, 6, T + 4, t("energy.axis"), text3, "start", "chart-label axis-label");
 
     el("line", { x1: L, y1: sy(0), x2: W - R, y2: sy(0), stroke: C("chart-grid"), "stroke-dasharray": "4 4" }, svg);
-    txt(svg, W - R - 2, sy(0) - 4, t("energy.sep"), text3, "end");
+    txt(svg, W - R - 2, sy(0) - 4, t("energy.sep"), text3, "end", "chart-label axis-label");
 
     // experimental Morse
     var d = "";
@@ -140,7 +155,7 @@
 
     if (!scan) {
       txt(svg, sx(Re) + 6, sy(-De) + 11,
-        t("energy.morse", { Re: Re.toFixed(2), De: De.toFixed(2) }), C("text-2"));
+        t("energy.morse", { Re: Re.toFixed(2), De: De.toFixed(2) }), C("text-2"), "start", "chart-label legend-label");
       return;
     }
 
@@ -156,14 +171,33 @@
       el("path", { d: dr, fill: "none", stroke: color, "stroke-width": width }, svg);
     }
     curve(scan.Eplot, cCalc, 1.8);
-    var ly = T + 10;
-    txt(svg, L + 4, ly, t("energy.leg.calc",
-      { method: scan.method || "RHF", basis: scan.basis || "STO-3G" }), cCalc); ly += 11;
+    var legendItems = [{
+      label: shortLegend(t("energy.leg.calc", {
+        method: scan.method || "RHF",
+        basis: scan.basis || "STO-3G"
+      }), 30),
+      color: cCalc,
+      dash: null
+    }];
     if (scan.Efci) {
       curve(scan.Efci, cFci, 1.6);
-      txt(svg, L + 4, ly, t("energy.leg.fci"), cFci); ly += 11;
+      legendItems.push({ label: shortLegend(t("energy.leg.fci"), 30), color: cFci, dash: null });
     }
-    txt(svg, L + 4, ly, t("energy.leg.exp"), cExp);
+    legendItems.push({ label: shortLegend(t("energy.leg.exp"), 30), color: cExp, dash: "4 3" });
+    var legendX = L + 3;
+    var legendY = T + 4;
+    var legendH = 6 + legendItems.length * 12;
+    el("rect", {
+      x: legendX, y: legendY, width: 176, height: legendH,
+      rx: 4, ry: 4,
+      fill: C("surface"), opacity: 0.95,
+      stroke: C("stroke-2")
+    }, svg);
+    legendItems.forEach(function (it, i) {
+      var ly = legendY + 10 + i * 12;
+      legendLine(svg, legendX + 6, ly - 1, it.color, it.dash);
+      txt(svg, legendX + 24, ly + 3, it.label, it.color, "start", "chart-label legend-label");
+    });
 
     // current slider position
     var cr = scan.Rs[idx], ce = scan.Eplot[idx];

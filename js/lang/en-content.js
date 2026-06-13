@@ -48,7 +48,27 @@
     },
     {
       id: "export", title: "Export and caching",
-      body: "PNG saves a snapshot of the current map or 3D view. The .cube button writes the current field (density, \u0394\u03c1, spin density or a selected orbital) as a Gaussian cube file on a 64\u00b3 grid - the standard volumetric format read by VMD, Avogadro, Multiwfn and others. JSON exports energies, orbital coefficients, charges and properties for further analysis.\n\nEvery completed calculation (including R-scans, optimizations and Hessians) is cached in the browser\u2019s IndexedDB: repeating it is instantaneous, and previously visited molecules work offline. The cache is keyed by geometry, charge, multiplicity and basis."
+      body: "PNG saves a snapshot of the current map or 3D view. The .cube button writes the current field (density, \u0394\u03c1, spin density or a selected orbital) as a Gaussian cube file on a 64\u00b3 grid - the standard volumetric format read by VMD, Avogadro, Multiwfn and others. JSON exports energies, orbital coefficients, charges, properties and the provenance manifest.\n\nThe REPORT export creates a journal-ready bundle: a markdown summary, methods appendix, figure-pack manifest and a reproducibility manifest with scientific guardrails and uncertainty hints.\n\nEvery completed calculation (including R-scans, optimizations and Hessians) is cached in the browser\u2019s IndexedDB: repeating it is instantaneous, and previously visited molecules work offline. The cache is keyed by geometry, charge, multiplicity and basis."
+    },
+    {
+      id: "provenance", title: "Provenance, guardrails and uncertainty",
+      body: "The budget panel now includes a scientific QA layer. Provenance records method, basis, source (worker/main/cache), iteration count and a reproducibility request key. This is the minimum metadata needed to replay and audit a result.\n\nGuardrails provide a fast quality gate: SCF convergence, virial behavior, spin consistency and request-key presence. The uncertainty block adds a qualitative risk level plus estimated bands for key observables (energy, dipole, HOMO-LUMO gap). Treat these as guidance for trust calibration, not strict statistical confidence intervals."
+    },
+    {
+      id: "cavity", title: "Cavity QED sandbox (toy)",
+      body: "This panel is a fast pedagogical two-level model, not a full ab initio cavity-QED solver. It estimates light-matter mixing around the molecular HOMO-LUMO gap and visualizes avoided crossing with tunable cavity frequency \u03c9c, coupling g and polarization.\n\nUse it to build intuition: on resonance, splitting scales with coupling; changing polarization weakens or strengthens effective interaction. The toy PES shift is shown for diatomic presets where a Morse-like reference exists."
+    },
+    {
+      id: "scaling", title: "Scaling-law lab (toy)",
+      body: "The scaling lab explores qualitative trends often discussed in field-informed chemistry workflows: \u03b1 ~ L^4 and RvdW ~ \u03b1^(1/7). Sliders set user-defined anchors (A0, R0), while the current molecule marker links the trend plot to your computed structure size.\n\nThese curves are for intuition and hypothesis generation, not for publishing fitted constants. Validate final numbers with domain-specific calculations."
+    },
+    {
+      id: "bridge", title: "Cross-method bridge",
+      body: "The bridge helps interoperability with external ecosystems. It generates minimal templates for PySCF, QED-TDDFT-like scaffolds and CavMD-style JSON, then parses pasted outputs to extract core metrics (energy, convergence, gap, splitting).\n\nThe parser is intentionally lightweight and robust to common text formats, but it is not a replacement for full native post-processing. Always verify externally before publication."
+    },
+    {
+      id: "bench", title: "Benchmark card and mini-suite",
+      body: "The benchmark card compares the current calculation against built-in STO-3G references for selected presets. PASS/WARN reflects whether \u0394E stays within tolerance.\n\nThe RUN SUITE button executes the same reference checks across the built-in mini-set (H2, HeH+, H2O, CH4, N2) and reports aggregate pass/fail. This is a quick regression signal, not a complete validation campaign."
     },
     {
       id: "qft", title: "The QFT viewpoint",
@@ -115,6 +135,16 @@
       body: "A classic analytic model of a diatomic bond curve: V(R) = D\u2091(1 \u2212 e^{\u2212a(R\u2212R\u2091)})\u00b2 \u2212 D\u2091. Built here from experimental spectroscopic constants (Huber & Herzberg) and used as the reference for computed E(R) curves." },
     { id: "virial", term: "Virial theorem",
       body: "For a Coulomb system at equilibrium the exact ratio \u2212V/T equals 2 (V - total potential, T - kinetic energy). The budget panel reports it as a quality check: deviations from 2 reveal basis strain or non-equilibrium geometry." },
+    { id: "provenance", term: "Provenance manifest",
+      body: "A compact reproducibility record stored with each result: method, basis, charge/multiplicity, execution source (worker/main/cache), timing/iteration metadata and a request key derived from inputs. It enables reliable replay, traceability and comparison across runs." },
+    { id: "guardrails", term: "Scientific guardrails",
+      body: "A lightweight quality gate shown in the UI: SCF convergence, virial ratio behavior, spin consistency and reproducibility-key presence. Guardrails are fast indicators that help catch obviously unreliable runs before deeper analysis." },
+    { id: "uncertainty", term: "Uncertainty hint",
+      body: "A qualitative trust score derived from method/basis and runtime diagnostics, shown as low/medium/high with confidence and estimated bands for key observables. This is not a statistical confidence interval; it is a practical warning system for model limitations." },
+    { id: "bridge", term: "Cross-method bridge",
+      body: "A minimal interoperability layer that exports starter templates for external codes and parses pasted output snippets into core metrics. Useful for fast workflow handoff; final publication analysis should still use native toolchains." },
+    { id: "benchmark", term: "Benchmark mini-suite",
+      body: "Built-in reference checks (currently STO-3G preset set) used for quick sanity regression. Passing the suite indicates stable baseline behavior but does not replace broad method validation against external datasets." },
     { id: "bo", term: "Born\u2013Oppenheimer approximation",
       body: "Nuclei are \u223c10\u2074 times heavier than electrons, so the electronic problem is solved at fixed nuclear positions, and the nuclei then move on the resulting energy surface. All maps here are electronic structure at clamped nuclei; nuclear motion enters through E(R) scans and the Hessian." },
     { id: "qft-view", term: "QFT view: fields and quanta",
@@ -123,5 +153,5 @@
       body: "The unit system of quantum chemistry: \u0127 = m\u2091 = e = 4\u03c0\u03b5\u2080 = 1. Energy is measured in hartree (1 Ha = 27.211 eV), length in bohr (0.5292 \u00c5). The interface shows energies in hartree, gaps and \u03b5 in eV, geometry in angstroms." }
   ];
 
-  d.about = "Molecules through Quantum Field Theory is an educational application that runs a genuine ab initio quantum chemistry engine - restricted and unrestricted Hartree\u2013Fock with Gaussian bases (STO-3G, 6-31G, 6-31G*), plus full CI for two-electron systems - entirely in the browser, with no server. The presentation deliberately uses the language of quantum field theory: orbitals as field modes, electrons as quanta, exchange as a consequence of anticommutation.\n\nWhat it computes: electron density, deformation and spin densities, electrostatic potential, canonical and Boys-localized orbitals, orbital energies, total-energy decomposition, Mulliken charges, Mayer bond orders, dipole moments, Koopmans ionization potentials, E(R) bond curves with experimental Morse references, geometry optimization (BFGS), harmonic vibrational analysis with IR intensities, and export to PNG, Gaussian cube and JSON.\n\nAccuracy disclaimer: Hartree\u2013Fock with small bases is a qualitative tool. Typical errors: bond lengths to a few percent, dipoles to tens of percent, harmonic frequencies +10% systematic. Comparisons with experiment shown in the interface (NIST, CCCBDB, Huber & Herzberg) are there to make these errors visible rather than to hide them.\n\nEverything is computed locally; calculations are cached in your browser (IndexedDB) and previously visited molecules work offline. The code is plain JavaScript with zero dependencies. Standard textbook reference: A. Szabo, N. S. Ostlund, \u201cModern Quantum Chemistry\u201d (Dover, 1996).";
+  d.about = "Molecules through Quantum Field Theory is an educational application that runs a genuine ab initio quantum chemistry engine - restricted and unrestricted Hartree\u2013Fock with Gaussian bases (STO-3G, 6-31G, 6-31G*), plus full CI for two-electron systems - entirely in the browser, with no server. The presentation deliberately uses the language of quantum field theory: orbitals as field modes, electrons as quanta, exchange as a consequence of anticommutation.\n\nWhat it computes: electron density, deformation and spin densities, electrostatic potential, canonical and Boys-localized orbitals, orbital energies, total-energy decomposition, Mulliken charges, Mayer bond orders, dipole moments, Koopmans ionization potentials, E(R) bond curves with experimental Morse references, geometry optimization (BFGS), harmonic vibrational analysis with IR intensities, provenance/guardrail/uncertainty metadata, cavity and scaling toy labs, cross-method bridge helpers, and export to PNG, Gaussian cube, JSON and REPORT bundles.\n\nAccuracy disclaimer: Hartree\u2013Fock with small bases is a qualitative tool. Typical errors: bond lengths to a few percent, dipoles to tens of percent, harmonic frequencies +10% systematic. Comparisons with experiment shown in the interface (NIST, CCCBDB, Huber & Herzberg) are there to make these errors visible rather than to hide them.\n\nEverything is computed locally; calculations are cached in your browser (IndexedDB) and previously visited molecules work offline. The code is plain JavaScript with zero dependencies. Standard textbook reference: A. Szabo, N. S. Ostlund, \u201cModern Quantum Chemistry\u201d (Dover, 1996).";
 })(typeof globalThis.App === "object" ? globalThis.App : (globalThis.App = {}));

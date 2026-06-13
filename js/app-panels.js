@@ -184,7 +184,9 @@
       card.style.display = show ? "" : "none";
       // exchange card takes the full row when there is no E(R) curve
       $("bottomGrid").classList.toggle("solo", !show);
-      App.scanCtl.presetLoaded(show ? state.preset : null, state.result);
+      if (App.scanCtl && App.scanCtl.presetLoaded) {
+        App.scanCtl.presetLoaded(show ? state.preset : null, state.result);
+      }
     }
 
     return {

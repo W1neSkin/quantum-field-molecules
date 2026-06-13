@@ -48,9 +48,23 @@
     if (dash) attrs["stroke-dasharray"] = dash;
     el("path", attrs, svg);
   }
-  function label(svg, x, y, s, c, anchor) {
-    var t = el("text", { x: x, y: y, "font-size": 9, fill: c, "text-anchor": anchor || "start" }, svg);
+  function label(svg, x, y, s, c, anchor, cls) {
+    var t = el("text", {
+      x: x, y: y, fill: c,
+      "text-anchor": anchor || "start",
+      "class": cls || "chart-label"
+    }, svg);
     t.textContent = s;
+  }
+  function shortLegend(s, maxChars) {
+    var v = String(s || "");
+    if (v.length <= maxChars) return v;
+    return v.slice(0, Math.max(1, maxChars - 1)).trim() + "…";
+  }
+  function legendLine(svg, x, y, color, dash) {
+    var attrs = { x1: x, y1: y, x2: x + 14, y2: y, stroke: color, "stroke-width": 1.8 };
+    if (dash) attrs["stroke-dasharray"] = dash;
+    el("line", attrs, svg);
   }
   function colors() {
     var C = App.theme && App.theme.color ? App.theme.color : null;
@@ -60,7 +74,9 @@
       text: C ? C("text-2") : "#b9c0ca",
       c1: C ? C("curve-calc") : "#e3a153",
       c2: C ? C("curve-exp") : "#6aa0dc",
-      c3: C ? C("curve-fci") : "#7fbf7f"
+      c3: C ? C("curve-fci") : "#7fbf7f",
+      surface: C ? C("surface") : "#181818",
+      stroke2: C ? C("stroke-2") : "rgba(255,255,255,0.12)"
     };
   }
 
@@ -95,9 +111,9 @@
     var svg = $("scaleAlpha");
     if (!svg) return;
     clear(svg);
-    svg.setAttribute("viewBox", "0 0 340 190");
+    svg.setAttribute("viewBox", "0 0 360 200");
     var c = colors(), t = App.i18n.t;
-    var W = 340, H = 190, L = 40, R = 12, T = 10, B = 26;
+    var W = 360, H = 200, L = 42, R = 14, T = 14, B = 30;
     var yMax = Math.max.apply(null, data.y4.concat(data.y3)) * 1.05;
     var sx = function (x) { return L + (x - 0.6) / (data.Lmax - 0.6) * (W - L - R); };
     var sy = function (y) { return T + (yMax - y) / yMax * (H - T - B); };
@@ -107,20 +123,36 @@
     path(svg, data.x, data.y3, sx, sy, c.c2, "4 3");
     el("line", { x1: sx(S.L), y1: T, x2: sx(S.L), y2: H - B, stroke: c.grid, "stroke-dasharray": "2 2" }, svg);
     if (Lmol) el("line", { x1: sx(Lmol), y1: T, x2: sx(Lmol), y2: H - B, stroke: c.c3, "stroke-dasharray": "3 2" }, svg);
-    label(svg, W - R, H - 4, t("scale.axis.L"), c.text, "end");
-    label(svg, 6, T + 3, t("scale.axis.A"), c.text);
-    label(svg, L + 3, T + 10, t("scale.legend.l4"), c.c1);
-    label(svg, L + 3, T + 21, t("scale.legend.l3"), c.c2);
-    if (Lmol) label(svg, L + 180, T + 10, t("scale.legend.mol"), c.c3);
+    label(svg, W - R, H - 4, t("scale.axis.L"), c.text, "end", "chart-label axis-label");
+    label(svg, 6, T + 4, t("scale.axis.A"), c.text, "start", "chart-label axis-label");
+    var legendItems = [
+      { label: shortLegend(t("scale.legend.l4"), 32), color: c.c1, dash: null },
+      { label: shortLegend(t("scale.legend.l3"), 32), color: c.c2, dash: "4 3" }
+    ];
+    if (Lmol) legendItems.push({ label: shortLegend(t("scale.legend.mol"), 32), color: c.c3, dash: "3 2" });
+    var legendX = L + 4;
+    var legendY = T + 4;
+    var legendH = 6 + legendItems.length * 12;
+    el("rect", {
+      x: legendX, y: legendY, width: 220, height: legendH,
+      rx: 4, ry: 4,
+      fill: c.surface, opacity: 0.95,
+      stroke: c.stroke2
+    }, svg);
+    legendItems.forEach(function (it, i) {
+      var ly = legendY + 10 + i * 12;
+      legendLine(svg, legendX + 6, ly - 1, it.color, it.dash);
+      label(svg, legendX + 24, ly + 3, it.label, it.color, "start", "chart-label legend-label");
+    });
   }
 
   function drawR(data, Acur, Amol) {
     var svg = $("scaleRvdw");
     if (!svg) return;
     clear(svg);
-    svg.setAttribute("viewBox", "0 0 340 190");
+    svg.setAttribute("viewBox", "0 0 360 200");
     var c = colors(), t = App.i18n.t;
-    var W = 340, H = 190, L = 40, R = 12, T = 10, B = 26;
+    var W = 360, H = 200, L = 42, R = 14, T = 14, B = 30;
     var yMax = Math.max.apply(null, data.y7.concat(data.y3)) * 1.05;
     var sx = function (x) { return L + (x - data.minA) / (data.maxA - data.minA) * (W - L - R); };
     var sy = function (y) { return T + (yMax - y) / yMax * (H - T - B); };
@@ -130,11 +162,27 @@
     path(svg, data.x, data.y3, sx, sy, c.c2, "4 3");
     el("line", { x1: sx(Acur), y1: T, x2: sx(Acur), y2: H - B, stroke: c.grid, "stroke-dasharray": "2 2" }, svg);
     if (Amol) el("line", { x1: sx(Amol), y1: T, x2: sx(Amol), y2: H - B, stroke: c.c3, "stroke-dasharray": "3 2" }, svg);
-    label(svg, W - R, H - 4, t("scale.axis.A"), c.text, "end");
-    label(svg, 6, T + 3, t("scale.axis.R"), c.text);
-    label(svg, L + 3, T + 10, t("scale.legend.r7"), c.c1);
-    label(svg, L + 3, T + 21, t("scale.legend.r3"), c.c2);
-    if (Amol) label(svg, L + 180, T + 10, t("scale.legend.mol"), c.c3);
+    label(svg, W - R, H - 4, t("scale.axis.A"), c.text, "end", "chart-label axis-label");
+    label(svg, 6, T + 4, t("scale.axis.R"), c.text, "start", "chart-label axis-label");
+    var legendItems = [
+      { label: shortLegend(t("scale.legend.r7"), 32), color: c.c1, dash: null },
+      { label: shortLegend(t("scale.legend.r3"), 32), color: c.c2, dash: "4 3" }
+    ];
+    if (Amol) legendItems.push({ label: shortLegend(t("scale.legend.mol"), 32), color: c.c3, dash: "3 2" });
+    var legendX = L + 4;
+    var legendY = T + 4;
+    var legendH = 6 + legendItems.length * 12;
+    el("rect", {
+      x: legendX, y: legendY, width: 220, height: legendH,
+      rx: 4, ry: 4,
+      fill: c.surface, opacity: 0.95,
+      stroke: c.stroke2
+    }, svg);
+    legendItems.forEach(function (it, i) {
+      var ly = legendY + 10 + i * 12;
+      legendLine(svg, legendX + 6, ly - 1, it.color, it.dash);
+      label(svg, legendX + 24, ly + 3, it.label, it.color, "start", "chart-label legend-label");
+    });
   }
 
   function syncControlLabels() {

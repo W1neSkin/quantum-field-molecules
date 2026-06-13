@@ -3,7 +3,7 @@
 (function (App) {
   "use strict";
   var deps = null;
-  var S = { target: "pyscf" };
+  var S = { target: "pyscf", bound: false };
   var $ = function (id) { return document.getElementById(id); };
 
   function atomsFromResult(result) {
@@ -188,6 +188,7 @@
 
   function refresh() {
     if (typeof document === "undefined") return;
+    bindUi();
     var t = App.i18n.t;
     if (!$("bridgeTemplate") || !$("bridgeMsg")) return;
     $("bridgeTemplate").value = makeTemplate(S.target, currentData());
@@ -195,11 +196,18 @@
     $("bridgeMsg").textContent = t("bridge.msg.ready");
   }
 
-  function init(opts) {
-    deps = opts || {};
-    if (typeof document === "undefined") return;
-    var target = $("bridgeTarget"), gen = $("bridgeGenBtn"), copy = $("bridgeCopyBtn"), parse = $("bridgeParseBtn");
-    if (!target || !gen || !copy || !parse) return;
+  function renderParsed() {
+    var out = $("bridgeParsed");
+    var inp = $("bridgeImport");
+    if (!out || !inp) return;
+    var p = parseResult(inp.value || "");
+    out.textContent = formatParsed(p, App.i18n.t);
+  }
+
+  function bindUi() {
+    if (typeof document === "undefined" || S.bound) return;
+    var target = $("bridgeTarget"), gen = $("bridgeGenBtn"), copy = $("bridgeCopyBtn"), parseBtn = $("bridgeParseBtn");
+    if (!target || !gen || !copy || !parseBtn) return;
     target.value = S.target;
     target.addEventListener("change", function () { S.target = target.value || "pyscf"; refresh(); });
     gen.addEventListener("click", refresh);
@@ -210,10 +218,19 @@
       try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
       $("bridgeMsg").textContent = ok ? t("bridge.msg.copied") : t("bridge.msg.copyfail");
     });
-    parse.addEventListener("click", function () {
-      var p = parseResult($("bridgeImport").value || "");
-      $("bridgeParsed").textContent = formatParsed(p, App.i18n.t);
+    // Some browser/webview environments may swallow one of the handlers.
+    // Keep both wiring paths to make parse rendering predictable.
+    parseBtn.addEventListener("click", function (e) {
+      if (e && e.preventDefault) e.preventDefault();
+      renderParsed();
     });
+    parseBtn.onclick = renderParsed;
+    S.bound = true;
+  }
+
+  function init(opts) {
+    deps = opts || {};
+    bindUi();
     refresh();
   }
 

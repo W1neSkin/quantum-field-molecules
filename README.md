@@ -9,6 +9,11 @@ IR spectra and an exchange diagram. The interface is available in five
 languages (EN/RU/DE/ES/ZH) with built-in help, a wiki-style glossary and
 dark/light themes.
 
+Recent scientific UX layers include provenance manifests, live quality
+guardrails, uncertainty hints with estimated bands, a lightweight benchmark
+card + mini-suite, a cavity-QED toy sandbox, a scaling-law toy lab, a
+cross-method bridge for external workflows and a journal-ready report export.
+
 The key point: **there is no precomputed molecule database** - the electronic
 structure is computed on the fly by a real Hartree–Fock method (RHF and UHF;
 STO-3G, 6-31G, 6-31G* basis sets) implemented in pure JavaScript. Presets are
@@ -54,6 +59,21 @@ the main thread (the UI may stutter on heavy molecules like benzene).
 - Mayer bond orders, Mulliken charges, spin populations.
 - Virial ratio −V/T as a live sanity check of the calculation.
 
+### Scientific QA and interoperability
+
+- **Provenance manifest** per result: method, basis, charge/multiplicity,
+  transport source (worker/main/cache), iteration and timing metadata, request
+  key.
+- **Live scientific guardrails** in the budget panel: SCF convergence, virial
+  behavior, spin consistency, reproducibility-key presence.
+- **Uncertainty hints**: low/medium/high risk level, confidence estimate and
+  qualitative bands for energy/dipole/HOMO-LUMO gap.
+- **Benchmark card + mini-suite**: fast STO-3G reference comparison for
+  built-in presets and a one-click multi-case regression signal.
+- **Cross-method bridge**: template export for PySCF / QED-TDDFT scaffold /
+  CavMD JSON and parser for pasted outputs (energy, convergence, gap,
+  splitting).
+
 ### Visualization
 
 - Map modes: total density, deformation Δρ (STO-3G only), electrostatic
@@ -87,7 +107,9 @@ the main thread (the UI may stutter on heavy molecules like benzene).
 - **.cube** - the current field in Gaussian cube format (opens in VMD,
   Avogadro, Multiwfn).
 - **JSON** - energies, orbitals, properties, FCI - everything for further
-  processing.
+  processing (with provenance).
+- **REPORT** - journal-ready bundle (`.md` report, methods appendix, figure
+  pack manifest, reproducibility manifest with guardrails + uncertainty).
 
 ### Interface
 
@@ -99,7 +121,8 @@ the main thread (the UI may stutter on heavy molecules like benzene).
   localized right in the worker.
 - **Help and wiki glossary**: a modal window (the "Help" button or the "?" in
   each panel header) with three tabs - a guide to the main features
-  (13 sections, including "Fields: what exists and what is drawn"), a glossary
+  (including provenance/guardrails, cavity/scaling labs, bridge, benchmark and
+  "Fields: what exists and what is drawn"), a glossary
   of ~30 terms with search (Hartree–Fock, basis set, ESP, ELF, the Laplacian,
   Koopmans, correlation, Hessian, the QFT view, etc.) and "About".
 - **Dark and light themes**: a toggle in the header, starts from
@@ -121,8 +144,9 @@ the main thread (the UI may stutter on heavy molecules like benzene).
 ## Architecture
 
 ```
-UI (app.js, heatmap.js, grid3d.js + view3d.js, molevels.js, energy.js, irchart.js, diagrams.js)
-  + i18n.js + lang/{en,ru,de,es,zh}.js (+ *-content.js), theme.js, help.js
+UI (app.js + app-*.js modules, heatmap.js, grid3d.js + view3d.js, molevels.js, energy.js, irchart.js, diagrams.js)
+  + i18n.js + lang/{en,ru,de,es,zh}.js (+ *-content.js), theme.js, help.js, tooltip.js
+  + provenance.js, benchmark.js, uncertainty.js, cavity-sandbox.js, scaling-lab.js, cross-bridge.js, exporter.js
   └─ compute client (client.js): cache + transport (+ request language)
        └─ Web Worker (worker.js) | main thread (file://)
             └─ engine: basis.js → integrals.js + eri.js → scf.js | uhf.js
@@ -180,7 +204,7 @@ npm test
 node test/selfcheck.js
 ```
 
-39 checks against literature values (excerpt):
+Selfcheck covers core scientific regressions and workflow checks (excerpt):
 
 | What | Reference | Source |
 |------|-----------|--------|
@@ -194,6 +218,10 @@ node test/selfcheck.js
 | Boys localization (H₂O) | core + 2 lone pairs + 2 bonds | density invariants |
 | H₂ optimum | R = 0.7122 Å | CCCBDB HF/STO-3G |
 | H₂ / H₂O frequencies | 5482 / 2170, 4140, 4391 cm⁻¹ | CCCBDB HF/STO-3G |
+| Provenance / guardrails / uncertainty | reproducibility + QA metadata present | internal contract |
+| Bridge parser and templates | text/JSON extraction + template markers | multi-format smoke cases |
+| Journal report bundle | report/methods/figure-pack/manifest generation | exporter integration |
+| Benchmark mini-suite | H2, HeH+, H2O, CH4, N2 pass | built-in STO-3G references |
 
 The same self-check is run automatically on every push/PR via
 `.github/workflows/selfcheck.yml`.

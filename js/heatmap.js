@@ -324,7 +324,7 @@
 
     // nuclei markers and 1 angstrom scale bar, in full canvas resolution
     var fg = App.theme ? App.theme.color("chart-fg") : "rgb(212,212,212)";
-    ctx.font = Math.round(11 * S) + "px system-ui, sans-serif";
+    ctx.font = "500 " + Math.round(11 * S) + "px \"Segoe UI\", \"Noto Sans\", Roboto, Arial, sans-serif";
     var pxPerBohr = cw / (2 * prep.halfU);
     prep.proj.forEach(function (uv, ai) {
       var x = cw / 2 + uv[0] * pxPerBohr, y = ch / 2 - uv[1] * pxPerBohr;

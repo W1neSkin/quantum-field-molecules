@@ -25,10 +25,38 @@
     var runVib = ctx.runVib;
     var syncBusyUi = ctx.syncBusyUi;
 
+    function safeRun(name, fn) {
+      try { fn(); }
+      catch (e) {
+        if (typeof console !== "undefined" && console.error) {
+          console.error("Startup step failed (" + name + "):", e);
+        }
+      }
+    }
+
+    function recoverFromFatalInit(err) {
+      if (typeof console !== "undefined" && console.error) {
+        console.error("Fatal init error:", err);
+      }
+      safeRun("fatalErrorBox", function () {
+        var box = $("errorBox");
+        if (!box) return;
+        box.textContent = "Startup error: " + ((err && err.message) || err);
+        box.style.display = "";
+      });
+      safeRun("fatalPresetRetry", function () {
+        if (state.result || state.busy) return;
+        var m = $("molSelect");
+        if (m && !m.value) m.value = "H2";
+        selectPreset((m && m.value) || "H2");
+      });
+    }
+
     function init() {
-      App.theme.init();
-      App.i18n.init();
-      createControllers();
+      try {
+        App.theme.init();
+        App.i18n.init();
+        createControllers();
 
       var langSel = $("langSelect");
       App.i18n.languages().forEach(function (l) {
@@ -40,8 +68,6 @@
       langSel.addEventListener("change", function () { App.i18n.setLang(langSel.value); });
       App.i18n.onChange(rerenderText);
       App.theme.onChange(rerenderTheme);
-      App.help.init();
-      initOnboarding();
 
       var sel = $("molSelect");
       fillMolSelect();
@@ -49,6 +75,9 @@
         if (state.busy) return;
         selectPreset(sel.value);
       });
+      // Kick off the first calculation immediately after selector wiring.
+      // If later optional init blocks throw, the user still sees data on load.
+      if (!state.result && !state.busy) selectPreset(sel.value || "H2");
       initBuilder();
 
       var bsel = $("basisSelect");
@@ -64,43 +93,53 @@
         reloadCurrent();
       });
 
-      if (App.view3d.supported() && App.view3d.init($("gl"), $("glLabels"))) {
-        $("btn3d").style.display = "";
-        $("btn3d").addEventListener("click", function () {
-          setView(state.view === "2d" ? "3d" : "2d");
-        });
-      }
-      App.scanCtl.init({ apply: applyScanGeometry });
-
-      App.exporter.init({
-        getResult: function () { return state.result; },
-        getMode: function () { return state.mode; },
-        getPreset: function () { return state.preset; },
-        getProvenance: function () { return state.provenance || null; },
-        getView: function () { return state.view; },
-        getCanvas2d: function () { return $("density"); },
-        getCanvasGl: function () { return $("gl"); },
-        ensurePrep3d: ensurePrep3d
+      safeRun("view3d", function () {
+        if (App.view3d.supported() && App.view3d.init($("gl"), $("glLabels"))) {
+          $("btn3d").style.display = "";
+          $("btn3d").addEventListener("click", function () {
+            setView(state.view === "2d" ? "3d" : "2d");
+          });
+        }
       });
-      if (App.cavitySandbox && App.cavitySandbox.init) {
+      safeRun("scanCtl", function () {
+        if (App.scanCtl && App.scanCtl.init) App.scanCtl.init({ apply: applyScanGeometry });
+      });
+
+      safeRun("exporter", function () {
+        App.exporter.init({
+          getResult: function () { return state.result; },
+          getMode: function () { return state.mode; },
+          getPreset: function () { return state.preset; },
+          getProvenance: function () { return state.provenance || null; },
+          getView: function () { return state.view; },
+          getCanvas2d: function () { return $("density"); },
+          getCanvasGl: function () { return $("gl"); },
+          ensurePrep3d: ensurePrep3d
+        });
+      });
+
+      safeRun("cavitySandbox", function () {
+        if (!App.cavitySandbox || !App.cavitySandbox.init) return;
         App.cavitySandbox.init({
           getResult: function () { return state.result; },
           getPreset: function () { return state.preset; }
         });
-      }
-      if (App.scalingLab && App.scalingLab.init) {
+      });
+      safeRun("scalingLab", function () {
+        if (!App.scalingLab || !App.scalingLab.init) return;
         App.scalingLab.init({
           getResult: function () { return state.result; },
           getPreset: function () { return state.preset; }
         });
-      }
-      if (App.crossBridge && App.crossBridge.init) {
+      });
+      safeRun("crossBridge", function () {
+        if (!App.crossBridge || !App.crossBridge.init) return;
         App.crossBridge.init({
           getResult: function () { return state.result; },
           getPreset: function () { return state.preset; },
           getProvenance: function () { return state.provenance || null; }
         });
-      }
+      });
       ["btnPng", "btnCube", "btnJson", "btnReport"].forEach(function (id) {
         $(id).addEventListener("click", function () {
           if (!state.result || state.busy) return;
@@ -131,9 +170,29 @@
       $("btnOpt").addEventListener("click", optimizeGeometry);
       $("vibBtn").addEventListener("click", runVib);
 
-      App.diagrams.renderExchange($("exchange"));
+      safeRun("help", function () { App.help.init(); });
+      safeRun("labTabs", function () {
+        if (App.labTabs && App.labTabs.init) App.labTabs.init();
+      });
+      safeRun("onboarding", initOnboarding);
+      safeRun("exchange", function () { App.diagrams.renderExchange($("exchange")); });
       syncBusyUi();
-      selectPreset("H2");
+      // Fallback: ensure startup data is present even if a prior path aborted.
+      if (!state.result && !state.busy) selectPreset($("molSelect").value || "H2");
+      // Extra startup watchdogs: if any optional init blocked first render,
+      // force the same path as user interaction (mol selector change).
+        [150, 1200].forEach(function (ms) {
+          setTimeout(function () {
+            if (state.result || state.busy) return;
+            var m = $("molSelect");
+            if (!m) { selectPreset("H2"); return; }
+            if (!m.value) m.value = "H2";
+            m.dispatchEvent(new Event("change", { bubbles: true }));
+          }, ms);
+        });
+      } catch (e) {
+        recoverFromFatalInit(e);
+      }
     }
 
     return { init: init };
