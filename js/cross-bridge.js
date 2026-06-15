@@ -186,7 +186,7 @@
     return lines.join("\n");
   }
 
-  function refresh() {
+  function refreshImpl() {
     if (typeof document === "undefined") return;
     bindUi();
     var t = App.i18n.t;
@@ -194,6 +194,12 @@
     $("bridgeTemplate").value = makeTemplate(S.target, currentData());
     $("bridgeNote").textContent = t("bridge.note");
     $("bridgeMsg").textContent = t("bridge.msg.ready");
+  }
+
+  // Optional decorative panel: never let it throw into the render pipeline.
+  function refresh() {
+    try { refreshImpl(); }
+    catch (e) { if (typeof console !== "undefined" && console.error) console.error("bridge refresh failed:", e); }
   }
 
   function renderParsed() {

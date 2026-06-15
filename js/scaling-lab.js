@@ -191,7 +191,7 @@
     if ($("scaleR0Val")) $("scaleR0Val").textContent = S.R0.toFixed(2) + " Å";
   }
 
-  function refresh() {
+  function refreshImpl() {
     if (typeof document === "undefined") return;
     syncControlLabels();
     if (!$("scaleSummary")) return;
@@ -210,6 +210,12 @@
     var aData = alphaData(Lmol);
     drawAlpha(aData, Lmol);
     drawR(rData(Math.max.apply(null, aData.y4)), Acur, Lmol ? predictAlpha(Lmol, L0, S.A0, 4) : null);
+  }
+
+  // Optional decorative panel: never let it throw into the render pipeline.
+  function refresh() {
+    try { refreshImpl(); }
+    catch (e) { if (typeof console !== "undefined" && console.error) console.error("scaling refresh failed:", e); }
   }
 
   function init(opts) {

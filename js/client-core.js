@@ -124,6 +124,13 @@
     if (restartWorker) {
       terminateWorker();
       workerBroken = false;
+      // The terminated worker can no longer answer any job it was still running.
+      // Reject every remaining (other-kind) request so its caller never hangs.
+      var stranded = pending;
+      pending = {};
+      Object.keys(stranded).forEach(function (id) {
+        stranded[id].reject(makeCancelledError(message || CANCEL_ERR));
+      });
     }
   }
 

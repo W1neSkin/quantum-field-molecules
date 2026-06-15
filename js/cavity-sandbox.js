@@ -176,14 +176,16 @@
     if ($("cavityWcVal")) $("cavityWcVal").textContent = S.wc.toFixed(2) + " eV";
     if ($("cavityGVal")) $("cavityGVal").textContent = S.g.toFixed(2) + " eV";
   }
-  function refresh() {
+  function refreshImpl() {
     if (typeof document === "undefined") return;
     syncControlLabels();
     if (!$("cavitySummary") || !$("cavityNote")) return;
     var result = deps && deps.getResult ? deps.getResult() : null;
     var preset = deps && deps.getPreset ? deps.getPreset() : null;
     var t = App.i18n.t, Eex = gapEv(result);
-    if (!isFinite(Eex)) {
+    // gapEv returns null for systems with no virtual orbital (e.g. He2);
+    // isFinite(null) is true, so guard on null explicitly before toFixed.
+    if (Eex == null || !isFinite(Eex)) {
       $("cavitySummary").textContent = t("cavity.wait");
       $("cavityNote").textContent = t("cavity.note");
       drawPes(null);
@@ -197,6 +199,12 @@
     drawPes(pes);
     $("cavityNote").textContent = pes ? t("cavity.pes.caption") : t("cavity.pes.none");
   }
+
+  // Optional decorative panel: never let it throw into the render pipeline.
+  function refresh() {
+    try { refreshImpl(); }
+    catch (e) { if (typeof console !== "undefined" && console.error) console.error("cavity refresh failed:", e); }
+  }
   function init(opts) {
     deps = opts || {};
     if (typeof document === "undefined") return;
@@ -208,5 +216,5 @@
     pol.addEventListener("change", function () { S.pol = pol.value === "perp" ? "perp" : "parallel"; refresh(); });
     refresh();
   }
-  App.cavitySandbox = { init: init, refresh: refresh, solve: solve };
+  App.cavitySandbox = { init: init, refresh: refresh, solve: solve, gapEv: gapEv };
 })(typeof globalThis.App === "object" ? globalThis.App : (globalThis.App = {}));

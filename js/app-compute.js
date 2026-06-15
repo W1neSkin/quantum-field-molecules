@@ -68,14 +68,23 @@
           : null;
         setStatus(t("status.map"), "busy");
         var finished = false;
-        var prepTimer = setTimeout(function () {
-          if (finished || gen !== state.resultGen) return;
-          try {
-            completeMapPrep(App.heatmap.prepare(result));
-          } catch (e) {
-            failMapPrep(new Error("Map preparation timeout: " + ((e && e.message) || e)));
-          }
-        }, MAP_PREP_TIMEOUT_MS);
+        var lastProgress = Date.now();
+        var prepTimer = null;
+        // Watchdog only fires if the async build truly stalls (no progress for
+        // the whole window). Otherwise we let it finish instead of racing a
+        // blocking synchronous rebuild against the still-running async one.
+        function armWatchdog() {
+          prepTimer = setTimeout(function () {
+            if (finished || gen !== state.resultGen) return;
+            if (Date.now() - lastProgress < MAP_PREP_TIMEOUT_MS) { armWatchdog(); return; }
+            try {
+              completeMapPrep(App.heatmap.prepare(result));
+            } catch (e) {
+              failMapPrep(new Error("Map preparation failed: " + ((e && e.message) || e)));
+            }
+          }, MAP_PREP_TIMEOUT_MS);
+        }
+        armWatchdog();
 
         function completeMapPrep(prep) {
           if (finished || gen !== state.resultGen) return;
@@ -105,7 +114,7 @@
         }
 
         try {
-          App.heatmap.prepareAsync(result, null, completeMapPrep);
+          App.heatmap.prepareAsync(result, function () { lastProgress = Date.now(); }, completeMapPrep);
         } catch (e) {
           failMapPrep(e);
         }
