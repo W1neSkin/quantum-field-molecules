@@ -190,11 +190,53 @@
     });
   }
 
+  // requestSearch({seed, charge, basis, targets, opts, onProgress}) -> Promise<{candidates}>
+  // Inverse design: not cached (results depend on the live target spec).
+  function requestSearch(opts) {
+    core.cancelPending(function (p) { return p.kind === "search"; }, "Superseded by a newer search request", true);
+    return new Promise(function (resolve, reject) {
+      var id = core.addPending("search", opts.onProgress, resolve, reject);
+      var w = core.getWorker();
+      if (w) {
+        w.postMessage({ id: id, type: "search", lang: App.LANG, seed: opts.seed,
+          charge: opts.charge, basis: opts.basis, targets: opts.targets, opts: opts.opts });
+        return;
+      }
+      // main-thread fallback: one candidate per tick (UI freezes during each SCF)
+      setTimeout(function () {
+        if (!core.getPending(id)) return;
+        var cands;
+        try { cands = App.finderCore.genCandidates(opts.seed, opts.opts); }
+        catch (e) { if (core.getPending(id)) { core.removePending(id); reject(e); } return; }
+        var out = [], i = 0;
+        (function step() {
+          var p = core.getPending(id);
+          if (!p) return; // cancelled
+          if (i >= cands.length) {
+            core.removePending(id);
+            resolve({ candidates: App.finderCore.rank(out, opts.targets), evaluated: out.length });
+            return;
+          }
+          try {
+            var xyz = App.finderCore.atomsToXyz(cands[i].atoms);
+            var res = App.engine.compute(xyz, opts.charge || 0, 0, opts.basis || "STO-3G");
+            out.push({ label: cands[i].label, formula: cands[i].formula, xyz: xyz,
+              desc: App.finderCore.descriptors(res) });
+          } catch (e) { /* skip bad candidate */ }
+          if (p.onProgress) p.onProgress({ stage: "search", frac: (i + 1) / cands.length });
+          i++;
+          setTimeout(step, 0);
+        })();
+      }, 30);
+    });
+  }
+
   App.compute = {
     request: request,
     requestScan: requestScan,
     requestOpt: requestOpt,
     requestVib: requestVib,
+    requestSearch: requestSearch,
     cacheKey: core.cacheKey,
     isCancelledError: core.isCancelledError
   };

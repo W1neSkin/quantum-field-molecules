@@ -15,6 +15,7 @@
     if (targetId === "cavityCard" && App.cavitySandbox && App.cavitySandbox.refresh) App.cavitySandbox.refresh();
     if (targetId === "scalingCard" && App.scalingLab && App.scalingLab.refresh) App.scalingLab.refresh();
     if (targetId === "bridgeCard" && App.crossBridge && App.crossBridge.refresh) App.crossBridge.refresh();
+    if (targetId === "finderCard" && App.finder && App.finder.refresh) App.finder.refresh();
   }
 
   function show(targetId) {

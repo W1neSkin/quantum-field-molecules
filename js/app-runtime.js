@@ -75,6 +75,7 @@
       if (App.cavitySandbox && App.cavitySandbox.refresh) App.cavitySandbox.refresh();
       if (App.scalingLab && App.scalingLab.refresh) App.scalingLab.refresh();
       if (App.crossBridge && App.crossBridge.refresh) App.crossBridge.refresh();
+      if (App.finder && App.finder.refresh) App.finder.refresh();
       if (state.view === "3d") ensureVolume();
       updateNote();
     }

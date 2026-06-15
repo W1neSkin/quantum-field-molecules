@@ -16,6 +16,7 @@ require("../js/fci2.js");
 require("../js/localize.js");
 require("../js/localize-async.js");
 require("../js/engine.js");
+require("../js/finder-core.js");
 require("../js/optimize.js");
 require("../js/vib.js");
 require("../js/fields2d.js");
@@ -408,6 +409,17 @@ function runAsyncChecks() {
   check("cavity polarization", cavPerp.split < cavPar.split,
     "split_perp = " + cavPerp.split.toFixed(3) + " < split_parallel = " + cavPar.split.toFixed(3));
 
+  // He2 has no virtual orbital, so the HOMO-LUMO gap is undefined (null).
+  // refresh() must guard on null before toFixed; isFinite(null) is true and
+  // would slip past a naive check, locking the UI in a busy state.
+  var he2 = App.engine.compute("He 0 0 0\nHe 0 0 3.0", 0, 0, "STO-3G");
+  var gapHe2 = App.cavitySandbox.gapEv(he2);
+  var gapH2 = App.cavitySandbox.gapEv(App.engine.compute(cases[0].xyz, 0, 0, "STO-3G"));
+  var guardHe2 = gapHe2 == null || !isFinite(gapHe2);
+  var guardH2 = gapH2 == null || !isFinite(gapH2);
+  check("cavity null gap guard", gapHe2 === null && guardHe2 && isFinite(gapH2) && !guardH2,
+    "gap(He2) = " + gapHe2 + ", gap(H2) = " + (gapH2 == null ? "null" : gapH2.toFixed(2)) + " eV");
+
   var aScale = App.scalingLab.predictAlpha(6, 3, 10, 4);
   var rScale = App.scalingLab.predictRvdw(128, 1, 1, 1 / 7);
   var spanScale = App.scalingLab.sizeSpanAngstrom({
@@ -419,6 +431,42 @@ function runAsyncChecks() {
     "R(128) = " + rScale.toFixed(3) + " (expected 2.000)");
   check("scaling span size", Math.abs(spanScale - 1) < 1e-9,
     "span = " + spanScale.toFixed(3) + " A (expected 1.000)");
+
+  // --- inverse-design finder (finder-core.js) ---
+  var fc = App.finderCore;
+  var waterXyz = cases[2].xyz;
+  var waterRes = App.engine.compute(waterXyz, 0);
+  var wDesc = fc.descriptors(waterRes);
+  check("finder descriptors", wDesc && Math.abs(wDesc.dipoleD - 1.71) < 0.06 &&
+    isFinite(wDesc.gapEv) && wDesc.gapEv > 0 && isFinite(wDesc.ipEv) && wDesc.ipEv > 0 &&
+    wDesc.openShell === false && wDesc.nelec === 10,
+    "mu = " + wDesc.dipoleD.toFixed(2) + " D, gap = " + wDesc.gapEv.toFixed(2) +
+    " eV, IP = " + wDesc.ipEv.toFixed(2) + " eV");
+
+  // relax pulls a slightly stretched bond back toward the covalent length.
+  var hh = fc.relaxAtoms([{ Z: 1, xyz: [0, 0, 0] }, { Z: 1, xyz: [0, 0, 0.74] }], 60);
+  var hhD = Math.hypot(hh[0].xyz[0] - hh[1].xyz[0], hh[0].xyz[1] - hh[1].xyz[1], hh[0].xyz[2] - hh[1].xyz[2]);
+  check("finder relax bond", hhD < 0.74 && hhD > 0.45,
+    "H-H " + hhD.toFixed(3) + " A toward r0 = 0.62");
+
+  // single-atom substitutions: bounded, deduped, all chemically plausible.
+  var seedW = [{ Z: 8, xyz: [0, 0, 0.12] }, { Z: 1, xyz: [0, 0.76, -0.47] }, { Z: 1, xyz: [0, -0.76, -0.47] }];
+  var cands = fc.genCandidates(seedW, { cap: 10, relaxIters: 40, relax: true });
+  var allPlausible = cands.every(function (c) { return fc.isPlausible(c.atoms); });
+  var touchedO = cands.some(function (c) { return c.label.indexOf("O1\u2192") === 0; });
+  check("finder candidates", cands.length > 0 && cands.length <= 10 && allPlausible && touchedO,
+    cands.length + " candidates, all plausible, O-site varied = " + touchedO);
+
+  // ranking: closer to the target dipole must sort first; no target -> null.
+  var fakeTargets = { dipole: { on: true, val: 0.0 } };
+  var ranked = fc.rank([
+    { label: "b", formula: "B", xyz: "", desc: { dipoleD: 3.0, gapEv: 5, ipEv: 10, openShell: false } },
+    { label: "a", formula: "A", xyz: "", desc: { dipoleD: 0.1, gapEv: 5, ipEv: 10, openShell: false } }
+  ], fakeTargets);
+  check("finder rank order", ranked.length === 2 && ranked[0].label === "a" && ranked[0].score < ranked[1].score,
+    "best = " + ranked[0].label + " (score " + ranked[0].score.toFixed(3) + ")");
+  check("finder no-target null", fc.score(wDesc, { dipole: { on: false } }) === null,
+    "score with no enabled target is null");
 
   var bPass = App.benchmark.evaluate(App.engine.compute(cases[0].xyz, 0), { id: "H2" });
   var bBasis = App.benchmark.evaluate(App.engine.compute(cases[0].xyz, 0, 0, "6-31G"), { id: "H2" });

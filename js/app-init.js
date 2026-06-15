@@ -140,6 +140,25 @@
           getProvenance: function () { return state.provenance || null; }
         });
       });
+      safeRun("finder", function () {
+        if (!App.finder || !App.finder.init) return;
+        App.finder.init({
+          getResult: function () { return state.result; },
+          getPreset: function () { return state.preset; },
+          getCharge: function () { return state.lastCharge || 0; },
+          isBusy: function () { return state.busy; },
+          // load a candidate geometry as a custom molecule (reuses the custom path)
+          loadXyz: function (xyz) {
+            if (state.busy) return;
+            var m = $("molSelect");
+            if (m) m.value = "custom";
+            selectPreset("custom");
+            var ta = $("xyzInput");
+            if (ta) ta.value = xyz;
+            reloadCurrent();
+          }
+        });
+      });
       ["btnPng", "btnCube", "btnJson", "btnReport"].forEach(function (id) {
         $(id).addEventListener("click", function () {
           if (!state.result || state.busy) return;

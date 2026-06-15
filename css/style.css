@@ -365,3 +365,40 @@ footer { margin-top: 20px; }
   .help-body.with-nav { grid-template-columns: 1fr; }
   .help-nav { display: none; }
 }
+
+/* property finder lab: target cells light up when active, results read as
+   neutral cards with chip badges and a green accent on the best match. */
+.finder-targets { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
+.finder-target {
+  display: flex; flex-direction: column; gap: 7px;
+  border: 1px solid var(--stroke-2); border-radius: 8px;
+  padding: 8px 10px; background: var(--fill-2);
+}
+.finder-target.on { border-color: var(--accent); background: var(--fill); }
+.finder-target__top { display: flex; align-items: center; gap: 6px; color: var(--text-3); }
+.finder-target.on .finder-target__top { color: var(--text); }
+.finder-target input[type=number] { width: 100%; }
+.finder-target select { width: 100%; max-width: none; }
+.finder-target input:disabled, .finder-target select:disabled { opacity: 0.4; cursor: default; }
+
+.finder-results { display: grid; gap: 8px; margin-top: 10px; }
+.finder-results:empty { display: none; }
+.finder-row {
+  display: flex; flex-direction: column; gap: 7px;
+  border: 1px solid var(--stroke-2); border-radius: 8px;
+  padding: 9px 12px; background: var(--fill-2);
+}
+.finder-row.best { border-color: var(--green); }
+.finder-row__head { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.finder-row__name { display: flex; align-items: center; gap: 8px; min-width: 0; flex-wrap: wrap; }
+.finder-row__name b { font-weight: 590; font-variant-numeric: tabular-nums; }
+.finder-rank {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-width: 22px; height: 18px; padding: 0 6px; border-radius: 9999px;
+  border: 1px solid var(--stroke-2); font-size: 11px; color: var(--text-3);
+  font-variant-numeric: tabular-nums;
+}
+.finder-row.best .finder-rank { color: var(--green); border-color: var(--green); }
+.finder-meta { display: flex; flex-wrap: wrap; gap: 6px; }
+.finder-meta .chip { margin: 0; font-variant-numeric: tabular-nums; }
+.finder-meta .chip.score { border-color: var(--stroke); color: var(--text); }

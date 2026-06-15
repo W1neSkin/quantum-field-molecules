@@ -3,7 +3,8 @@
 importScripts("i18n.js", "lang/en.js", "lang/ru.js", "lang/de.js", "lang/es.js",
   "lang/zh.js",
   "basis.js", "basis631.js", "linalg.js", "integrals.js", "eri.js", "scf.js",
-  "uhf.js", "props.js", "fci2.js", "engine.js", "optimize.js", "vib.js");
+  "uhf.js", "props.js", "fci2.js", "engine.js", "optimize.js", "vib.js",
+  "finder-core.js");
 
 var cancelled = Object.create(null);
 
@@ -49,6 +50,33 @@ function runScan(msg) {
   })();
 }
 
+// Inverse-design search: HF one candidate per tick to keep the worker responsive.
+function runSearch(msg) {
+  var id = msg.id;
+  var core = globalThis.App.finderCore;
+  var cands;
+  try { cands = core.genCandidates(msg.seed, msg.opts); }
+  catch (err) { postError(id, err); return; }
+  var out = [];
+  var i = 0;
+  (function step() {
+    if (isCancelled(id)) { clearCancelled(id); return; }
+    if (i >= cands.length) {
+      postResult(id, { candidates: core.rank(out, msg.targets), evaluated: out.length });
+      return;
+    }
+    try {
+      var c = cands[i];
+      var xyz = core.atomsToXyz(c.atoms);
+      var res = globalThis.App.engine.compute(xyz, msg.charge || 0, 0, msg.basis || "STO-3G");
+      out.push({ label: c.label, formula: c.formula, xyz: xyz, desc: core.descriptors(res) });
+    } catch (err) { /* skip a candidate that fails to converge/parse */ }
+    postProgress(id, { stage: "search", frac: (i + 1) / cands.length });
+    i++;
+    setTimeout(step, 0);
+  })();
+}
+
 self.onmessage = function (e) {
   var msg = e.data;
   if (msg.type === "cancel") {
@@ -76,6 +104,10 @@ self.onmessage = function (e) {
     if (msg.type === "scan") {
       // diatomic R-scan along z, one SCF per point; stepped to keep the worker responsive.
       runScan(msg);
+      return;
+    }
+    if (msg.type === "search") {
+      runSearch(msg);
       return;
     }
     if (isCancelled(msg.id)) { clearCancelled(msg.id); return; }

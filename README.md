@@ -12,7 +12,8 @@ dark/light themes.
 Recent scientific UX layers include provenance manifests, live quality
 guardrails, uncertainty hints with estimated bands, a lightweight benchmark
 card + mini-suite, a cavity-QED toy sandbox, a scaling-law toy lab, a
-cross-method bridge for external workflows and a journal-ready report export.
+cross-method bridge for external workflows, a property-to-molecule finder
+(experimental inverse design) and a journal-ready report export.
 
 The key point: **there is no precomputed molecule database** - the electronic
 structure is computed on the fly by a real Hartree–Fock method (RHF and UHF;
@@ -73,6 +74,13 @@ the main thread (the UI may stutter on heavy molecules like benzene).
 - **Cross-method bridge**: template export for PySCF / QED-TDDFT scaffold /
   CavMD JSON and parser for pasted outputs (energy, convergence, gap,
   splitting).
+- **Property finder (inverse design, experimental)**: name target properties
+  (dipole, HOMO-LUMO gap, ionization potential, closed/open shell) and the app
+  substitutes one atom at a time in the current molecule (heavy atoms over
+  B/C/N/O/F, H↔F), relaxes each candidate, runs HF/STO-3G and ranks them by
+  closeness to the targets; "load" drops a hit into the editor for a full
+  calculation and geometry optimization. A bounded heuristic, not validated
+  generative design.
 
 ### Visualization
 
@@ -121,10 +129,11 @@ the main thread (the UI may stutter on heavy molecules like benzene).
   localized right in the worker.
 - **Help and wiki glossary**: a modal window (the "Help" button or the "?" in
   each panel header) with three tabs - a guide to the main features
-  (including provenance/guardrails, cavity/scaling labs, bridge, benchmark and
-  "Fields: what exists and what is drawn"), a glossary
+  (including provenance/guardrails, cavity/scaling labs, bridge, benchmark,
+  the property finder and "Fields: what exists and what is drawn"), a glossary
   of ~30 terms with search (Hartree–Fock, basis set, ESP, ELF, the Laplacian,
-  Koopmans, correlation, Hessian, the QFT view, etc.) and "About".
+  Koopmans, correlation, Hessian, inverse design, the QFT view, etc.) and
+  "About".
 - **Dark and light themes**: a toggle in the header, starts from
   prefers-color-scheme, remembered. Everything is repainted, including the
   canvas LUT density maps and the SVG charts.
@@ -146,11 +155,11 @@ the main thread (the UI may stutter on heavy molecules like benzene).
 ```
 UI (app.js + app-*.js modules, heatmap.js, grid3d.js + view3d.js, molevels.js, energy.js, irchart.js, diagrams.js)
   + i18n.js + lang/{en,ru,de,es,zh}.js (+ *-content.js), theme.js, help.js, tooltip.js
-  + provenance.js, benchmark.js, uncertainty.js, cavity-sandbox.js, scaling-lab.js, cross-bridge.js, exporter.js
+  + provenance.js, benchmark.js, uncertainty.js, cavity-sandbox.js, scaling-lab.js, cross-bridge.js, finder.js, exporter.js
   └─ compute client (client.js): cache + transport (+ request language)
        └─ Web Worker (worker.js) | main thread (file://)
             └─ engine: basis.js → integrals.js + eri.js → scf.js | uhf.js
-                       → props.js, fci2.js, optimize.js, vib.js (engine.js)
+                       → props.js, fci2.js, optimize.js, vib.js, finder-core.js (engine.js)
 ```
 
 i18n: dictionaries are flat keys in `App.I18N[lang]` with `{x}` interpolation
@@ -191,6 +200,7 @@ ever needed.
 | `esp.js` | Electrostatic potential on a slice (reuses ERI pairs) |
 | `fields2d.js` | ELF and ∇²ρ on a slice: density-matrix contraction of basis values, gradients and Laplacians |
 | `builder.js` | Click-to-build molecule editor: VSEPR-like atom placement, skeleton preview |
+| `finder-core.js` | Inverse-design search: single-atom substitutions, local relax, property descriptors, scoring and ranking |
 | `engine.js` | XYZ parser and the computation pipeline |
 | `i18n.js` + `lang/` | EN/RU/DE/ES/ZH dictionaries, `t()` with interpolation, `data-i18n` DOM markup |
 | `theme.js` | Dark/light themes, CSS variable access for canvas/SVG |
