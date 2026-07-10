@@ -1,0 +1,20 @@
+cff-version: 1.2.0
+message: "If you use this software, cite the repository and record the commit hash."
+title: "Quantum Field Molecules"
+type: software
+authors:
+  - family-names: "W1neSkin"
+version: 1.0.0
+repository-code: "https://github.com/W1neSkin/quantum-field-molecules"
+url: "https://w1neskin.github.io/quantum-field-molecules/"
+license: MIT
+keywords:
+  - Hartree-Fock
+  - quantum chemistry
+  - quantum field theory
+  - molecular orbitals
+  - education
+abstract: >-
+  A dependency-free in-browser educational quantum chemistry laboratory with
+  RHF, UHF, selected two-electron FCI, molecular field visualizations,
+  geometry optimization and vibrational analysis.

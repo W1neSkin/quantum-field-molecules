@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Валидация и воспроизводимость | Quantum Field Molecules</title>
+  <meta name="description" content="Опубликованные результаты валидации, научные ограничения, порядок воспроизведения и источники браузерного движка Хартри–Фока Quantum Field Molecules.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://w1neskin.github.io/quantum-field-molecules/ru/validation/">
+  <link rel="alternate" hreflang="en" href="https://w1neskin.github.io/quantum-field-molecules/validation/">
+  <link rel="alternate" hreflang="ru" href="https://w1neskin.github.io/quantum-field-molecules/ru/validation/">
+  <link rel="alternate" hreflang="x-default" href="https://w1neskin.github.io/quantum-field-molecules/validation/">
+  <meta property="og:type" content="article">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:title" content="Валидация и воспроизводимость">
+  <meta property="og:description" content="Регрессионные результаты, ограничения, источники и шаги воспроизведения браузерного квантово-химического движка.">
+  <meta property="og:url" content="https://w1neskin.github.io/quantum-field-molecules/ru/validation/">
+  <meta property="og:image" content="https://w1neskin.github.io/quantum-field-molecules/assets/og.png">
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../css/content.css">
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"TechArticle",
+    "headline":"Валидация и воспроизводимость",
+    "description":"Опубликованные проверки и научные ограничения браузерного движка Quantum Field Molecules.",
+    "url":"https://w1neskin.github.io/quantum-field-molecules/ru/validation/",
+    "image":"https://w1neskin.github.io/quantum-field-molecules/assets/og.png",
+    "datePublished":"2026-07-11",
+    "dateModified":"2026-07-11",
+    "inLanguage":"ru",
+    "author":{"@type":"Organization","name":"Участники quantum-field-molecules","url":"https://github.com/W1neSkin/quantum-field-molecules"}
+  }
+  </script>
+</head>
+<body>
+  <a class="skip" href="#content">К содержанию</a>
+  <header class="site-header">
+    <nav class="nav" aria-label="Основная навигация">
+      <a class="brand" href="../../?lang=ru">Молекулы глазами КТП</a>
+      <span class="nav-links"><a href="../learn/">Материалы</a><a href="../../validation/" lang="en">English</a></span>
+    </nav>
+  </header>
+  <main id="content">
+    <nav class="breadcrumbs" aria-label="Хлебные крошки"><a href="../../?lang=ru">Лаборатория</a> / Валидация</nav>
+    <p class="eyebrow">Научное доверие</p>
+    <h1>Валидация и воспроизводимость</h1>
+    <p class="lead">Проект выполняет настоящие расчёты RHF/UHF, но остаётся учебным движком. Здесь проверенное численное поведение отделено от внешних экспериментальных сведений и качественных toy-моделей.</p>
+    <a class="button" href="../../?lang=ru&amp;mol=H2&amp;basis=STO-3G">Открыть проверенный пример H₂</a>
+    <a class="button secondary" href="https://github.com/W1neSkin/quantum-field-molecules/actions">Автоматические проверки</a>
+
+    <h2>Текущий результат регрессии</h2>
+    <p>11 июля 2026 года <code>npm test</code> прошёл полный набор научных и SEO-проверок. Браузерный benchmark из пяти молекул прошёл с общим допуском 5×10⁻⁴ хартри:</p>
+    <ul>
+      <li>H₂: расчёт −1,116717 Ha; цель −1,116700 Ha.</li>
+      <li>HeH⁺: расчёт −2,841838 Ha; цель −2,841800 Ha.</li>
+      <li>H₂O: расчёт −74,965901 Ha; цель −74,965900 Ha.</li>
+      <li>CH₄: расчёт −39,726809 Ha; цель −39,726900 Ha.</li>
+      <li>N₂: расчёт −107,495893 Ha; цель −107,496000 Ha.</li>
+    </ul>
+    <p>Это округлённые регрессионные цели для указанных геометрий, метода и базиса. Совпадение подтверждает согласованность реализации, но не экспериментальную точность.</p>
+
+    <h2>Что ещё проверяется</h2>
+    <ul>
+      <li>Энергии RHF/UHF, число электронов, среднее ⟨S²⟩ и кулоновское вириальное отношение.</li>
+      <li>Корреляция FCI и правильный предел двух атомов для растянутой H₂ в конечном базисе.</li>
+      <li>Диполь, сохранение полного заряда по Малликену и регрессия порядков связи Майера.</li>
+      <li>Поведение базисов 6-31G и 6-31G*, включая d-функции и вариационный порядок энергий.</li>
+      <li>Инварианты локализации Бойза, оптимизация геометрии, численный гессиан и ИК-поведение.</li>
+      <li>Provenance, манифест отчёта, эвристические risk-метки, отмена задач и нормализация cache key.</li>
+    </ul>
+    <p>Исполняемые проверки опубликованы в <a href="https://github.com/W1neSkin/quantum-field-molecules/blob/main/test/selfcheck.js"><code>test/selfcheck.js</code></a>. GitHub Actions запускает их для каждого push и pull request.</p>
+
+    <h2>Как воспроизвести результат</h2>
+    <ol>
+      <li>Откройте URL, фиксирующий <code>mol</code>, <code>basis</code>, <code>mode</code> и при необходимости <code>lang</code>.</li>
+      <li>Сохраните геометрию, заряд, мультиплетность, RHF/UHF-метод и базис из REPORT или JSON-манифеста.</li>
+      <li>Запустите <code>npm test</code> в чистой копии репозитория для проверки численных контрактов.</li>
+      <li>Для публикационной работы повторите расчёт через шаблон Bridge в PySCF или другой признанной программе.</li>
+    </ol>
+
+    <div class="note">
+      <strong>Граница применимости.</strong>
+      <p>Хартри–Фок в малом базисе не учитывает основную часть электронной корреляции и не является количественным методом предсказания. Панель uncertainty — качественная эвристика, а не статистический доверительный интервал. Cavity, scaling и molecule finder явно обозначены как toy- или экспериментальные модели.</p>
+    </div>
+
+    <h2>Цитирование</h2>
+    <p>Цитируйте программу с помощью машиночитаемого файла <a href="https://github.com/W1neSkin/quantum-field-molecules/blob/main/CITATION.cff"><code>CITATION.cff</code></a>. Укажите hash коммита и request key из экспорта, чтобы читатель мог восстановить точный код и входные данные.</p>
+
+    <h2>Научные источники</h2>
+    <ul class="references">
+      <li>A. Szabo and N. S. Ostlund, <em>Modern Quantum Chemistry</em>, Dover (1996).</li>
+      <li><a href="https://cccbdb.nist.gov/">NIST Computational Chemistry Comparison and Benchmark Database</a>.</li>
+      <li>Q. Sun et al., <a href="https://doi.org/10.1002/wcms.1340">PySCF: the Python-based simulations of chemistry framework</a>, WIREs Comput. Mol. Sci. 8, e1340 (2018).</li>
+      <li>S. F. Boys, <a href="https://doi.org/10.1103/RevModPhys.32.296">Construction of some molecular orbitals to be approximately invariant for changes from one molecule to another</a>, Rev. Mod. Phys. 32, 296 (1960).</li>
+      <li>Данные базисов: <a href="https://www.basissetexchange.org/">Basis Set Exchange</a>.</li>
+    </ul>
+  </main>
+  <footer class="site-footer"><div class="footer-inner"><span>Проверено 11 июля 2026</span><a href="https://github.com/W1neSkin/quantum-field-molecules">Код и issue tracker</a></div></footer>
+</body>
+</html>

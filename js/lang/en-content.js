@@ -52,7 +52,7 @@
     },
     {
       id: "provenance", title: "Provenance, guardrails and uncertainty",
-      body: "The budget panel now includes a scientific QA layer. Provenance records method, basis, source (worker/main/cache), iteration count and a reproducibility request key. This is the minimum metadata needed to replay and audit a result.\n\nGuardrails provide a fast quality gate: SCF convergence, virial behavior, spin consistency and request-key presence. The uncertainty block adds a qualitative risk level plus estimated bands for key observables (energy, dipole, HOMO-LUMO gap). Treat these as guidance for trust calibration, not strict statistical confidence intervals."
+      body: "The budget panel includes a scientific QA layer. Provenance records method, basis, source (worker/main/cache), iteration count and a reproducibility request key. This is the minimum metadata needed to replay and audit a result.\n\nGuardrails provide a fast quality gate: SCF convergence, virial behavior, spin consistency and request-key presence. The uncertainty block is an explicitly heuristic risk indicator. Its ranges and confidence index are qualitative prompts, not calibrated error bars or statistical confidence intervals."
     },
     {
       id: "cavity", title: "Cavity QED sandbox (toy)",

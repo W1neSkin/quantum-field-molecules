@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Validation and reproducibility | Quantum Field Molecules</title>
+  <meta name="description" content="Published validation results, scientific scope, reproducibility workflow and citations for the in-browser Hartree–Fock engine in Quantum Field Molecules.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://w1neskin.github.io/quantum-field-molecules/validation/">
+  <link rel="alternate" hreflang="en" href="https://w1neskin.github.io/quantum-field-molecules/validation/">
+  <link rel="alternate" hreflang="ru" href="https://w1neskin.github.io/quantum-field-molecules/ru/validation/">
+  <link rel="alternate" hreflang="x-default" href="https://w1neskin.github.io/quantum-field-molecules/validation/">
+  <meta property="og:type" content="article">
+  <meta property="og:locale" content="en_US">
+  <meta property="og:title" content="Validation and reproducibility">
+  <meta property="og:description" content="Regression results, limitations, citations and reproducibility steps for the browser quantum chemistry engine.">
+  <meta property="og:url" content="https://w1neskin.github.io/quantum-field-molecules/validation/">
+  <meta property="og:image" content="https://w1neskin.github.io/quantum-field-molecules/assets/og.png">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/content.css">
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"TechArticle",
+    "headline":"Validation and reproducibility",
+    "description":"Published checks and scientific scope for the Quantum Field Molecules browser engine.",
+    "url":"https://w1neskin.github.io/quantum-field-molecules/validation/",
+    "image":"https://w1neskin.github.io/quantum-field-molecules/assets/og.png",
+    "datePublished":"2026-07-11",
+    "dateModified":"2026-07-11",
+    "inLanguage":"en",
+    "author":{"@type":"Organization","name":"quantum-field-molecules contributors","url":"https://github.com/W1neSkin/quantum-field-molecules"}
+  }
+  </script>
+</head>
+<body>
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="site-header">
+    <nav class="nav" aria-label="Main navigation">
+      <a class="brand" href="../">Quantum Field Molecules</a>
+      <span class="nav-links"><a href="../learn/">Learn</a><a href="../ru/validation/" lang="ru">Русский</a></span>
+    </nav>
+  </header>
+  <main id="content">
+    <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../">Laboratory</a> / Validation</nav>
+    <p class="eyebrow">Scientific trust</p>
+    <h1>Validation and reproducibility</h1>
+    <p class="lead">The project runs real RHF/UHF calculations, but it is an educational engine. This page separates tested numerical behavior from external experimental context and from qualitative toy models.</p>
+    <a class="button" href="../?mol=H2&amp;basis=STO-3G">Open the validated H₂ case</a>
+    <a class="button secondary" href="https://github.com/W1neSkin/quantum-field-molecules/actions">View automated checks</a>
+
+    <h2>Current regression result</h2>
+    <p>On 11 July 2026, <code>npm test</code> passed the complete scientific and SEO suite. The five-case browser benchmark passed with a common tolerance of 5×10⁻⁴ hartree:</p>
+    <ul>
+      <li>H₂: calculated −1.116717 Ha; target −1.116700 Ha.</li>
+      <li>HeH⁺: calculated −2.841838 Ha; target −2.841800 Ha.</li>
+      <li>H₂O: calculated −74.965901 Ha; target −74.965900 Ha.</li>
+      <li>CH₄: calculated −39.726809 Ha; target −39.726900 Ha.</li>
+      <li>N₂: calculated −107.495893 Ha; target −107.496000 Ha.</li>
+    </ul>
+    <p>These rounded targets are regression references at the listed geometries, method and basis. Agreement proves implementation consistency; it does not establish experimental accuracy.</p>
+
+    <h2>What else is checked</h2>
+    <ul>
+      <li>RHF/UHF energies, electron counts, spin expectation values and the Coulombic virial ratio.</li>
+      <li>FCI correlation and the correct two-atom limit for stretched H₂ in the finite basis.</li>
+      <li>Dipole, Mulliken charge conservation and Mayer bond-order regression values.</li>
+      <li>6-31G and 6-31G* basis behavior, including d functions and variational energy ordering.</li>
+      <li>Boys localization invariants, geometry optimization, numerical Hessians and IR behavior.</li>
+      <li>Provenance, report manifests, heuristic-risk labels, cancellation and cache-key normalization.</li>
+    </ul>
+    <p>The executable assertions are public in <a href="https://github.com/W1neSkin/quantum-field-molecules/blob/main/test/selfcheck.js"><code>test/selfcheck.js</code></a>. Every push and pull request runs them in GitHub Actions.</p>
+
+    <h2>Reproduce a result</h2>
+    <ol>
+      <li>Open a URL that fixes <code>mol</code>, <code>basis</code>, <code>mode</code> and, if needed, <code>lang</code>.</li>
+      <li>Record the geometry, charge, multiplicity, RHF/UHF method and basis from the exported REPORT or JSON manifest.</li>
+      <li>Run <code>npm test</code> from a clean checkout to verify the numerical contracts.</li>
+      <li>Use the Bridge template to repeat publication-grade work in PySCF or another established package.</li>
+    </ol>
+
+    <div class="note">
+      <strong>Scope boundary.</strong>
+      <p>Small-basis Hartree–Fock omits most electron correlation and is not a quantitative prediction method. The uncertainty panel is a qualitative heuristic, not a statistical confidence interval. Cavity, scaling and molecule-finder panels are explicitly toy or experimental models.</p>
+    </div>
+
+    <h2>Citation</h2>
+    <p>Cite the software using the repository’s machine-readable <a href="https://github.com/W1neSkin/quantum-field-molecules/blob/main/CITATION.cff"><code>CITATION.cff</code></a>. Record the commit hash and exported request key so another reader can identify the exact code and input.</p>
+
+    <h2>Scientific references</h2>
+    <ul class="references">
+      <li>A. Szabo and N. S. Ostlund, <em>Modern Quantum Chemistry</em>, Dover (1996).</li>
+      <li><a href="https://cccbdb.nist.gov/">NIST Computational Chemistry Comparison and Benchmark Database</a>.</li>
+      <li>Q. Sun et al., <a href="https://doi.org/10.1002/wcms.1340">PySCF: the Python-based simulations of chemistry framework</a>, WIREs Comput. Mol. Sci. 8, e1340 (2018).</li>
+      <li>S. F. Boys, <a href="https://doi.org/10.1103/RevModPhys.32.296">Construction of some molecular orbitals to be approximately invariant for changes from one molecule to another</a>, Rev. Mod. Phys. 32, 296 (1960).</li>
+      <li>Basis data: <a href="https://www.basissetexchange.org/">Basis Set Exchange</a>.</li>
+    </ul>
+  </main>
+  <footer class="site-footer"><div class="footer-inner"><span>Verified 11 July 2026</span><a href="https://github.com/W1neSkin/quantum-field-molecules">Source and issue tracker</a></div></footer>
+</body>
+</html>

@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>H₂ Dissociation: RHF, UHF and Full CI | Interactive</title>
+  <meta name="description" content="Explore the H2 bond-breaking curve interactively and understand why RHF fails, how UHF breaks spin symmetry and how full CI restores electron correlation.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://w1neskin.github.io/quantum-field-molecules/learn/h2-dissociation/">
+  <link rel="alternate" hreflang="en" href="https://w1neskin.github.io/quantum-field-molecules/learn/h2-dissociation/">
+  <link rel="alternate" hreflang="ru" href="https://w1neskin.github.io/quantum-field-molecules/ru/learn/h2-dissociation/">
+  <link rel="alternate" hreflang="x-default" href="https://w1neskin.github.io/quantum-field-molecules/learn/h2-dissociation/">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="H₂ Dissociation: RHF, UHF and Full CI">
+  <meta property="og:description" content="A live bond-breaking experiment that makes electron correlation visible.">
+  <meta property="og:url" content="https://w1neskin.github.io/quantum-field-molecules/learn/h2-dissociation/">
+  <meta property="og:image" content="https://w1neskin.github.io/quantum-field-molecules/assets/og.png">
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../css/content.css">
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"TechArticle",
+    "headline":"H₂ Dissociation: RHF, UHF and Full CI",
+    "description":"An interactive explanation of electron correlation and bond breaking in H2.",
+    "url":"https://w1neskin.github.io/quantum-field-molecules/learn/h2-dissociation/",
+    "image":"https://w1neskin.github.io/quantum-field-molecules/assets/og.png",
+    "datePublished":"2026-07-11",
+    "dateModified":"2026-07-11",
+    "inLanguage":"en",
+    "author":{"@type":"Organization","name":"quantum-field-molecules contributors","url":"https://github.com/W1neSkin/quantum-field-molecules"}
+  }
+  </script>
+</head>
+<body>
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="site-header"><nav class="nav" aria-label="Primary"><a class="brand" href="../../">Quantum Field Molecules</a><span class="nav-links"><a href="../">Learn</a><a href="../../ru/learn/h2-dissociation/" lang="ru">Русский</a></span></nav></header>
+  <main id="content">
+    <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../../">Laboratory</a> / <a href="../">Learn</a> / H₂ dissociation</nav>
+    <p class="eyebrow">Guided experiment</p>
+    <h1>Break the H₂ bond: RHF, UHF and full CI</h1>
+    <p class="lead">Hydrogen is the smallest molecule, yet stretching its bond exposes the central limitation of a single-determinant wavefunction. The app lets you follow the energy and density while the nuclei separate.</p>
+    <a class="button" href="../../?mol=H2&amp;basis=STO-3G&amp;mode=density">Open the H₂ experiment</a>
+
+    <h2>Start near equilibrium</h2>
+    <p>At the experimental distance Rₑ ≈ 0.741 Å, both electrons predominantly occupy the bonding σg orbital. RHF is a useful approximation here: its single determinant captures the covalent bond qualitatively, and the density is concentrated between the nuclei.</p>
+    <p>The app overlays three different objects. The yellow curve is computed Hartree–Fock energy. The blue curve is a Morse potential constructed from experimental spectroscopic constants. The green curve is full configuration interaction for the two electrons, exact only within the chosen finite basis.</p>
+
+    <h2>Why restricted Hartree–Fock fails</h2>
+    <p>RHF requires one doubly occupied spatial orbital at every distance. At large R that orbital remains a symmetric combination of the two atomic 1s functions. The determinant therefore contains an unphysical mixture of neutral and ionic fragments rather than exactly one electron on each atom.</p>
+    <p>The error is static correlation: two determinants become equally important, but RHF permits only one. On the plot the RHF curve approaches the wrong dissociation limit. A larger basis improves flexibility but does not remove this one-determinant failure.</p>
+
+    <h2>What UHF repairs—and breaks</h2>
+    <p>UHF allows the α orbital to localize on one atom and the β orbital on the other. The energy then reaches a physically sensible separated-atom limit. However, the resulting determinant is no longer a pure singlet and mixes in triplet character. This is visible as spin contamination in ⟨S²⟩.</p>
+    <p>Symmetry breaking is therefore useful but not exact: UHF trades spin purity for a qualitatively correct dissociation picture.</p>
+
+    <h2>How full CI restores correlation</h2>
+    <p>For two electrons the application can include every determinant available in the selected orbital basis. Full CI mixes the bonding and antibonding configurations with R-dependent coefficients. Near equilibrium the bonding determinant dominates; at large R the combination removes the ionic terms and gives two neutral hydrogen atoms.</p>
+    <div class="note"><strong>Exact has a qualifier.</strong><p>Full CI is exact for the chosen finite Gaussian basis, not for the complete physical Hilbert space. STO-3G full CI still has basis-set error.</p></div>
+
+    <h2>Reproduce the comparison</h2>
+    <ol>
+      <li>Open H₂ with STO-3G and wait for the E(R) scan.</li>
+      <li>Drag R from equilibrium toward 3–5 Å and watch the density split.</li>
+      <li>Compare the yellow RHF and green FCI tails.</li>
+      <li>Repeat with 6-31G and distinguish basis error from correlation error.</li>
+      <li>Export JSON or the report bundle to record method, basis and request key.</li>
+    </ol>
+
+    <h2>Why this matters beyond H₂</h2>
+    <p>The same multireference problem appears in bond breaking, diradicals, transition-metal chemistry and excited states. H₂ is valuable because the failure is visible without chemical complexity. It teaches when a plausible orbital picture is not enough.</p>
+
+    <h2>References</h2>
+    <ul class="references">
+      <li>A. Szabo and N. S. Ostlund, <cite>Modern Quantum Chemistry</cite>, sections on H₂ and configuration interaction.</li>
+      <li><a href="https://cccbdb.nist.gov/">NIST CCCBDB</a> for benchmark molecular data.</li>
+      <li><a href="https://mccullaghlab.github.io/physical_chemistry/quantum_mechanics/H2_Configuration_Interaction.html">H₂ Configuration Interaction</a>, Chemistry Lessons with Jupyter Notebooks.</li>
+    </ul>
+    <p>Background: <a href="../hartree-fock/">how the Hartree–Fock SCF method works</a>.</p>
+  </main>
+  <footer class="site-footer"><div class="footer-inner"><span>Updated 11 July 2026</span><a href="https://github.com/W1neSkin/quantum-field-molecules">Source and tests</a></div></footer>
+</body>
+</html>

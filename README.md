@@ -10,7 +10,7 @@ languages (EN/RU/DE/ES/ZH) with built-in help, a wiki-style glossary and
 dark/light themes.
 
 Recent scientific UX layers include provenance manifests, live quality
-guardrails, uncertainty hints with estimated bands, a lightweight benchmark
+guardrails, qualitative uncertainty hints with heuristic bands, a lightweight benchmark
 card + mini-suite, a cavity-QED toy sandbox, a scaling-law toy lab, a
 cross-method bridge for external workflows, a property-to-molecule finder
 (experimental inverse design) and a journal-ready report export.
@@ -67,8 +67,8 @@ the main thread (the UI may stutter on heavy molecules like benzene).
   key.
 - **Live scientific guardrails** in the budget panel: SCF convergence, virial
   behavior, spin consistency, reproducibility-key presence.
-- **Uncertainty hints**: low/medium/high risk level, confidence estimate and
-  qualitative bands for energy/dipole/HOMO-LUMO gap.
+- **Uncertainty hints**: low/medium/high risk level, a non-statistical
+  confidence index and heuristic bands for energy/dipole/HOMO-LUMO gap.
 - **Benchmark card + mini-suite**: fast STO-3G reference comparison for
   built-in presets and a one-click multi-case regression signal.
 - **Cross-method bridge**: template export for PySCF / QED-TDDFT scaffold /
@@ -208,6 +208,9 @@ ever needed.
 
 ## Verification
 
+Published results, limitations and a reproducibility checklist:
+<https://w1neskin.github.io/quantum-field-molecules/validation/>
+
 ```bash
 npm test
 # or
@@ -235,6 +238,12 @@ Selfcheck covers core scientific regressions and workflow checks (excerpt):
 
 The same self-check is run automatically on every push/PR via
 `.github/workflows/selfcheck.yml`.
+
+For citation metadata, use [`CITATION.cff`](CITATION.cff) and record the commit
+hash plus the request key from the exported reproducibility manifest.
+After deployment, use the fixed
+[Search Console measurement checklist](docs/search-console-checklist.md) for
+the release-day baseline and 7/28-day comparisons.
 
 ## Physical caveats
 

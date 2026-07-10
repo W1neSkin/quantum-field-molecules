@@ -169,10 +169,13 @@
     }
 
     function renderFacts() {
+      var basisName = state.result && state.result.basisName ? state.result.basisName : "STO-3G";
       var facts = state.preset
         ? App.presetFacts(state.preset)
-        : [t("facts.custom", { basis: state.result.basisName || "STO-3G" })];
-      $("facts").innerHTML = facts.map(function (f) { return "<p class='small sec'>- " + f + "</p>"; }).join("");
+        : [t("facts.custom", { basis: basisName })];
+      var factsHtml = facts.map(function (f) { return "<p class='small sec'>- " + f + "</p>"; }).join("");
+      factsHtml += "<p class='small faint'>" + t("facts.scope", { basis: basisName }) + "</p>";
+      $("facts").innerHTML = factsHtml;
 
       var c = App.diagrams.pairCounts(state.result.atoms, state.result.scf.nelec);
       $("pairs").textContent = t("pairs", { ee: c.ee, en: c.en, nn: c.nn });

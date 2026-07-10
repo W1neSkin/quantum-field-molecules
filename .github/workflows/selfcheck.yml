@@ -16,5 +16,5 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Run numerical self-check
+      - name: Run scientific and SEO checks
         run: npm test

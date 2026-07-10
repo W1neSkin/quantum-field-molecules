@@ -2,32 +2,86 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://w1neskin.github.io/quantum-field-molecules/</loc>
-    <lastmod>2026-06-14</lastmod>
+    <lastmod>2026-07-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://w1neskin.github.io/quantum-field-molecules/?lang=ru</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://w1neskin.github.io/quantum-field-molecules/ru/</loc>
+    <lastmod>2026-07-11</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://w1neskin.github.io/quantum-field-molecules/learn/</loc>
+    <lastmod>2026-07-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://w1neskin.github.io/quantum-field-molecules/?lang=de</loc>
-    <lastmod>2026-06-14</lastmod>
+    <loc>https://w1neskin.github.io/quantum-field-molecules/ru/learn/</loc>
+    <lastmod>2026-07-11</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://w1neskin.github.io/quantum-field-molecules/?lang=es</loc>
-    <lastmod>2026-06-14</lastmod>
-    <changefreq>weekly</changefreq>
+    <loc>https://w1neskin.github.io/quantum-field-molecules/learn/hartree-fock/</loc>
+    <lastmod>2026-07-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://w1neskin.github.io/quantum-field-molecules/ru/learn/hartree-fock/</loc>
+    <lastmod>2026-07-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://w1neskin.github.io/quantum-field-molecules/learn/h2-dissociation/</loc>
+    <lastmod>2026-07-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://w1neskin.github.io/quantum-field-molecules/ru/learn/h2-dissociation/</loc>
+    <lastmod>2026-07-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://w1neskin.github.io/quantum-field-molecules/learn/electron-density-orbitals/</loc>
+    <lastmod>2026-07-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://w1neskin.github.io/quantum-field-molecules/ru/learn/electron-density-orbitals/</loc>
+    <lastmod>2026-07-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://w1neskin.github.io/quantum-field-molecules/learn/qft-molecules/</loc>
+    <lastmod>2026-07-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://w1neskin.github.io/quantum-field-molecules/ru/learn/qft-molecules/</loc>
+    <lastmod>2026-07-11</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://w1neskin.github.io/quantum-field-molecules/validation/</loc>
+    <lastmod>2026-07-11</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://w1neskin.github.io/quantum-field-molecules/?lang=zh</loc>
-    <lastmod>2026-06-14</lastmod>
-    <changefreq>weekly</changefreq>
+    <loc>https://w1neskin.github.io/quantum-field-molecules/ru/validation/</loc>
+    <lastmod>2026-07-11</lastmod>
+    <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 </urlset>

@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Молекулы и квантовая теория поля | КТП и КЭД</title>
+  <meta name="description" content="Как язык квантовой теории поля связан с методом Хартри–Фока, что реально вычисляет приложение и где начинаются настоящие методы молекулярной КЭД.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://w1neskin.github.io/quantum-field-molecules/ru/learn/qft-molecules/">
+  <link rel="alternate" hreflang="en" href="https://w1neskin.github.io/quantum-field-molecules/learn/qft-molecules/">
+  <link rel="alternate" hreflang="ru" href="https://w1neskin.github.io/quantum-field-molecules/ru/learn/qft-molecules/">
+  <link rel="alternate" hreflang="x-default" href="https://w1neskin.github.io/quantum-field-molecules/learn/qft-molecules/">
+  <meta property="og:type" content="article">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:title" content="Молекулы и квантовая теория поля">
+  <meta property="og:description" content="Что означает язык полей, что считает браузер и где начинается молекулярная КЭД.">
+  <meta property="og:url" content="https://w1neskin.github.io/quantum-field-molecules/ru/learn/qft-molecules/">
+  <meta property="og:image" content="https://w1neskin.github.io/quantum-field-molecules/assets/og.png">
+  <link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../../css/content.css">
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"TechArticle",
+    "headline":"Молекулы и квантовая теория поля",
+    "description":"Связь обычной квантовой химии, языка квантовых полей и молекулярной cavity QED.",
+    "url":"https://w1neskin.github.io/quantum-field-molecules/ru/learn/qft-molecules/",
+    "image":"https://w1neskin.github.io/quantum-field-molecules/assets/og.png",
+    "datePublished":"2026-07-11",
+    "dateModified":"2026-07-11",
+    "inLanguage":"ru",
+    "author":{"@type":"Organization","name":"Участники quantum-field-molecules","url":"https://github.com/W1neSkin/quantum-field-molecules"}
+  }
+  </script>
+</head>
+<body>
+  <a class="skip" href="#content">К содержанию</a>
+  <header class="site-header"><nav class="nav" aria-label="Основная навигация"><a class="brand" href="../../../?lang=ru">Молекулы глазами КТП</a><span class="nav-links"><a href="../">Материалы</a><a href="../../../learn/qft-molecules/" lang="en">English</a></span></nav></header>
+  <main id="content">
+    <nav class="breadcrumbs" aria-label="Хлебные крошки"><a href="../../../?lang=ru">Лаборатория</a> / <a href="../">Материалы</a> / КТП и молекулы</nav>
+    <p class="eyebrow">Концепция и область применимости</p>
+    <h1>Что квантовая теория поля добавляет к картине молекулы?</h1>
+    <p class="lead">Приложение намеренно излагает знакомую квантовую химию на языке полей. Такой взгляд корректен и полезен, но его нельзя путать с явным ab initio расчётом квантовой электродинамики.</p>
+    <a class="button" href="../../../?lang=ru&amp;mol=H2&amp;basis=STO-3G&amp;lab=cavity">Открыть КТП- и cavity-панели</a>
+
+    <h2>Частицы — кванты полей</h2>
+    <p>В квантовой теории поля электронное поле заполняет пространство, а электрон является одним квантом этого поля. Молекула — связанное многочастичное состояние с фиксированным числом возбуждений электронного поля, взаимодействующих с ядрами и электромагнитным полем.</p>
+    <p>В нерелятивистском режиме с фиксированным числом частиц вторично-квантованная запись и обычная многоэлектронная квантовая механика описывают одну электронную задачу. Молекулярные орбитали — одночастичные моды разложения оператора поля; заселить моду означает поместить в неё кванты поля.</p>
+
+    <h2>Плотность и обмен на языке полей</h2>
+    <p>Показанная электронная плотность — среднее значение ⟨ψ̂†(r)ψ̂(r)⟩. Фермионные полевые операторы антикоммутируют; из этой алгебры следуют антисимметрия детерминанта Слэтера, принцип Паули и обменный член K метода Хартри–Фока.</p>
+    <p>Кулоновское притяжение и отталкивание вычисляются в приложении как стандартное мгновенное взаимодействие 1/r. В КЭД его можно понимать как статический предел в кулоновской калибровке, связанный с обменом виртуальными фотонами. Диаграмма переводит физический смысл, но код не распространяет фотонные моды во время HF-расчёта.</p>
+
+    <h2>Что на самом деле решает основной движок</h2>
+    <p>Численное ядро — нерелятивистская квантовая химия в приближении Борна–Оппенгеймера: закреплённые ядра, гауссовы орбитали и самосогласованные RHF/UHF-уравнения. Для двух электронов полное КВ учитывает электронную корреляцию точно в конечном базисе. Карты и свойства следуют из этого электронного расчёта.</p>
+    <div class="note"><strong>Чего здесь нет.</strong><p>Основной движок не считает лэмбовский сдвиг, поляризацию вакуума, релятивистские поправки или электрон-фотонную коррелированную волновую функцию. Факты о таких эффектах — внешний научный контекст.</p></div>
+
+    <h2>Где начинается молекулярная КЭД</h2>
+    <p>В настоящей cavity QED выбранные моды электромагнитного поля становятся квантовыми степенями свободы и связываются с веществом, например гамильтонианом Паули–Фирца. В зависимости от приближения состояние содержит электронные, ядерные и фотонные координаты на равных основаниях.</p>
+    <p>Методы QED-HF, QED-DFT и QED coupled cluster могут предсказывать изменение орбиталей, энергий и отклика в резонаторе. Это активная исследовательская область, существенно более сложная, чем график avoided crossing.</p>
+
+    <h2>Cavity-панель — toy-модель</h2>
+    <p>Панель использует формулу смешения двух уровней. Щель HOMO–LUMO Хартри–Фока берётся как прокси энергии возбуждения, объединяется с выбранной энергией резонатора и связью, после чего строятся нижняя и верхняя ветви. На резонансе расщепление задаётся связью.</p>
+    <p>HF-щель в общем случае не равна оптической энергии возбуждения. Модель не содержит переходных диполей из excited-state метода, самополяризации, многих мод, диссипации и коррелированной электрон-фотонной структуры. Она учит расстройке и avoided crossing, но не предсказывает поляритонную химию.</p>
+
+    <h2>Безопасный научный процесс</h2>
+    <ol>
+      <li>Исследуйте голую молекулу на уровне HF в основной лаборатории.</li>
+      <li>Используйте cavity-панель только для качественной интуиции по параметрам.</li>
+      <li>Экспортируйте геометрию и создайте шаблон внешнего расчёта через Bridge.</li>
+      <li>Перед публикацией проверьте выводы в QED-HF, QED-DFT, coupled-cluster или dynamics-коде.</li>
+    </ol>
+
+    <h2>Источники</h2>
+    <ul class="references">
+      <li><a href="https://arxiv.org/abs/2603.17582">Quantum Field Approaches to Chemical Systems</a>, arXiv:2603.17582.</li>
+      <li>M. Ruggenthaler et al., <a href="https://doi.org/10.1021/acs.chemrev.2c00788">Chem. Rev. (2023)</a>.</li>
+      <li>C. Schäfer et al., <a href="https://doi.org/10.1038/s41467-022-29003-2">Nature Communications 13, 1315 (2022)</a>.</li>
+    </ul>
+    <p>Об электронном приближении: <a href="../hartree-fock/">метод Хартри–Фока в браузере</a>.</p>
+  </main>
+  <footer class="site-footer"><div class="footer-inner"><span>Обновлено 11 июля 2026</span><a href="https://github.com/W1neSkin/quantum-field-molecules">Код и тесты</a></div></footer>
+</body>
+</html>

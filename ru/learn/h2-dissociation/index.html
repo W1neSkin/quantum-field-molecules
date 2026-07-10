@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Диссоциация H₂: RHF, UHF и полное КВ | Интерактивно</title>
+  <meta name="description" content="Интерактивная кривая разрыва связи H2: почему RHF ошибается, как UHF нарушает спиновую симметрию и как полное КВ учитывает корреляцию.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://w1neskin.github.io/quantum-field-molecules/ru/learn/h2-dissociation/">
+  <link rel="alternate" hreflang="en" href="https://w1neskin.github.io/quantum-field-molecules/learn/h2-dissociation/">
+  <link rel="alternate" hreflang="ru" href="https://w1neskin.github.io/quantum-field-molecules/ru/learn/h2-dissociation/">
+  <link rel="alternate" hreflang="x-default" href="https://w1neskin.github.io/quantum-field-molecules/learn/h2-dissociation/">
+  <meta property="og:type" content="article">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:title" content="Диссоциация H₂: RHF, UHF и полное КВ">
+  <meta property="og:description" content="Живой эксперимент по разрыву связи, который делает электронную корреляцию видимой.">
+  <meta property="og:url" content="https://w1neskin.github.io/quantum-field-molecules/ru/learn/h2-dissociation/">
+  <meta property="og:image" content="https://w1neskin.github.io/quantum-field-molecules/assets/og.png">
+  <link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../../css/content.css">
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"TechArticle",
+    "headline":"Диссоциация H₂: RHF, UHF и полное КВ",
+    "description":"Интерактивное объяснение электронной корреляции и разрыва связи H2.",
+    "url":"https://w1neskin.github.io/quantum-field-molecules/ru/learn/h2-dissociation/",
+    "image":"https://w1neskin.github.io/quantum-field-molecules/assets/og.png",
+    "datePublished":"2026-07-11",
+    "dateModified":"2026-07-11",
+    "inLanguage":"ru",
+    "author":{"@type":"Organization","name":"Участники quantum-field-molecules","url":"https://github.com/W1neSkin/quantum-field-molecules"}
+  }
+  </script>
+</head>
+<body>
+  <a class="skip" href="#content">К содержанию</a>
+  <header class="site-header"><nav class="nav" aria-label="Основная навигация"><a class="brand" href="../../../?lang=ru">Молекулы глазами КТП</a><span class="nav-links"><a href="../">Материалы</a><a href="../../../learn/h2-dissociation/" lang="en">English</a></span></nav></header>
+  <main id="content">
+    <nav class="breadcrumbs" aria-label="Хлебные крошки"><a href="../../../?lang=ru">Лаборатория</a> / <a href="../">Материалы</a> / Диссоциация H₂</nav>
+    <p class="eyebrow">Пошаговый эксперимент</p>
+    <h1>Разорвите связь H₂: RHF, UHF и полное КВ</h1>
+    <p class="lead">Водород — простейшая молекула, однако растяжение её связи сразу показывает главный недостаток однодетерминантной волновой функции. Приложение позволяет следить за энергией и плотностью при удалении ядер.</p>
+    <a class="button" href="../../../?lang=ru&amp;mol=H2&amp;basis=STO-3G&amp;mode=density">Открыть эксперимент H₂</a>
+
+    <h2>Начните около равновесия</h2>
+    <p>При экспериментальном расстоянии Rₑ ≈ 0,741 Å оба электрона преимущественно занимают связывающую σg-орбиталь. Здесь RHF даёт полезное приближение: один детерминант качественно описывает ковалентную связь, а плотность концентрируется между ядрами.</p>
+    <p>На графике совмещены три разных объекта. Жёлтая кривая — вычисленная энергия Хартри–Фока. Синяя — потенциал Морзе по экспериментальным спектроскопическим константам. Зелёная — полное конфигурационное взаимодействие двух электронов, точное только в выбранном конечном базисе.</p>
+
+    <h2>Почему RHF даёт неверный предел</h2>
+    <p>RHF требует одну дважды занятую пространственную орбиталь при любом расстоянии. На больших R она остаётся симметричной комбинацией двух атомных функций 1s. Поэтому детерминант содержит нефизическую смесь нейтральных и ионных фрагментов вместо ровно одного электрона на каждом атоме.</p>
+    <p>Это ошибка статической корреляции: два детерминанта становятся одинаково важными, а RHF разрешает только один. Поэтому хвост RHF-кривой стремится к неверному пределу. Расширение базиса не устраняет эту однодетерминантную проблему.</p>
+
+    <h2>Что исправляет и нарушает UHF</h2>
+    <p>UHF разрешает α-орбитали локализоваться на одном атоме, а β-орбитали — на другом. Энергия приходит к физически разумному пределу изолированных атомов. Но полученный детерминант уже не является чистым синглетом и содержит триплетную примесь, что видно по спиновой контаминации ⟨S²⟩.</p>
+    <p>Нарушение симметрии полезно, но не точно: UHF обменивает чистоту спина на качественно правильную диссоциацию.</p>
+
+    <h2>Как полное КВ восстанавливает корреляцию</h2>
+    <p>Для двух электронов приложение включает все детерминанты, доступные в выбранном орбитальном базисе. Полное КВ смешивает связывающую и разрыхляющую конфигурации с коэффициентами, зависящими от R. Около равновесия доминирует связывающий детерминант; на больших R комбинация удаляет ионные члены и даёт два нейтральных атома.</p>
+    <div class="note"><strong>У слова «точное» есть условие.</strong><p>Полное КВ точно для выбранного конечного гауссова базиса, а не для полного физического гильбертова пространства. У FCI/STO-3G остаётся ошибка базиса.</p></div>
+
+    <h2>Воспроизведите сравнение</h2>
+    <ol>
+      <li>Откройте H₂ со STO-3G и дождитесь скана E(R).</li>
+      <li>Перемещайте R от равновесия к 3–5 Å и наблюдайте разделение плотности.</li>
+      <li>Сравните хвосты жёлтой RHF- и зелёной FCI-кривых.</li>
+      <li>Повторите с 6-31G и отделите ошибку базиса от ошибки корреляции.</li>
+      <li>Экспортируйте JSON или отчёт, чтобы зафиксировать метод, базис и ключ запроса.</li>
+    </ol>
+
+    <h2>Почему пример важен</h2>
+    <p>Та же многоконфигурационная проблема возникает при разрыве других связей, в дирадикалах, химии переходных металлов и возбуждённых состояниях. H₂ ценен тем, что отказ приближения виден без лишней химической сложности.</p>
+
+    <h2>Источники</h2>
+    <ul class="references">
+      <li>А. Сабо, Н. Ослунд, <cite>Современная квантовая химия</cite>, разделы о H₂ и конфигурационном взаимодействии.</li>
+      <li><a href="https://cccbdb.nist.gov/">NIST CCCBDB</a> — справочные молекулярные данные.</li>
+      <li><a href="https://mccullaghlab.github.io/physical_chemistry/quantum_mechanics/H2_Configuration_Interaction.html">H₂ Configuration Interaction</a>, Chemistry Lessons with Jupyter Notebooks.</li>
+    </ul>
+    <p>Теория метода: <a href="../hartree-fock/">как работает цикл Хартри–Фока</a>.</p>
+  </main>
+  <footer class="site-footer"><div class="footer-inner"><span>Обновлено 11 июля 2026</span><a href="https://github.com/W1neSkin/quantum-field-molecules">Код и тесты</a></div></footer>
+</body>
+</html>

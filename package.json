@@ -4,7 +4,10 @@
   "version": "1.0.0",
   "description": "In-browser Hartree-Fock quantum chemistry playground.",
   "scripts": {
-    "test": "node test/selfcheck.js",
+    "test": "npm run test:scientific && npm run test:routing && npm run test:seo",
+    "test:scientific": "node test/selfcheck.js",
+    "test:routing": "node test/url-state-check.js",
+    "test:seo": "node test/seo-check.js",
     "selfcheck": "node test/selfcheck.js"
   }
 }

@@ -11,7 +11,12 @@
     var t = localStorage.getItem("qft.theme") ||
       (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
     document.documentElement.setAttribute("data-theme", t);
-  } catch (e) { document.documentElement.setAttribute("data-theme", "dark"); }
+    document.documentElement.setAttribute("data-onboarding",
+      localStorage.getItem("qft.onb.dismissed") === "1" ? "dismissed" : "show");
+  } catch (e) {
+    document.documentElement.setAttribute("data-theme", "dark");
+    document.documentElement.setAttribute("data-onboarding", "show");
+  }
 })();
 </script>
 <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
@@ -24,10 +29,7 @@
 <meta name="googlebot" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1">
 <link rel="canonical" href="https://w1neskin.github.io/quantum-field-molecules/">
 <link rel="alternate" hreflang="en" href="https://w1neskin.github.io/quantum-field-molecules/">
-<link rel="alternate" hreflang="ru" href="https://w1neskin.github.io/quantum-field-molecules/?lang=ru">
-<link rel="alternate" hreflang="de" href="https://w1neskin.github.io/quantum-field-molecules/?lang=de">
-<link rel="alternate" hreflang="es" href="https://w1neskin.github.io/quantum-field-molecules/?lang=es">
-<link rel="alternate" hreflang="zh" href="https://w1neskin.github.io/quantum-field-molecules/?lang=zh">
+<link rel="alternate" hreflang="ru" href="https://w1neskin.github.io/quantum-field-molecules/ru/">
 <link rel="alternate" hreflang="x-default" href="https://w1neskin.github.io/quantum-field-molecules/">
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://w1neskin.github.io/quantum-field-molecules/">
@@ -39,9 +41,6 @@
 <meta property="og:image:height" content="630">
 <meta property="og:locale" content="en_US">
 <meta property="og:locale:alternate" content="ru_RU">
-<meta property="og:locale:alternate" content="de_DE">
-<meta property="og:locale:alternate" content="es_ES">
-<meta property="og:locale:alternate" content="zh_CN">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="Molecules through Quantum Field Theory">
 <meta name="twitter:description" content="In-browser Hartree-Fock quantum chemistry with densities, orbitals, ESP/ELF, optimization and IR spectra.">
@@ -70,27 +69,42 @@
 <body>
 <main>
   <div class="titlebar">
-    <h1 data-i18n="app.h1">Molecules through the eyes of quantum field theory</h1>
+    <h1 data-i18n="app.h1">Molecules through the lens of quantum field theory</h1>
     <span class="row" style="gap:8px;flex-wrap:nowrap">
-      <select id="langSelect" data-i18n-title="top.lang.tip"></select>
+      <select id="langSelect" data-i18n-title="top.lang.tip"><option value="en">English</option></select>
       <button id="themeToggle" class="btn icon" data-i18n-title="top.theme.tip">&#9790;</button>
-      <button id="helpBtn" class="btn" data-i18n="help.btn" data-i18n-title="top.help.tip"></button>
+      <button id="helpBtn" class="btn" data-i18n="help.btn" data-i18n-title="top.help.tip">guide</button>
     </span>
   </div>
-  <p class="lead" data-i18n="app.lead"></p>
-  <div id="onbBox" class="callout" style="display:none">
+  <p class="lead" data-i18n="app.lead">Every molecule shown here is a bound state |Ω⟩ of the electron, nuclear and electromagnetic fields. The map displays the observable ⟨Ω|ψ̂†(x)ψ̂(x)|Ω⟩ - the electron field density, computed in your browser by the Hartree–Fock method. Select a preset or supply your own geometry.</p>
+  <noscript>
+    <section class="card">
+      <div class="body">
+        <h2>Static learning guides</h2>
+        <p class="small sec">The interactive laboratory requires JavaScript. Read the guides without it:</p>
+        <ul class="small sec">
+          <li><a href="learn/hartree-fock/">Hartree–Fock in the browser</a></li>
+          <li><a href="learn/h2-dissociation/">H₂ dissociation: RHF, UHF and full CI</a></li>
+          <li><a href="learn/electron-density-orbitals/">Electron density, orbitals, ELF and Boys localization</a></li>
+          <li><a href="learn/qft-molecules/">Molecules through quantum field theory</a></li>
+        </ul>
+        <p class="small sec"><a href="learn/">All English guides</a> · <a href="ru/learn/" lang="ru">Русские материалы</a></p>
+      </div>
+    </section>
+  </noscript>
+  <div id="onbBox" class="callout">
     <div class="row" style="justify-content:space-between;align-items:flex-start;gap:12px">
-      <p class="small sec" style="margin:0" data-i18n="onb.text"></p>
-      <button id="onbClose" class="btn" data-i18n="onb.close"></button>
+      <p class="small sec" style="margin:0" data-i18n="onb.text">Quick start: pick a preset and click 3D for volume view. For custom molecules open the editor, click an atom to select it, then use “connect” to snap it to any other atom.</p>
+      <button id="onbClose" class="btn" data-i18n="onb.close">hide</button>
     </div>
   </div>
 
   <div class="shell">
     <aside class="side">
-      <select id="molSelect" data-i18n-title="top.mol.tip"></select>
-      <select id="basisSelect" data-i18n-title="top.basis.tip"></select>
-      <button id="btnOpt" class="btn" data-i18n="top.optimize" data-i18n-title="top.optimize.tip"></button>
-      <span id="status" class="status">…</span>
+      <select id="molSelect" data-i18n-title="top.mol.tip"><option value="H2">H₂ - hydrogen</option></select>
+      <select id="basisSelect" data-i18n-title="top.basis.tip"><option value="STO-3G">STO-3G</option></select>
+      <button id="btnOpt" class="btn" data-i18n="top.optimize" data-i18n-title="top.optimize.tip">optimize geometry</button>
+      <span id="status" class="status" aria-live="polite">Loading H₂…</span>
 
       <div id="customPanel" style="display:none">
         <button id="openBuilderBtn" class="btn" data-i18n="custom.open" data-i18n-title="custom.open.tip"></button>
@@ -103,8 +117,13 @@
         <p class="small faint" data-i18n="custom.hint"></p>
       </div>
 
-      <div id="errorBox" class="callout" style="display:none"></div>
-      <div id="facts"></div>
+      <div id="errorBox" class="callout" role="alert" style="display:none"></div>
+      <div id="facts">
+        <p class="small sec">- The reference covalent bond: both quanta of the electron field occupy a single bonding σg mode.</p>
+        <p class="small sec">- The QED correction (Lamb shift) to the dissociation energy is −0.195 cm⁻¹ and has been confirmed experimentally.</p>
+        <p class="small sec">- For this two-electron system the exact problem (full CI) is also solved here - the green curve on the E(R) chart.</p>
+        <p class="small faint">Scope note: panel values are from browser HF (STO-3G); some facts are external references for context and are not direct outputs of this calculation.</p>
+      </div>
     </aside>
 
     <div class="center">
@@ -135,9 +154,9 @@
         <label id="frameWrap" class="small muted" style="display:none;gap:5px;align-items:center;margin:2px 0 6px" data-i18n-title="frame.tip">
           <input type="checkbox" id="frameToggle"> <span data-i18n="frame.label"></span>
         </label>
-        <canvas id="density" width="960" height="576"></canvas>
+        <canvas id="density" width="960" height="576" role="img" aria-label="Electron field density map"></canvas>
         <div id="glWrap" style="display:none">
-          <canvas id="gl" width="960" height="576"></canvas>
+          <canvas id="gl" width="960" height="576" role="img" aria-label="Three-dimensional molecular field view"></canvas>
           <div id="glLabels"></div>
         </div>
         <p id="modeNote" class="small muted" style="margin-top:8px"></p>
@@ -156,7 +175,7 @@
       <div class="body">
         <svg id="energySvg" class="chart-svg"></svg>
         <div id="scanRow" class="row" style="margin-top:8px;display:none">
-          <input id="rSlider" type="range" min="0" max="0" value="0" step="1" disabled style="flex:1">
+          <input id="rSlider" type="range" min="0" max="0" value="0" step="1" disabled style="flex:1" data-i18n-title="scan.slider.tip">
           <span id="rReadout" class="small muted" style="white-space:nowrap"></span>
         </div>
         <p id="energyCaption" class="small faint" style="margin-top:6px" data-i18n="scan.const"></p>
@@ -382,6 +401,25 @@
     </div>
   </section>
 
+  <!-- Semantic Learn block: real <a> links for crawlers; labels stay i18n-aware. -->
+  <section class="card" id="learnCard" aria-labelledby="learnHeading">
+    <div class="body">
+      <h2 id="learnHeading" class="learn-h2" data-i18n="learn.title">Learn what the laboratory computes</h2>
+      <p class="small sec" data-i18n="learn.lead">Short scientific guides connect each interactive view to its equations, limits and a reproducible experiment.</p>
+      <ul class="small sec learn-list">
+        <li><a href="learn/hartree-fock/" data-i18n="learn.hf">Hartree–Fock: RHF, UHF, SCF and basis limits</a></li>
+        <li><a href="learn/h2-dissociation/" data-i18n="learn.h2">H₂ dissociation with RHF, UHF and full CI</a></li>
+        <li><a href="learn/electron-density-orbitals/" data-i18n="learn.density">Electron density, orbitals, ELF and Boys localization</a></li>
+        <li><a href="learn/qft-molecules/" data-i18n="learn.qft">Molecules through quantum field theory</a></li>
+      </ul>
+      <p class="small sec">
+        <a href="learn/" data-i18n="learn.all">All English guides</a>
+        ·
+        <a href="ru/learn/" lang="ru" data-i18n="learn.ru">Русские материалы</a>
+      </p>
+    </div>
+  </section>
+
   <section class="card" id="aboutCard">
     <header><span data-i18n="about.title">About this project</span></header>
     <div class="body">
@@ -393,6 +431,7 @@
 
   <footer>
     <p class="small faint" data-i18n="footer"></p>
+    <p class="small faint"><a href="validation/"><span data-i18n="footer.validation">Validation, reproducibility and citation</span></a> · <a href="learn/"><span data-i18n="footer.guides">Scientific guides</span></a></p>
     <p class="small faint"><a href="https://github.com/W1neSkin/quantum-field-molecules" rel="author"><span data-i18n="footer.src">Source code (MIT) on GitHub</span></a></p>
   </footer>
 </main>
@@ -485,63 +524,64 @@ H 0 -0.7572 -0.4692</textarea>
   </div>
 </div>
 
-<script src="js/theme.js"></script>
-<script src="js/i18n.js"></script>
-<script src="js/lang/en.js"></script>
-<script src="js/lang/en-content.js"></script>
-<script src="js/lang/ru.js"></script>
-<script src="js/lang/ru-content.js"></script>
-<script src="js/lang/de.js"></script>
-<script src="js/lang/es.js"></script>
-<script src="js/lang/zh.js"></script>
-<script src="js/basis.js"></script>
-<script src="js/basis631.js"></script>
-<script src="js/linalg.js"></script>
-<script src="js/integrals.js"></script>
-<script src="js/eri.js"></script>
-<script src="js/scf.js"></script>
-<script src="js/uhf.js"></script>
-<script src="js/props.js"></script>
-<script src="js/fci2.js"></script>
-<script src="js/engine.js"></script>
-<script src="js/finder-core.js"></script>
-<script src="js/geometries.js"></script>
-<script src="js/client-core.js"></script>
-<script src="js/client.js"></script>
-<script src="js/provenance.js"></script>
-<script src="js/heatmap.js"></script>
-<script src="js/esp.js"></script>
-<script src="js/fields2d.js"></script>
-<script src="js/builder.js?v=20260613fh"></script>
-<script src="js/localize.js"></script>
-<script src="js/localize-async.js"></script>
-<script src="js/grid3d.js"></script>
-<script src="js/view3d.js"></script>
-<script src="js/vib.js"></script>
-<script src="js/energy.js"></script>
-<script src="js/cavity-sandbox.js"></script>
-<script src="js/scaling-lab.js"></script>
-<script src="js/cross-bridge.js"></script>
-<script src="js/finder.js"></script>
-<script src="js/irchart.js"></script>
-<script src="js/scan.js"></script>
-<script src="js/molevels.js"></script>
-<script src="js/diagrams.js"></script>
-<script src="js/benchmark.js"></script>
-<script src="js/uncertainty.js"></script>
-<script src="js/exporter.js"></script>
-<script src="js/help.js"></script>
-<script src="js/tooltip.js"></script>
-<script src="js/lab-tabs.js"></script>
-<script src="js/app-map.js"></script>
-<script src="js/app-view.js"></script>
-<script src="js/app-panels.js"></script>
-<script src="js/app-compute.js"></script>
-<script src="js/app-runtime.js"></script>
-<script src="js/app-shell.js"></script>
-<script src="js/app-builder-ui.js"></script>
-<script src="js/app-builder.js"></script>
-<script src="js/app-init.js"></script>
-<script src="js/app.js"></script>
+<script defer src="js/theme.js"></script>
+<script defer src="js/i18n.js"></script>
+<script defer src="js/url-state.js"></script>
+<script defer src="js/lang/en.js"></script>
+<script defer src="js/lang/en-content.js"></script>
+<script defer src="js/lang/ru.js"></script>
+<script defer src="js/lang/ru-content.js"></script>
+<script defer src="js/lang/de.js"></script>
+<script defer src="js/lang/es.js"></script>
+<script defer src="js/lang/zh.js"></script>
+<script defer src="js/basis.js"></script>
+<script defer src="js/basis631.js"></script>
+<script defer src="js/linalg.js"></script>
+<script defer src="js/integrals.js"></script>
+<script defer src="js/eri.js"></script>
+<script defer src="js/scf.js"></script>
+<script defer src="js/uhf.js"></script>
+<script defer src="js/props.js"></script>
+<script defer src="js/fci2.js"></script>
+<script defer src="js/engine.js"></script>
+<script defer src="js/finder-core.js"></script>
+<script defer src="js/geometries.js"></script>
+<script defer src="js/client-core.js"></script>
+<script defer src="js/client.js"></script>
+<script defer src="js/provenance.js"></script>
+<script defer src="js/heatmap.js"></script>
+<script defer src="js/esp.js"></script>
+<script defer src="js/fields2d.js"></script>
+<script defer src="js/builder.js?v=20260613fh"></script>
+<script defer src="js/localize.js"></script>
+<script defer src="js/localize-async.js"></script>
+<script defer src="js/grid3d.js"></script>
+<script defer src="js/view3d.js"></script>
+<script defer src="js/vib.js"></script>
+<script defer src="js/energy.js"></script>
+<script defer src="js/cavity-sandbox.js"></script>
+<script defer src="js/scaling-lab.js"></script>
+<script defer src="js/cross-bridge.js"></script>
+<script defer src="js/finder.js"></script>
+<script defer src="js/irchart.js"></script>
+<script defer src="js/scan.js"></script>
+<script defer src="js/molevels.js"></script>
+<script defer src="js/diagrams.js"></script>
+<script defer src="js/benchmark.js"></script>
+<script defer src="js/uncertainty.js"></script>
+<script defer src="js/exporter.js"></script>
+<script defer src="js/help.js"></script>
+<script defer src="js/tooltip.js"></script>
+<script defer src="js/lab-tabs.js"></script>
+<script defer src="js/app-map.js"></script>
+<script defer src="js/app-view.js"></script>
+<script defer src="js/app-panels.js"></script>
+<script defer src="js/app-compute.js"></script>
+<script defer src="js/app-runtime.js"></script>
+<script defer src="js/app-shell.js"></script>
+<script defer src="js/app-builder-ui.js"></script>
+<script defer src="js/app-builder.js"></script>
+<script defer src="js/app-init.js"></script>
+<script defer src="js/app.js"></script>
 </body>
 </html>

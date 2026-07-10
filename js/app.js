@@ -148,7 +148,7 @@
     });
     computeCtl = App.appCompute.create({
       state: state, t: t, $: $, setBusy: setBusy, setStatus: setStatus,
-      renderAll: renderAll, renderVib: renderVib, haToEv: HA_TO_EV
+      renderAll: renderAll, renderVib: renderVib, setMode: setMode, haToEv: HA_TO_EV
     });
     shellCtl = App.appShell.create({
       state: state, t: t, $: $, loadMolecule: loadMolecule,

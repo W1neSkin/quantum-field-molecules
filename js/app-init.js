@@ -57,8 +57,11 @@
         App.theme.init();
         App.i18n.init();
         createControllers();
+        var route = App.urlState && App.urlState.read ? App.urlState.read() : {};
+        state.pendingMode = route.mode || "";
 
       var langSel = $("langSelect");
+      langSel.innerHTML = "";
       App.i18n.languages().forEach(function (l) {
         var o = document.createElement("option");
         o.value = l.code; o.textContent = l.name;
@@ -71,27 +74,29 @@
 
       var sel = $("molSelect");
       fillMolSelect();
+      if (route.molecule && App.getPreset(route.molecule)) sel.value = route.molecule;
       sel.addEventListener("change", function () {
         if (state.busy) return;
         selectPreset(sel.value);
       });
-      // Kick off the first calculation immediately after selector wiring.
-      // If later optional init blocks throw, the user still sees data on load.
-      if (!state.result && !state.busy) selectPreset(sel.value || "H2");
-      initBuilder();
 
       var bsel = $("basisSelect");
+      bsel.innerHTML = "";
       Object.keys(App.BASIS_TABLES).forEach(function (name) {
         var o = document.createElement("option");
         o.value = name; o.textContent = name;
         bsel.appendChild(o);
       });
+      if (route.basis && App.BASIS_TABLES[route.basis]) state.basis = route.basis;
       bsel.value = state.basis;
       bsel.addEventListener("change", function () {
         if (state.busy) { bsel.value = state.basis; return; }
         state.basis = bsel.value;
         reloadCurrent();
       });
+      // Apply molecule and basis from the URL before the first calculation.
+      if (!state.result && !state.busy) selectPreset(sel.value || "H2");
+      initBuilder();
 
       safeRun("view3d", function () {
         if (App.view3d.supported() && App.view3d.init($("gl"), $("glLabels"))) {
@@ -191,7 +196,9 @@
 
       safeRun("help", function () { App.help.init(); });
       safeRun("labTabs", function () {
-        if (App.labTabs && App.labTabs.init) App.labTabs.init();
+        if (!App.labTabs || !App.labTabs.init) return;
+        App.labTabs.init();
+        if (route.labTarget && App.labTabs.show) App.labTabs.show(route.labTarget);
       });
       safeRun("onboarding", initOnboarding);
       safeRun("exchange", function () { App.diagrams.renderExchange($("exchange")); });

@@ -556,12 +556,13 @@ function runAsyncChecks() {
   );
   check("report pack", /Journal-ready report/.test(repPack.reportMd) &&
     /Methods appendix/.test(repPack.methodsMd) && /Validity checklist/.test(repPack.reportMd) &&
-    /Uncertainty hint/.test(repPack.reportMd) && /Bands:/.test(repPack.reportMd) &&
+    /Uncertainty hint/.test(repPack.reportMd) && /Heuristic bands:/.test(repPack.reportMd) &&
     repPack.figurePack.figures.length >= 3,
   "report/methods/figure-pack artifacts are generated");
   check("report manifest", repPack.manifest.requestKey === "abc123" &&
     repPack.manifest.source === "worker" && !!repPack.manifest.validityChecklist &&
-    !!repPack.manifest.uncertainty && !!(repPack.manifest.uncertainty.bands),
+    !!repPack.manifest.uncertainty && repPack.manifest.uncertainty.kind === "heuristic" &&
+    repPack.manifest.uncertainty.statistical === false && !!(repPack.manifest.uncertainty.bands),
   "manifest keeps provenance, validity checklist and uncertainty");
 
   // Async Boys localization should return the same output shape as the sync path.

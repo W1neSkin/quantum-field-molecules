@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Электронная плотность, орбитали, ELF и орбитали Бойса</title>
+  <meta name="description" content="Как интерпретировать электронную плотность, молекулярные орбитали, электростатический потенциал, ELF, лапласиан и локализованные связи Бойса.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://w1neskin.github.io/quantum-field-molecules/ru/learn/electron-density-orbitals/">
+  <link rel="alternate" hreflang="en" href="https://w1neskin.github.io/quantum-field-molecules/learn/electron-density-orbitals/">
+  <link rel="alternate" hreflang="ru" href="https://w1neskin.github.io/quantum-field-molecules/ru/learn/electron-density-orbitals/">
+  <link rel="alternate" hreflang="x-default" href="https://w1neskin.github.io/quantum-field-molecules/learn/electron-density-orbitals/">
+  <meta property="og:type" content="article">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:title" content="Электронная плотность, орбитали, ELF и локализация Бойса">
+  <meta property="og:description" content="Какие молекулярные карты наблюдаемы, какие являются представлениями и как их читать.">
+  <meta property="og:url" content="https://w1neskin.github.io/quantum-field-molecules/ru/learn/electron-density-orbitals/">
+  <meta property="og:image" content="https://w1neskin.github.io/quantum-field-molecules/assets/og.png">
+  <link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../../css/content.css">
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"TechArticle",
+    "headline":"Электронная плотность, орбитали, ELF и локализация Бойса",
+    "description":"Практический разбор карт плотности и орбитальных представлений молекулы.",
+    "url":"https://w1neskin.github.io/quantum-field-molecules/ru/learn/electron-density-orbitals/",
+    "image":"https://w1neskin.github.io/quantum-field-molecules/assets/og.png",
+    "datePublished":"2026-07-11",
+    "dateModified":"2026-07-11",
+    "inLanguage":"ru",
+    "author":{"@type":"Organization","name":"Участники quantum-field-molecules","url":"https://github.com/W1neSkin/quantum-field-molecules"}
+  }
+  </script>
+</head>
+<body>
+  <a class="skip" href="#content">К содержанию</a>
+  <header class="site-header"><nav class="nav" aria-label="Основная навигация"><a class="brand" href="../../../?lang=ru">Молекулы глазами КТП</a><span class="nav-links"><a href="../">Материалы</a><a href="../../../learn/electron-density-orbitals/" lang="en">English</a></span></nav></header>
+  <main id="content">
+    <nav class="breadcrumbs" aria-label="Хлебные крошки"><a href="../../../?lang=ru">Лаборатория</a> / <a href="../">Материалы</a> / Плотность и орбитали</nav>
+    <p class="eyebrow">Разбор визуализаций</p>
+    <h1>Плотность наблюдаема, орбитали — способ представления</h1>
+    <p class="lead">Приложение показывает несколько цветных карт одного состояния Хартри–Фока. Они отвечают на разные вопросы и не должны восприниматься как взаимозаменяемые изображения.</p>
+    <a class="button" href="../../../?lang=ru&amp;mol=H2O&amp;basis=STO-3G&amp;mode=elf">Исследовать карты H₂O</a>
+
+    <h2>Полная электронная плотность ρ(r)</h2>
+    <p>Полная плотность — среднее значение оператора плотности; её интеграл равен числу электронов. В HF с замкнутой оболочкой она собирается из занятых орбиталей, но не меняется при любом унитарном повороте внутри занятого пространства.</p>
+    <p>Поэтому плотность фундаментальнее конкретной орбитальной картинки. Двумерная карта — сечение через ядра; трёхмерный режим дискретизирует то же поле на конечной сетке и выполняет объёмный рендеринг.</p>
+
+    <h2>Молекулярные орбитали и знак</h2>
+    <p>Канонические молекулярные орбитали диагонализуют матрицу Фока. Их энергии поддерживают качественные понятия HOMO, LUMO и потенциал ионизации по Купмансу. Оранжевые и синие лепестки показывают знак амплитуды ψ, а не положительный и отрицательный заряд.</p>
+    <p>Отдельные занятые орбитали не являются уникальными наблюдаемыми. Поворот занятого набора меняет их форму, но оставляет детерминант, плотность и HF-энергию прежними. Поэтому одна молекула допускает несколько корректных орбитальных картин.</p>
+
+    <h2>Локализованные связи и пары Бойса</h2>
+    <p>Локализация Фостера–Бойса выбирает поворот занятых орбиталей, который делает центроиды орбитального заряда компактными. У воды делокализованный канонический набор превращается в остов кислорода, две O–H-связи и две неподелённые пары — привычную картину Льюиса.</p>
+    <p>Локализованные подписи помогают интерпретации. Индивидуальные энергии таких орбиталей не определены, поэтому диаграмма уровней продолжает показывать канонические МО.</p>
+
+    <h2>ELF и лапласиан плотности</h2>
+    <p>Функция локализации электронов ELF — безразмерный индикатор, построенный из плотности и кинетической плотности. Значения около единицы выделяют области локализованных пар, а около 0,5 напоминают однородный электронный газ. Яркие бассейны ELF показывают связи, неподелённые пары и оболочки.</p>
+    <p>Лапласиан ∇²ρ измеряет локальную кривизну. Отрицательные области соответствуют концентрации заряда, положительные — разрежению. Для строгого QTAIM-анализа нужны также топология, критические точки и численная сходимость, а не только сечение.</p>
+
+    <h2>Электростатическая и спиновая карты</h2>
+    <p>Электростатический потенциал объединяет ядерный и электронный заряд и указывает области притяжения положительного пробного заряда. Стрелки показывают E = −∇φ. Спиновая плотность ρ↑−ρ↓ доступна для UHF-систем и локализует неспаренный спин, например на двух атомах триплетного O₂.</p>
+
+    <div class="note"><strong>Цвета разных режимов нельзя сравнивать как одну шкалу.</strong><p>Плотность, амплитуда орбитали, ELF, лапласиан, ЭСП и спиновая плотность имеют разные определения и нормировки. Перед сравнением прочитайте подпись режима.</p></div>
+
+    <h2>Полезная последовательность для H₂O</h2>
+    <ol>
+      <li>Начните с полной плотности и найдите область O–H-связей.</li>
+      <li>Откройте занятые канонические орбитали и оцените их делокализацию.</li>
+      <li>Включите орбитали Бойса и найдите две связи и две неподелённые пары.</li>
+      <li>Сравните те же области на ELF и электростатическом потенциале.</li>
+      <li>Смените STO-3G на 6-31G* и отделите устойчивые признаки от артефактов базиса.</li>
+    </ol>
+
+    <h2>Источники</h2>
+    <ul class="references">
+      <li>J. M. Foster, S. F. Boys, <a href="https://doi.org/10.1103/RevModPhys.32.300">Rev. Mod. Phys. 32, 300 (1960)</a>.</li>
+      <li>A. D. Becke, K. E. Edgecombe, <a href="https://doi.org/10.1063/1.458517">J. Chem. Phys. 92, 5397 (1990)</a>.</li>
+      <li>R. F. W. Bader, <cite>Atoms in Molecules: A Quantum Theory</cite>.</li>
+    </ul>
+    <p>Контекст метода: <a href="../hartree-fock/">Хартри–Фок и зависимость от базиса</a>.</p>
+  </main>
+  <footer class="site-footer"><div class="footer-inner"><span>Обновлено 11 июля 2026</span><a href="https://github.com/W1neSkin/quantum-field-molecules">Код и тесты</a></div></footer>
+</body>
+</html>

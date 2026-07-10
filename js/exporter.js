@@ -58,7 +58,7 @@
         "quantum-field-molecules: " + (deps.getPreset()
           ? deps.getPreset().formula + " " + presetDisplayName(deps.getPreset())
           : "custom molecule"),
-        "field: " + modeTag(mode) + " (RHF/UHF STO-3G, computed in browser)",
+        "field: " + modeTag(mode) + " (" + methodTag(result) + "/" + (result.basisName || "unknown basis") + ", computed in browser)",
         ("     " + (isMo ? -result.atoms.length : result.atoms.length)).slice(-5) + f6(o[0]) + f6(o[1]) + f6(o[2]),
         ("     " + N).slice(-5) + f6(step) + f6(0) + f6(0),
         ("     " + N).slice(-5) + f6(0) + f6(step) + f6(0),
@@ -168,6 +168,8 @@
     manifest.validityChecklist = checklist;
     if (uncertainty) {
       manifest.uncertainty = {
+        kind: "heuristic",
+        statistical: false,
         level: uncertainty.level,
         score: uncertainty.score,
         confidence: uncertainty.confidence,
@@ -201,10 +203,10 @@
       "",
       "## Uncertainty hint",
       uncertainty
-        ? ("- Level: " + uncertainty.level + " (score " + uncertainty.score + "/8, confidence " + Math.round(uncertainty.confidence * 100) + "%).")
+        ? ("- Level: " + uncertainty.level + " (heuristic risk score " + uncertainty.score + "/8, confidence index " + Math.round(uncertainty.confidence * 100) + "%).")
         : "- n/a",
       uncertainty && uncertainty.bands
-        ? ("- Bands: ±" + uncertainty.bands.energyHa.toFixed(4) + " Ha (E)" +
+        ? ("- Heuristic bands: ±" + uncertainty.bands.energyHa.toFixed(4) + " Ha (E)" +
           (uncertainty.bands.dipoleD != null ? ", ±" + uncertainty.bands.dipoleD.toFixed(2) + " D (dipole)" : "") +
           (uncertainty.bands.gapEv != null ? ", ±" + uncertainty.bands.gapEv.toFixed(2) + " eV (gap)" : ""))
         : "- Bands: n/a",

@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Electron Density, Molecular Orbitals, ELF and Boys</title>
+  <meta name="description" content="Interpret electron density, molecular orbitals, electrostatic potential, ELF, the density Laplacian and Boys-localized bonds in an interactive molecule.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://w1neskin.github.io/quantum-field-molecules/learn/electron-density-orbitals/">
+  <link rel="alternate" hreflang="en" href="https://w1neskin.github.io/quantum-field-molecules/learn/electron-density-orbitals/">
+  <link rel="alternate" hreflang="ru" href="https://w1neskin.github.io/quantum-field-molecules/ru/learn/electron-density-orbitals/">
+  <link rel="alternate" hreflang="x-default" href="https://w1neskin.github.io/quantum-field-molecules/learn/electron-density-orbitals/">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Electron Density, Molecular Orbitals, ELF and Boys Localization">
+  <meta property="og:description" content="Which molecular maps are observable, which are representations, and how to read them.">
+  <meta property="og:url" content="https://w1neskin.github.io/quantum-field-molecules/learn/electron-density-orbitals/">
+  <meta property="og:image" content="https://w1neskin.github.io/quantum-field-molecules/assets/og.png">
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../css/content.css">
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"TechArticle",
+    "headline":"Electron Density, Molecular Orbitals, ELF and Boys Localization",
+    "description":"A practical guide to density-derived molecular maps and orbital representations.",
+    "url":"https://w1neskin.github.io/quantum-field-molecules/learn/electron-density-orbitals/",
+    "image":"https://w1neskin.github.io/quantum-field-molecules/assets/og.png",
+    "datePublished":"2026-07-11",
+    "dateModified":"2026-07-11",
+    "inLanguage":"en",
+    "author":{"@type":"Organization","name":"quantum-field-molecules contributors","url":"https://github.com/W1neSkin/quantum-field-molecules"}
+  }
+  </script>
+</head>
+<body>
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="site-header"><nav class="nav" aria-label="Primary"><a class="brand" href="../../">Quantum Field Molecules</a><span class="nav-links"><a href="../">Learn</a><a href="../../ru/learn/electron-density-orbitals/" lang="ru">Русский</a></span></nav></header>
+  <main id="content">
+    <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../../">Laboratory</a> / <a href="../">Learn</a> / Density and orbitals</nav>
+    <p class="eyebrow">Visualization guide</p>
+    <h1>Electron density is observable; orbitals are a representation</h1>
+    <p class="lead">The app offers several colourful views of the same Hartree–Fock state. They answer different questions and should not be interpreted as interchangeable pictures.</p>
+    <a class="button" href="../../?mol=H2O&amp;basis=STO-3G&amp;mode=elf">Explore H₂O maps</a>
+
+    <h2>Total electron density ρ(r)</h2>
+    <p>The total density is the expectation value of the density operator and integrates to the electron count. In a closed-shell HF calculation it is assembled from the occupied orbitals, but it is invariant under any unitary rotation among those occupied orbitals.</p>
+    <p>Density is therefore more fundamental than a particular orbital picture. The two-dimensional map is a slice through the nuclei; the three-dimensional view samples the same field on a finite grid and volume-renders it.</p>
+
+    <h2>Molecular orbitals and their signs</h2>
+    <p>Canonical molecular orbitals diagonalize the Fock matrix. Their energies support qualitative concepts such as HOMO, LUMO and Koopmans ionization potential. The orange and blue lobes show the sign of the orbital amplitude ψ, not positive and negative charge.</p>
+    <p>Individual occupied orbitals are not unique observables. Rotating the occupied set can change their shapes while leaving the total determinant, density and HF energy unchanged. This is why different valid orbital pictures can describe the same molecule.</p>
+
+    <h2>Boys-localized bonds and lone pairs</h2>
+    <p>Foster–Boys localization chooses an occupied-orbital rotation that makes orbital charge centroids compact. For water, the delocalized canonical set becomes an oxygen core, two O–H bond orbitals and two lone pairs—the familiar Lewis-like picture.</p>
+    <p>Localized orbital labels are interpretive aids. Their individual orbital energies are not defined, so the energy-level diagram continues to show the canonical orbitals.</p>
+
+    <h2>ELF and the density Laplacian</h2>
+    <p>The electron localization function (ELF) is a dimensionless indicator derived from density and kinetic-energy-density terms. Values near one identify localized pair regions; values near one half resemble a homogeneous electron gas. Bright ELF basins can reveal bonds, lone pairs and shells.</p>
+    <p>The Laplacian ∇²ρ measures local curvature. Negative regions indicate local charge concentration; positive regions indicate depletion. It is useful for qualitative bonding analysis, but a rigorous QTAIM study also requires topology, critical points and careful numerical convergence beyond a display slice.</p>
+
+    <h2>Electrostatic and spin maps</h2>
+    <p>The electrostatic potential combines nuclear and electronic charge and helps identify regions attractive to a positive test charge. The arrow overlay shows E = −∇φ. Spin density ρ↑−ρ↓ is available for UHF systems and locates unpaired spin, for example on the two oxygen atoms in triplet O₂.</p>
+
+    <div class="note"><strong>Do not read colours across modes as the same scale.</strong><p>Density, orbital amplitude, ELF, Laplacian, ESP and spin density have different definitions and normalizations. Read the mode caption before comparing pictures.</p></div>
+
+    <h2>A useful H₂O sequence</h2>
+    <ol>
+      <li>Start with total density and identify the O–H bonding region.</li>
+      <li>Open the canonical occupied orbitals and note their delocalization.</li>
+      <li>Enable Boys orbitals and identify two bonds and two lone pairs.</li>
+      <li>Compare the same lone-pair regions in ELF and electrostatic potential.</li>
+      <li>Change STO-3G to 6-31G* and distinguish stable features from basis artefacts.</li>
+    </ol>
+
+    <h2>References</h2>
+    <ul class="references">
+      <li>J. M. Foster and S. F. Boys, “Canonical Configurational Interaction Procedure”, <a href="https://doi.org/10.1103/RevModPhys.32.300">Rev. Mod. Phys. 32, 300 (1960)</a>.</li>
+      <li>A. D. Becke and K. E. Edgecombe, “A simple measure of electron localization”, <a href="https://doi.org/10.1063/1.458517">J. Chem. Phys. 92, 5397 (1990)</a>.</li>
+      <li>R. F. W. Bader, <cite>Atoms in Molecules: A Quantum Theory</cite>.</li>
+    </ul>
+    <p>Method context: <a href="../hartree-fock/">Hartree–Fock and its basis dependence</a>.</p>
+  </main>
+  <footer class="site-footer"><div class="footer-inner"><span>Updated 11 July 2026</span><a href="https://github.com/W1neSkin/quantum-field-molecules">Source and tests</a></div></footer>
+</body>
+</html>

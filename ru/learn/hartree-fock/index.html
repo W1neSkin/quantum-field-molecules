@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Метод Хартри–Фока онлайн: расчёт в браузере | QFM</title>
+  <meta name="description" content="Как работают RHF, UHF, гауссовы базисы и цикл SCF, что показывает браузерный расчёт Хартри–Фока и какие у метода ограничения.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://w1neskin.github.io/quantum-field-molecules/ru/learn/hartree-fock/">
+  <link rel="alternate" hreflang="en" href="https://w1neskin.github.io/quantum-field-molecules/learn/hartree-fock/">
+  <link rel="alternate" hreflang="ru" href="https://w1neskin.github.io/quantum-field-molecules/ru/learn/hartree-fock/">
+  <link rel="alternate" hreflang="x-default" href="https://w1neskin.github.io/quantum-field-molecules/learn/hartree-fock/">
+  <meta property="og:type" content="article">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:title" content="Метод Хартри–Фока онлайн: расчёт в браузере">
+  <meta property="og:description" content="Прозрачный разбор RHF, UHF, самосогласования, базисов и научных ограничений.">
+  <meta property="og:url" content="https://w1neskin.github.io/quantum-field-molecules/ru/learn/hartree-fock/">
+  <meta property="og:image" content="https://w1neskin.github.io/quantum-field-molecules/assets/og.png">
+  <link rel="icon" href="../../../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../../css/content.css">
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"TechArticle",
+    "headline":"Метод Хартри–Фока онлайн: расчёт в браузере",
+    "description":"Как RHF, UHF, SCF и гауссовы базисы работают в лаборатории quantum-field-molecules.",
+    "url":"https://w1neskin.github.io/quantum-field-molecules/ru/learn/hartree-fock/",
+    "image":"https://w1neskin.github.io/quantum-field-molecules/assets/og.png",
+    "datePublished":"2026-07-11",
+    "dateModified":"2026-07-11",
+    "inLanguage":"ru",
+    "author":{"@type":"Organization","name":"Участники quantum-field-molecules","url":"https://github.com/W1neSkin/quantum-field-molecules"},
+    "isPartOf":{"@type":"WebSite","name":"Молекулы глазами квантовой теории поля","url":"https://w1neskin.github.io/quantum-field-molecules/ru/"}
+  }
+  </script>
+</head>
+<body>
+  <a class="skip" href="#content">К содержанию</a>
+  <header class="site-header"><nav class="nav" aria-label="Основная навигация"><a class="brand" href="../../../?lang=ru">Молекулы глазами КТП</a><span class="nav-links"><a href="../">Материалы</a><a href="../../../learn/hartree-fock/" lang="en">English</a></span></nav></header>
+  <main id="content">
+    <nav class="breadcrumbs" aria-label="Хлебные крошки"><a href="../../../?lang=ru">Лаборатория</a> / <a href="../">Материалы</a> / Хартри–Фок</nav>
+    <p class="eyebrow">Разбор метода</p>
+    <h1>Расчёт Хартри–Фока прямо в браузере</h1>
+    <p class="lead">Лаборатория локально решает настоящую задачу самосогласованного поля. Разберём, что означают RHF и UHF, что можно увидеть в результате и где заканчивается количественная точность.</p>
+    <a class="button" href="../../../?lang=ru&amp;mol=H2O&amp;basis=STO-3G&amp;mode=density">Рассчитать H₂O/STO-3G</a>
+
+    <h2>Приближение одного детерминанта</h2>
+    <p>Метод Хартри–Фока представляет N-электронное состояние одним детерминантом Слэтера. Каждый электрон движется в усреднённом кулоновском и обменном поле занятых орбиталей. Антисимметрия фермионной волновой функции и обмен учитываются точно, но мгновенная корреляция движения электронов с противоположными спинами отсутствует.</p>
+    <p>Энергия минимизируется по коэффициентам орбиталей. Эффективный оператор Фока зависит от тех же орбиталей, которые требуется найти, поэтому уравнения нелинейны и решаются итерациями.</p>
+
+    <h2>Что делает цикл SCF</h2>
+    <ol>
+      <li>Строит начальную матрицу плотности из приближённых молекулярных орбиталей.</li>
+      <li>Собирает матрицу Фока из одно- и двухэлектронных интегралов.</li>
+      <li>Решает обобщённую задачу на собственные значения в неортогональном гауссовом базисе.</li>
+      <li>Обновляет плотность, применяет смешивание или DIIS и повторяет цикл до стабилизации энергии и плотности.</li>
+    </ol>
+    <p>Приложение фиксирует сходимость, число итераций, базис, спиновый режим и ключ воспроизводимости. Сошедшееся SCF-решение необходимо, но само по себе не доказывает достаточную точность модели.</p>
+
+    <h2>RHF и UHF</h2>
+    <p>Ограниченный Хартри–Фок (RHF) использует одну пространственную орбиталь для пары α- и β-электронов. Он естественен для молекул с замкнутыми оболочками, например H₂O и CH₄. Неограниченный Хартри–Фок (UHF) разрешает разные α- и β-орбитали и применяется к O₂, NO, OH и другим системам с открытыми оболочками.</p>
+    <p>UHF показывает спиновую поляризацию и разумный предел диссоциации, но его детерминант может не быть собственной функцией S². Поэтому важно значение ⟨S²⟩: заметное отклонение от точного спина указывает на спиновую контаминацию.</p>
+
+    <h2>Почему важен базис</h2>
+    <p>Волновая функция раскладывается по гауссовым функциям на атомах. STO-3G — минимальный и быстрый базис; 6-31G расщепляет валентное пространство; 6-31G* добавляет поляризационные функции. Расширение базиса обычно понижает вариационную HF-энергию, но не добавляет недостающую электронную корреляцию.</p>
+    <div class="note"><strong>Правило интерпретации.</strong><p>Используйте STO-3G для быстрых качественных карт. Сравнивайте базисы перед выводом о тренде. Диполи, орбитальные щели, потенциалы ионизации по Купмансу и частоты зависят от модели.</p></div>
+
+    <h2>Что вычисляется, а что нет</h2>
+    <p>Движок считает RHF/UHF-энергии, орбитали, карты плотности, заряды Малликена, порядки связей Майера, диполи, численную оптимизацию геометрии и гармонические колебания. Для двухэлектронных систем дополнительно решается полное конфигурационное взаимодействие в выбранном малом базисе.</p>
+    <p>В приложении нет DFT, MP2, coupled cluster, релятивистских и радиационных КЭД-поправок. Cavity и scaling — учебные toy-модели. Для публикации экспортируйте геометрию или шаблон и перепроверьте результат промышленным квантово-химическим пакетом.</p>
+
+    <h2>Источники и проверка</h2>
+    <ul class="references">
+      <li>А. Сабо, Н. Ослунд, <cite>Современная квантовая химия</cite>.</li>
+      <li><a href="https://cccbdb.nist.gov/">NIST Computational Chemistry Comparison and Benchmark Database</a>.</li>
+      <li><a href="https://github.com/W1neSkin/quantum-field-molecules/blob/main/test/selfcheck.js">Численные selfcheck-тесты проекта</a>.</li>
+    </ul>
+    <p>Далее: почему одного детерминанта недостаточно при <a href="../h2-dissociation/">диссоциации H₂</a>.</p>
+  </main>
+  <footer class="site-footer"><div class="footer-inner"><span>Обновлено 11 июля 2026</span><a href="https://github.com/W1neSkin/quantum-field-molecules">Код и тесты</a></div></footer>
+</body>
+</html>

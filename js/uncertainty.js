@@ -89,6 +89,7 @@
     var u = evaluate(state.result, state.preset, state.provenance);
     if (!u || u.level === "na") { box.innerHTML = ""; return; }
     var rows = [
+      [t("unc.kind"), t("unc.kind.heuristic")],
       [t("unc.level"), t("unc." + u.level)],
       [t("unc.score"), String(u.score) + "/8"],
       [t("unc.conf"), Math.round(u.confidence * 100) + "%"]
@@ -103,9 +104,10 @@
         return t("unc.r." + k);
       }).join("; ") + "</p>"
       : "";
+    var note = "<p class='small faint'>" + t("unc.note") + "</p>";
     box.innerHTML = "<p class='small muted'>" + t("unc.title") + "</p>" + rows.map(function (r) {
       return "<div class='brow'><span>" + r[0] + "</span><b>" + r[1] + "</b></div>";
-    }).join("") + reasons;
+    }).join("") + reasons + note;
   }
 
   App.uncertainty = { evaluate: evaluate, render: render };

@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Квантовая химия в браузере: Хартри–Фок и молекулы</title>
+  <meta name="description" content="Бесплатная квантово-химическая лаборатория: RHF/UHF, полное КВ для двух электронов, молекулярные орбитали, электронная плотность, ELF и ИК-спектры.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://w1neskin.github.io/quantum-field-molecules/ru/">
+  <link rel="alternate" hreflang="en" href="https://w1neskin.github.io/quantum-field-molecules/">
+  <link rel="alternate" hreflang="ru" href="https://w1neskin.github.io/quantum-field-molecules/ru/">
+  <link rel="alternate" hreflang="x-default" href="https://w1neskin.github.io/quantum-field-molecules/">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="ru_RU">
+  <meta property="og:title" content="Квантовая химия и молекулы — лаборатория в браузере">
+  <meta property="og:description" content="Исследуйте плотность, орбитали, связи, колебания и спин с настоящим RHF/UHF-расчётом.">
+  <meta property="og:url" content="https://w1neskin.github.io/quantum-field-molecules/ru/">
+  <meta property="og:image" content="https://w1neskin.github.io/quantum-field-molecules/assets/og.png">
+  <link rel="icon" href="../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../css/content.css">
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"WebPage",
+    "name":"Квантовая химия в браузере",
+    "url":"https://w1neskin.github.io/quantum-field-molecules/ru/",
+    "inLanguage":"ru",
+    "about":{"@type":"WebApplication","name":"Molecules through Quantum Field Theory","url":"https://w1neskin.github.io/quantum-field-molecules/","isAccessibleForFree":true}
+  }
+  </script>
+</head>
+<body>
+  <a class="skip" href="#content">К содержанию</a>
+  <header class="site-header">
+    <nav class="nav" aria-label="Основная навигация">
+      <a class="brand" href="../?lang=ru">Молекулы глазами КТП</a>
+      <span class="nav-links"><a href="learn/">Материалы</a><a href="validation/">Валидация</a><a href="../" lang="en">English</a></span>
+    </nav>
+  </header>
+  <main id="content">
+    <p class="eyebrow">Открытая научная лаборатория</p>
+    <h1>Квантовая химия молекул прямо в браузере</h1>
+    <p class="lead">Приложение на лету решает уравнения Хартри–Фока для реальных молекул. Ничего не отправляется на сервер: расчёт, карты электронной плотности и трёхмерные орбитали строятся на вашем устройстве.</p>
+    <a class="button" href="../?lang=ru&amp;mol=H2O&amp;basis=STO-3G">Открыть лабораторию</a>
+    <a class="button secondary" href="learn/">Изучить физику расчёта</a>
+
+    <h2>Что можно исследовать</h2>
+    <p>Доступны RHF для замкнутых оболочек и UHF для радикалов, базисы STO-3G, 6-31G и 6-31G*, а также полное конфигурационное взаимодействие для двухэлектронных систем. Интерфейс показывает молекулярные орбитали, плотность, ELF, лапласиан, электростатический потенциал, спиновую плотность, диполь, порядки связей, оптимизацию геометрии и гармонические колебания.</p>
+
+    <h2>Зачем здесь квантовая теория поля</h2>
+    <p>Обычная нерелятивистская квантовая химия изложена на языке полей: электрон — квант электронного поля, орбиталь — его мода, обменная энергия следует из антикоммутации фермионных операторов. Сам расчёт остаётся Хартри–Фоком; радиационные КЭД-поправки в него не входят.</p>
+
+    <div class="note">
+      <strong>Границы применимости.</strong>
+      <p>Малые базисы и один детерминант дают качественную, а не публикационную точность. Toy-модули cavity QED и scaling предназначены только для обучения и генерации гипотез.</p>
+    </div>
+
+    <h2>Начать с проверяемого примера</h2>
+    <p>Откройте <a href="learn/h2-dissociation/">разбор диссоциации H₂</a>, чтобы сравнить RHF, UHF и точное в выбранном базисе полное КВ. Это наиболее наглядный сценарий приложения.</p>
+  </main>
+  <footer class="site-footer"><div class="footer-inner"><span>Учебное ПО с лицензией MIT</span><a href="https://github.com/W1neSkin/quantum-field-molecules">Код и тесты</a></div></footer>
+</body>
+</html>

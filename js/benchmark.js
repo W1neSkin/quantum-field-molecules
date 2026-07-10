@@ -4,10 +4,10 @@
   "use strict";
   var CASES = {
     "H2": { basis: "STO-3G", E: -1.1167, tol: 5e-4, charge: 0, mult: 0, xyz: "H 0 0 0\nH 0 0 0.7408" },
-    "HeH+": { basis: "STO-3G", E: -2.8418, tol: 2e-2, charge: 1, mult: 0, xyz: "He 0 0 0\nH 0 0 0.7743" },
-    "H2O": { basis: "STO-3G", E: -74.9659, tol: 2e-3, charge: 0, mult: 0, xyz: "O 0 0 0\nH 0.758130 0 0.635742\nH -0.758130 0 0.635742" },
-    "CH4": { basis: "STO-3G", E: -39.7269, tol: 2e-3, charge: 0, mult: 0, xyz: "C 0 0 0\nH 0.6276 0.6276 0.6276\nH 0.6276 -0.6276 -0.6276\nH -0.6276 0.6276 -0.6276\nH -0.6276 -0.6276 0.6276" },
-    "N2": { basis: "STO-3G", E: -107.4960, tol: 5e-3, charge: 0, mult: 0, xyz: "N 0 0 0\nN 0 0 1.0977" }
+    "HeH+": { basis: "STO-3G", E: -2.8418, tol: 5e-4, charge: 1, mult: 0, xyz: "He 0 0 0\nH 0 0 0.7743" },
+    "H2O": { basis: "STO-3G", E: -74.9659, tol: 5e-4, charge: 0, mult: 0, xyz: "O 0 0 0\nH 0.758130 0 0.635742\nH -0.758130 0 0.635742" },
+    "CH4": { basis: "STO-3G", E: -39.7269, tol: 5e-4, charge: 0, mult: 0, xyz: "C 0 0 0\nH 0.6276 0.6276 0.6276\nH 0.6276 -0.6276 -0.6276\nH -0.6276 0.6276 -0.6276\nH -0.6276 -0.6276 0.6276" },
+    "N2": { basis: "STO-3G", E: -107.4960, tol: 5e-4, charge: 0, mult: 0, xyz: "N 0 0 0\nN 0 0 1.0977" }
   };
   var SUITE_IDS = ["H2", "HeH+", "H2O", "CH4", "N2"];
   var S = { bound: false, running: false, progress: 0, summary: null };

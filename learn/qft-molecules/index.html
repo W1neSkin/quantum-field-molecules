@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Molecules Through Quantum Field Theory | QFT and QED</title>
+  <meta name="description" content="A careful explanation of molecules in quantum-field language, the relation to Hartree-Fock quantum chemistry and the limits of the app's toy cavity-QED model.">
+  <meta name="robots" content="index,follow,max-image-preview:large">
+  <link rel="canonical" href="https://w1neskin.github.io/quantum-field-molecules/learn/qft-molecules/">
+  <link rel="alternate" hreflang="en" href="https://w1neskin.github.io/quantum-field-molecules/learn/qft-molecules/">
+  <link rel="alternate" hreflang="ru" href="https://w1neskin.github.io/quantum-field-molecules/ru/learn/qft-molecules/">
+  <link rel="alternate" hreflang="x-default" href="https://w1neskin.github.io/quantum-field-molecules/learn/qft-molecules/">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Molecules Through Quantum Field Theory">
+  <meta property="og:description" content="What the field language means, what the browser computes and where genuine molecular QED begins.">
+  <meta property="og:url" content="https://w1neskin.github.io/quantum-field-molecules/learn/qft-molecules/">
+  <meta property="og:image" content="https://w1neskin.github.io/quantum-field-molecules/assets/og.png">
+  <link rel="icon" href="../../assets/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="../../css/content.css">
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"TechArticle",
+    "headline":"Molecules Through Quantum Field Theory",
+    "description":"How ordinary quantum chemistry relates to quantum-field language and molecular cavity QED.",
+    "url":"https://w1neskin.github.io/quantum-field-molecules/learn/qft-molecules/",
+    "image":"https://w1neskin.github.io/quantum-field-molecules/assets/og.png",
+    "datePublished":"2026-07-11",
+    "dateModified":"2026-07-11",
+    "inLanguage":"en",
+    "author":{"@type":"Organization","name":"quantum-field-molecules contributors","url":"https://github.com/W1neSkin/quantum-field-molecules"}
+  }
+  </script>
+</head>
+<body>
+  <a class="skip" href="#content">Skip to content</a>
+  <header class="site-header"><nav class="nav" aria-label="Primary"><a class="brand" href="../../">Quantum Field Molecules</a><span class="nav-links"><a href="../">Learn</a><a href="../../ru/learn/qft-molecules/" lang="ru">Русский</a></span></nav></header>
+  <main id="content">
+    <nav class="breadcrumbs" aria-label="Breadcrumb"><a href="../../">Laboratory</a> / <a href="../">Learn</a> / QFT and molecules</nav>
+    <p class="eyebrow">Concept and scope</p>
+    <h1>What does quantum field theory add to a molecule?</h1>
+    <p class="lead">The app deliberately narrates familiar quantum chemistry in field language. That viewpoint is valid and useful, but it must not be confused with an explicit ab initio quantum-electrodynamical calculation.</p>
+    <a class="button" href="../../?mol=H2&amp;basis=STO-3G&amp;lab=cavity">Open the QFT and cavity views</a>
+
+    <h2>Particles are quanta of fields</h2>
+    <p>In quantum field theory the electron field fills space, and an electron is one quantum of that field. A molecular state is a bound many-body state with a fixed number of electron-field excitations interacting with nuclei and the electromagnetic field.</p>
+    <p>In the nonrelativistic, fixed-particle-number regime, second-quantized field notation and ordinary many-electron quantum mechanics describe the same electronic problem. Molecular orbitals are one-particle modes used to expand the field operator; occupying a mode means placing field quanta in it.</p>
+
+    <h2>Density and exchange in field language</h2>
+    <p>The displayed electron density is the expectation value ⟨ψ̂†(r)ψ̂(r)⟩. Fermionic field operators anticommute, and that algebra produces the antisymmetric Slater determinant, Pauli exclusion and the Hartree–Fock exchange term K.</p>
+    <p>The app's Coulomb attraction and repulsion are evaluated through the standard instantaneous 1/r interaction. In QED this interaction can be understood as the static Coulomb-gauge limit associated with virtual-photon exchange. The diagram is a conceptual translation; the code does not propagate photon modes during the HF calculation.</p>
+
+    <h2>What the main engine actually solves</h2>
+    <p>The numerical core is nonrelativistic Born–Oppenheimer quantum chemistry: clamped nuclei, Gaussian orbitals and RHF/UHF self-consistency. For two electrons, full CI treats electronic correlation exactly within the finite basis. Density maps, orbital levels and molecular properties all follow from that electronic calculation.</p>
+    <div class="note"><strong>Not included.</strong><p>The main engine does not calculate Lamb shifts, vacuum polarization, relativistic corrections or electron–photon correlated wavefunctions. Preset facts mentioning such effects are external scientific context.</p></div>
+
+    <h2>Where molecular QED begins</h2>
+    <p>Genuine cavity QED promotes selected electromagnetic modes to quantum degrees of freedom and couples them to matter, commonly through a Pauli–Fierz Hamiltonian. Depending on the approximation, the state then contains electronic, nuclear and photonic coordinates on equal footing.</p>
+    <p>Ab initio QED-HF, QED-DFT and QED coupled-cluster methods can predict how a cavity changes orbitals, energies and response. These are active research methods and are substantially more demanding than drawing an avoided crossing.</p>
+
+    <h2>The cavity panel is a toy model</h2>
+    <p>The panel uses a two-level mixing formula. It takes the Hartree–Fock HOMO–LUMO gap as a proxy excitation energy, combines it with a user-selected cavity energy and coupling, and plots lower and upper branches. At resonance the model gives a splitting controlled by the coupling.</p>
+    <p>A HF orbital gap is not generally an optical excitation energy. The panel omits transition dipoles from an excited-state method, self-polarization, many modes, dissipation and correlated electron–photon structure. Its purpose is to teach detuning, polarization and avoided crossings—not to predict polaritonic chemistry.</p>
+
+    <h2>A scientifically safe workflow</h2>
+    <ol>
+      <li>Use the main app to understand the bare molecule at HF level.</li>
+      <li>Use the cavity panel only for qualitative parameter intuition.</li>
+      <li>Export the molecular geometry and generate a bridge template.</li>
+      <li>Validate with a native QED-HF, QED-DFT, coupled-cluster or dynamics code before publication.</li>
+    </ol>
+
+    <h2>References</h2>
+    <ul class="references">
+      <li><a href="https://arxiv.org/abs/2603.17582">Quantum Field Approaches to Chemical Systems</a>, arXiv:2603.17582.</li>
+      <li>M. Ruggenthaler et al., “Understanding Polaritonic Chemistry from Ab Initio Quantum Electrodynamics”, <a href="https://doi.org/10.1021/acs.chemrev.2c00788">Chem. Rev. (2023)</a>.</li>
+      <li>C. Schäfer et al., “Molecular orbital theory in cavity QED environments”, <a href="https://doi.org/10.1038/s41467-022-29003-2">Nature Communications 13, 1315 (2022)</a>.</li>
+    </ul>
+    <p>For the underlying electronic approximation, read <a href="../hartree-fock/">Hartree–Fock in the browser</a>.</p>
+  </main>
+  <footer class="site-footer"><div class="footer-inner"><span>Updated 11 July 2026</span><a href="https://github.com/W1neSkin/quantum-field-molecules">Source and tests</a></div></footer>
+</body>
+</html>

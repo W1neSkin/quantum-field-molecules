@@ -9,6 +9,7 @@
     var $ = ctx.$;
     var setBusy = ctx.setBusy;
     var setStatus = ctx.setStatus;
+    var setMode = ctx.setMode;
     var renderAll = ctx.renderAll;
     var renderVib = ctx.renderVib;
     var HA_TO_EV = ctx.haToEv;
@@ -104,6 +105,11 @@
           state.optInfo = null;
           renderOkStatus();
           setBusy(false);
+          if (state.pendingMode && App.urlState && App.urlState.resolveMode) {
+            var routedMode = App.urlState.resolveMode(state.pendingMode, result.scf, result.basisName || "STO-3G");
+            state.pendingMode = "";
+            if (routedMode && setMode) setMode(routedMode);
+          }
         }
 
         function failMapPrep(err) {

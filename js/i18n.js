@@ -38,15 +38,26 @@
   function applyDom() {
     if (typeof document === "undefined") return;
     document.documentElement.lang = App.LANG;
-    document.title = t("app.title");
+    var title = t("app.title");
+    if (document.title !== title) document.title = title;
     [].forEach.call(document.querySelectorAll("[data-i18n]"), function (el) {
-      el.textContent = t(el.getAttribute("data-i18n"));
+      // Keep server-rendered fallback text when it already matches. Replacing
+      // identical text delays LCP because the browser treats it as a new paint.
+      var text = t(el.getAttribute("data-i18n"));
+      if (el.textContent !== text) el.textContent = text;
     });
     // custom tooltips (js/tooltip.js) read data-tip; aria-label for a11y
     [].forEach.call(document.querySelectorAll("[data-i18n-title]"), function (el) {
       var s = t(el.getAttribute("data-i18n-title"));
       el.dataset.tip = s;
-      el.setAttribute("aria-label", s);
+      // A visible button label is the clearest accessible name. Tooltip text
+      // remains in data-tip; use it as aria-label only for icon/form controls.
+      var tag = el.tagName;
+      var visible = (el.textContent || "").trim();
+      var needsAria = tag === "SELECT" || tag === "INPUT" || tag === "TEXTAREA" ||
+        !visible || /^[?×✕☾☀]$/.test(visible);
+      if (needsAria) el.setAttribute("aria-label", s);
+      else el.removeAttribute("aria-label");
     });
     [].forEach.call(document.querySelectorAll("[data-i18n-ph]"), function (el) {
       el.placeholder = t(el.getAttribute("data-i18n-ph"));
